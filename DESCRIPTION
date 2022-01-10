@@ -1,10 +1,10 @@
 Package: dci
-Title: Calculate the dendritic connectivity index in river networks
+Title: Calculate the Dendritic Connectivity in River Networks
 Version: 0.0.0.9000
 Authors@R: 
     person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+Description: Calculate and analyze ecological connectivity across the watercourse of river networks using the Dendritic Connectivity Index.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
