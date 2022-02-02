@@ -2,6 +2,7 @@
 # For internal use only
 new_rivnet <- function(rivers,
                        barriers,
+                       sinks = NULL,
                        bar.perm = NULL,
                        extra.pts = NULL,
                        topology.check = TRUE,
@@ -17,6 +18,7 @@ validate_rivnet <- function(){
 # Constructor function
 rivnet <- function(rivers,
                    barriers,
+                   sinks = NULL,
                    bar.perm = NULL,
                    extra.pts = NULL,
                    topology.check = TRUE,
@@ -24,10 +26,13 @@ rivnet <- function(rivers,
                    snap.tolerance = 100){
 
   # Check that spatial inputs are valid sf objects
-  stopifnot("Rivers are not a valid sf object" = is.sf(rivers))
-  stopifnot("Barriers are not a valid sf object" = is.sf(barriers))
+  stopifnot("Rivers are not a valid sf object" = sf::is.sf(rivers))
+  stopifnot("Barriers are not a valid sf object" = sf::is.sf(barriers))
   if(!is.null(extra.pts)){
-    stopifnot("Extra points are not a valid sf object" = is.sf(extra.pts))
+    stopifnot("Extra points are not a valid sf object" = sf::is.sf(extra.pts))
+  }
+  if(!is.null(sinks)){
+    stopifnot("Sinks are not a valid sf object" = sf::is.sf(sinks))
   }
 
   # Assign 0% permeability to barriers by default if other permeability is not supplied
@@ -60,12 +65,12 @@ rivnet <- function(rivers,
   if(!is.null(extra.pts)){
     # Add 100% permeability to extra points
     extra.pts$perm <- 1
-    nodes <- st_combine(barriers, extra.pts)
+    nodes <- sf::st_combine(barriers, extra.pts)
   }
 
   # If specified, snap nodes to river edges
   if(snap){
-    nodes <- st_snap(nodes, rivers, snap.tolerance)
+    nodes <- sf::st_snap(nodes, rivers, snap.tolerance)
   }
 
   # Combine nodes and edges into sfnetwork object
