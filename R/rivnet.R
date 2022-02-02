@@ -66,15 +66,12 @@ rivnet <- function(rivers,
     # Add 100% permeability to extra points
     extra.pts$perm <- 1
     nodes <- sf::st_combine(barriers, extra.pts)
-<<<<<<< HEAD
   }
 
   # If supplied combine sinks to nodes
   if(!is.null(sinks)){
     sinks$perm <- 1
     nodes <- sf::st_combine(nodes, sinks)
-=======
->>>>>>> b8529fd22aa256b466781f694a35e68983bf00fd
   }
 
   # If specified, snap nodes to river edges
