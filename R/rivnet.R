@@ -8,30 +8,6 @@ new_rivnet <- function(rivers,
                        snap = TRUE,
                        snap.tolerance = 100){
 
-  # Assign 0% permeability to barriers by default if other permeability is not supplied
-  if(is.null(bar.perm)){
-    barriers$perm <- 0
-  }
-
-  # If supplied, assign barrier permeability to barriers
-  if(!is.null(bar.perm)){
-    barriers$perm <- bar.perm
-  }
-
-  # Check river topology
-
-  # Snap barriers to rivers
-
-  # Snap extra points to rivers (if present)
-
-  # Combine barriers, rivers, and points into sfnetwork
-  sfnetworks::sfnetwork()
-
-  # Code binary network topology
-
-  # Assign unique fragment IDs
-
-
 }
 
 validate_rivnet <- function(){
