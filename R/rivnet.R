@@ -10,8 +10,7 @@ new_rivnet <- function(rivers,
                        snap.tolerance = 100){
 
   # Prepare rivers
-  rivers <- sf::st_zm(rivers)
-  rivers <- sf::st_cast(rivers, "LINESTRING")
+  rivers <- prepare_rivers(rivers)
 
   # Prepare barriers
   barriers <- sf::st_zm(barriers)
