@@ -9,6 +9,13 @@ new_rivnet <- function(rivers,
                        snap = TRUE,
                        snap.tolerance = 100){
 
+  # Prepare rivers
+  rivers <- sf::st_zm(rivers)
+  rivers <- sf::st_cast(rivers, "LINESTRING")
+
+  # Prepare barriers
+  barriers <- sf::st_zm(barriers)
+
   # Assign 0% permeability to barriers by default if other permeability is not supplied
   if(is.null(bar.perm)){
     barriers$perm <- 0
@@ -37,6 +44,8 @@ new_rivnet <- function(rivers,
 
   # If supplied combine barriers and extra points
   if(!is.null(extra.pts)){
+    # Prepare extra points
+    extra.pts <- sf::st_zm(extra.pts)
     # Add 100% permeability to extra points
     extra.pts$perm <- 1
     nodes <- sf::st_combine(barriers, extra.pts)
