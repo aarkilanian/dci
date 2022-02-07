@@ -22,15 +22,11 @@ new_rivnet <- function(rivers,
 
     # If barrier permeabilities are supplied attempt to add them to the barriers
   } else {
-    # Check validity of barrier permeability
-    if(length(bar.perm) != nrow(barriers)){
-      stop("Length of barrier permeabilities is not equal to the number of barriers")
-    }
     # Convert barrier permeabilities to double type
     bar.perm <- tryCatch(
       as.double(bar.perm),
       error = function(e){
-        stop("Cannot coerce barrier permeabilities to double", call. = FALSE)
+        stop("Cannot coerce barrier permeabilities to double type", call. = FALSE)
       }
     )
     # Assign permeabilities to barriers
@@ -69,6 +65,9 @@ new_rivnet <- function(rivers,
 }
 
 validate_rivnet <- function(){
+
+  # Check validity of barrier permeability
+  # Ensure length of permeabilities is equal to number of barriers
 
 }
 
