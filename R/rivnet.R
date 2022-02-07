@@ -3,6 +3,7 @@
 new_rivnet <- function(rivers,
                        barriers,
                        sinks = NULL,
+                       riv.weight = NULL,
                        bar.perm = NULL,
                        extra.pts = NULL,
                        topology.check = TRUE,
@@ -10,7 +11,7 @@ new_rivnet <- function(rivers,
                        snap.tolerance = 100){
 
   # Prepare rivers
-  rivers <- prepare_rivers(rivers)
+  rivers <- prepare_rivers(rivers, riv.weight)
 
   # Prepare barriers
   barriers <- sf::st_zm(barriers)
