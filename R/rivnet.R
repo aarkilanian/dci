@@ -11,7 +11,7 @@ new_rivnet <- function(rivers,
                        snap.tolerance = 100){
 
   # Prepare rivers
-  rivers <- prepare_rivers(rivers, riv.weight)
+  rivers <- prepare_rivers(rivers)
 
   # Prepare barriers
   barriers <- sf::st_zm(barriers)
