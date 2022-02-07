@@ -1,4 +1,4 @@
-prepare_rivers <- function(rivers, weighting = NULL){
+prepare_rivers <- function(rivers){
 
   # Remove Z/M dimension
   rivers <- sf::st_zm(rivers)
@@ -9,11 +9,6 @@ prepare_rivers <- function(rivers, weighting = NULL){
   nodes <- extract_nodes(rivers)
   # Split rivers according to node locations
   rivers_prep <- sf::st_collection_extract(lwgeom::st_split(rivers, nodes), "LINESTRING")
-
-  # Re-incorporate weighting if specified
-  if(!is.null(weighting)){
-    # To be completed
-  }
 
   invisible(rivers_prep)
 
