@@ -32,12 +32,7 @@ new_rivnet <- function(rivers,
     # If barrier permeabilities are supplied attempt to add them to the barriers
   } else {
     # Convert barrier permeabilities to double type
-    bar.perm <- tryCatch(
-      as.double(bar.perm),
-      error = function(e){
-        stop("Cannot coerce barrier permeabilities to double type", call. = FALSE)
-      }
-    )
+    bar.perm <- as.double(bar.perm)
     # Assign permeabilities to barriers
     barriers$perm <- bar.perm
   }
