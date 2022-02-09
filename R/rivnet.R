@@ -39,7 +39,8 @@ new_rivnet <- function(rivers,
 
   # If specified, perform dendritic topology check of rivers
   if(topology.check){
-    rivers <- enforce_dendritic(rivers)
+    river_net <- sfnetworks::as_sfnetwork(rivers)
+    rivers <- enforce_dendritic(river_net)
   }
 
   # If supplied combine barriers and extra points

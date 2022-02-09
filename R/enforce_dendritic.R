@@ -1,7 +1,4 @@
-enforce_dendritic <- function(rivers){
-
-  # Prepare sfnetwork object
-  river_net <- sfnetworks::as_sfnetwork(rivers)
+enforce_dendritic <- function(river_net){
 
   # Identify diverging streams
   div_riv <- river_net %>%
