@@ -3,7 +3,7 @@ prepare_rivers <- function(rivers){
   # Remove Z/M dimension
   rivers <- sf::st_zm(rivers)
   # Convert to linestring geometries only
-  rivers <- st_cast(rivers, "LINESTRING")
+  rivers <- sf::st_cast(rivers, "LINESTRING")
 
   # Extract nodes at ends of lines and confluences
   nodes <- extract_nodes(rivers)
