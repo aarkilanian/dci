@@ -10,9 +10,9 @@ new_rivnet <- function(rivers,
                        snap = TRUE,
                        snap.tolerance = 100){
 
-  # Remove Z/M dimension
+  # Remove Z/M dimension from rivers
   rivers <- sf::st_zm(rivers)
-  # Convert to linestring geometries only
+  # Convert to rivers to linestring geometries only
   rivers <- sf::st_cast(rivers, "LINESTRING")
 
   # Create sfnetwork object with rivers
