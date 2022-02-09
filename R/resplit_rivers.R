@@ -1,4 +1,4 @@
-prepare_rivers <- function(river_net){
+resplit_rivers <- function(river_net){
 
   # Extract nodes from river network
   nodes <- sf::st_as_sf(sfnetworks::activate(river_net, nodes))
