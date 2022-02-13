@@ -10,7 +10,7 @@ enforce_dendritic <- function(river_net){
     dplyr::select(rivID, from)
 
   # Skip correction if no divergences are found
-  if(nrow(div.riv) = 0){
+  if(nrow(div.riv) == 0){
     # Issue message to user if no divergences found
     message("No divergences found.")
     break()
