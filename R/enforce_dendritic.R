@@ -13,9 +13,11 @@ enforce_dendritic <- function(river_net){
   if(nrow(div_riv) == 0){
     # Issue message to user if no divergences found
     message("No divergences found.")
-    rivers <-a <-  data.frame(sfnetworks::activate(river_net, edges))
+    rivers <-  data.frame(sfnetworks::activate(river_net, edges))
     rivers <- rivers[, !names(rivers) %in% c("from", "to")]
     invisible(rivers)
+  } else{
+
   }
 
 }
