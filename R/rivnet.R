@@ -7,6 +7,7 @@ new_rivnet <- function(rivers,
                        bar.perm = NULL,
                        extra.pts = NULL,
                        topology.check = TRUE,
+                       output_errors = FALSE,
                        snap = TRUE,
                        snap.tolerance = 100){
 
@@ -15,12 +16,17 @@ new_rivnet <- function(rivers,
   rivers <- sf::st_zm(rivers)
   # Convert to rivers to linestring geometries only
   rivers <- sf::st_cast(rivers, "LINESTRING")
-
   # Create sfnetwork object with rivers
   river_net <- sfnetworks::as_sfnetwork(rivers)
 
   # Correct river splitting
   rivers <- resplit_rivers(river_net)
+
+  # If specified, perform dendritic topology check of rivers
+  if(topology.check){
+    river_net <- sfnetworks::as_sfnetwork(rivers)
+    rivers <- enforce_dendritic(river_net, output_errors)
+  }
 
   # Prepare barriers
   barriers <- sf::st_zm(barriers)
@@ -35,12 +41,6 @@ new_rivnet <- function(rivers,
     bar.perm <- as.double(bar.perm)
     # Assign permeabilities to barriers
     barriers$perm <- bar.perm
-  }
-
-  # If specified, perform dendritic topology check of rivers
-  if(topology.check){
-    river_net <- sfnetworks::as_sfnetwork(rivers)
-    rivers <- enforce_dendritic(river_net)
   }
 
   # If supplied combine barriers and extra points
