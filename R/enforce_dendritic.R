@@ -10,11 +10,13 @@ enforce_dendritic <- function(river_net, output_errors){
     dplyr::select(rivID, from)
 
   # Skip correction if no divergences are found
-  if(nrow(div.riv) = 0){
+  if(nrow(div_riv) == 0){
     # Issue message to user if no divergences found
     message("No divergences found.")
-    break()
-    # Correct divergences that are detected
+    # Return unchanged rivers
+    rivers <-  data.frame(sfnetworks::activate(river_net, edges))
+    rivers <- rivers[, !names(rivers) %in% c("from", "to")]
+    invisible(rivers)
   } else {
     if(output_errors){
 
@@ -22,5 +24,4 @@ enforce_dendritic <- function(river_net, output_errors){
 
     }
   }
-
 }
