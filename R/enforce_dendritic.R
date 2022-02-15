@@ -7,7 +7,9 @@ enforce_dendritic <- function(river_net, output_errors){
     dplyr::mutate(rivID = 1:dplyr::n()) %>%
     dplyr::mutate(from_grp = forcats::fct_lump_min(as.factor(from), min = 2)) %>%
     dplyr::filter(from_grp != "Other") %>%
-    dplyr::select(rivID, from)
+    dplyr::select(rivID, from) %>%
+    dplyr::group_by(from) %>%
+    dplyr::mutate(divID = dplyr::cur_group_id())
 
   # Skip correction if no divergences are found
   if(nrow(div_riv) == 0){
@@ -18,8 +20,13 @@ enforce_dendritic <- function(river_net, output_errors){
     rivers <- rivers[, !names(rivers) %in% c("from", "to")]
     invisible(rivers)
   } else {
+    # Return divergent errors in spatial format
     if(output_errors){
-
+      div_join <- river_net %>%
+        sfnetworks::activate(edges) %>%
+        data.frame() %>%
+        dplyr::left_join(div_riv %>% dplyr::select(rivID, divID), by = rivID) %>%
+        sf::st_as_sf()
     } else {
 
     }
