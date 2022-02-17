@@ -27,6 +27,7 @@ enforce_dendritic <- function(river_net, output_errors){
         data.frame() %>%
         dplyr::left_join(div_riv %>% dplyr::select(rivID, divID), by = rivID) %>%
         sf::st_as_sf()
+      # Correct divergences automatically
     } else {
 
     }
