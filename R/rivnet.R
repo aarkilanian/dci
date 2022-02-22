@@ -7,7 +7,7 @@ new_rivnet <- function(rivers,
                        bar_perm = NULL,
                        extra.pts = NULL,
                        output_errors = FALSE,
-                       snap = TRUE,
+                       snap = FALSE,
                        snap.tolerance = 100){
 
   ### Prepare network nodes
@@ -73,9 +73,6 @@ new_rivnet <- function(rivers,
     nodes <- rbind(nodes, extra.pts)
   }
 
-  print(nodes)
-
-
   ### Prepare network edges
   #
   # Remove Z/M dimension from rivers
@@ -83,25 +80,12 @@ new_rivnet <- function(rivers,
   # Convert to rivers to linestring geometries only
   rivers <- sf::st_cast(rivers, "LINESTRING")
   # Create initial sfnetwork object and topology
-  river_net <- sfnetworks::sfnetwork(rivers)
+  river_net <- sfnetworks::as_sfnetwork(rivers)
 
   # Correct river splitting
   rivers <- resplit_rivers(river_net)
   # Correct non-dendritic topologies
   rivers <- enforce_dendritic(river_net, output_errors)
-
-
-
-  # If supplied combine barriers and extra points
-  if(!is.null(extra.pts)){
-    # Prepare extra points
-    extra.pts <- sf::st_zm(extra.pts)
-    # Add 100% permeability to extra points
-    extra.pts$perm <- 1
-    nodes <- sf::st_combine(barriers, extra.pts)
-  }
-
-
 
   # If specified, snap nodes to river edges
   if(snap){
@@ -109,8 +93,9 @@ new_rivnet <- function(rivers,
   }
 
   # Combine nodes and edges into sfnetwork object
-  sfnet <- sfnetworks::sfnetwork(nodes = nodes, edges = rivers, ...)
+  sfnet <- sfnetworks::as_sfnetwork(nodes = nodes, edges = rivers)
   rivnet <- structure(sfnet, class = c("rivnet", class(sfnet)))
+  invisible(rivnet)
 
 }
 
