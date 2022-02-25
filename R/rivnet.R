@@ -6,7 +6,6 @@ new_rivnet <- function(rivers,
                        riv.weight = NULL,
                        bar_perm = NULL,
                        extra.pts = NULL,
-                       output_errors = FALSE,
                        snap = FALSE,
                        snap.tolerance = 100){
 
