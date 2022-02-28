@@ -1,36 +1,78 @@
-enforce_dendritic <- function(river_net, output_errors){
+enforce_dendritic <- function(river_net){
 
-  # Identify diverging streams
-  div_riv <- river_net %>%
+  # Correct divergences
+  net_temp <- correct_divergences(river_net)
+
+  # Correct complex confluences
+  net_final <- correct_complex(net_temp)
+  return(net_final)
+
+}
+
+correct_divergences <- function(river_net){
+
+  # Automatically correct divergent pairs (longest length kept)
+  riv_corrected <- river_net %>%
     sfnetworks::activate(edges) %>%
     sf::st_as_sf() %>%
-    dplyr::mutate(rivID = 1:dplyr::n()) %>%
-    dplyr::mutate(from_grp = forcats::fct_lump_min(as.factor(from), min = 2)) %>%
-    dplyr::filter(from_grp != "Other") %>%
-    dplyr::select(rivID, from) %>%
     dplyr::group_by(from) %>%
-    dplyr::mutate(divID = dplyr::cur_group_id())
+    dplyr::filter(weight == max(weight))
 
-  # Skip correction if no divergences are found
-  if(nrow(div_riv) == 0){
-    # Issue message to user if no divergences found
-    message("No divergences found.")
-    # Return unchanged rivers
-    rivers <-  data.frame(sfnetworks::activate(river_net, edges))
-    rivers <- rivers[, !names(rivers) %in% c("from", "to")]
-    invisible(rivers)
+  # If no rivers are corrected return unchanged network
+  num_div <- nrow(river_net %>% sfnetworks::activate(edges) %>% tibble::as_tibble()) - nrow(riv_corrected)
+  if(num_div == 0){
+    message("No divergences detected.")
+    return(river_net)
   } else {
-    # Return divergent errors in spatial format
-    if(output_errors){
+    message(paste0(num_div, " divergences corrected."))
+    new_net <- sfnetworks::as_sfnetwork(riv_corrected, length_as_weight = TRUE)
+    return(new_net)
+  }
+
+}
+
+correct_complex <- function(river_net){
+
+  # Identify complex confluences
+  complex_nodes <- river_net %>%
+    tidygraph::convert(tidygraph::to_undirected) %>%
+    sfnetworks::activate(nodes) %>%
+    dplyr::mutate(nodeID = dplyr::n()) %>%
+    dplyr::mutate(degree = tidygraph::centrality_degree()) %>%
+    sf::st_as_sf() %>%
+    dplyr::filter(degree >= 4) %>%
+    dplyr::select(degree) %>%
+    dplyr::mutate(complexID = dplyr::n())
+}
+
+
+
+  # Check for divergences
+  if(nrow(div_riv) == 0){
+    # no divergence or complex confluences
+    if(nrow(complex_nodes) == 0){
+      message("No divergences or complex confluences found.")
+      # Return unchanged rivers
+      # To be completed based on format of output
+
+      # no divergences but some complex confluences
+    } else{
+      message()
+
+    }
+  } else {
+    # no complex confluences but some divergences
+    if(nrow(complex_nodes == 0)){
+      # all errors present
+    } else {
+
+    }
+  }
+
+
       div_join <- river_net %>%
         sfnetworks::activate(edges) %>%
         data.frame() %>%
         dplyr::left_join(div_riv %>% dplyr::select(c(divID))) %>%
         sf::st_as_sf()
       invisible(div_join)
-      # Correct divergences automatically
-    } else {
-
-    }
-  }
-}
