@@ -22,11 +22,11 @@ correct_divergences <- function(river_net){
   num_div <- nrow(river_net %>% sfnetworks::activate(edges) %>% tibble::as_tibble()) - nrow(riv_corrected)
   if(num_div == 0){
     message("No divergences detected.")
-    return(river_net)
+    invisible(river_net)
   } else {
     message(paste0(num_div, " divergences corrected."))
     new_net <- sfnetworks::as_sfnetwork(riv_corrected, length_as_weight = TRUE)
-    return(new_net)
+    invisible(new_net)
   }
 
 }
