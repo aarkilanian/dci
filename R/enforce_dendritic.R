@@ -43,36 +43,33 @@ correct_complex <- function(river_net){
     dplyr::filter(degree >= 4) %>%
     dplyr::select(degree) %>%
     dplyr::mutate(complexID = dplyr::n())
-}
 
-
-
-  # Check for divergences
-  if(nrow(div_riv) == 0){
-    # no divergence or complex confluences
-    if(nrow(complex_nodes) == 0){
-      message("No divergences or complex confluences found.")
-      # Return unchanged rivers
-      # To be completed based on format of output
-
-      # no divergences but some complex confluences
-    } else{
-      message()
-
-    }
+  # If no buffers return unchanged network
+  if(nrow(complex_nodes) == 0){
+    message("No complex confluences found.")
+    invisible(river_net)
   } else {
-    # no complex confluences but some divergences
-    if(nrow(complex_nodes == 0)){
-      # all errors present
-    } else {
 
-    }
+    # Create small buffer around confluence point
+    comp_buffer <- sf::st_buffer(complex_nodes, dist = 0.25)
+
+    # Create points at intersection of rivers and buffer and select node on downstream edge
+    new_points <- sf::st_intersection(river_net %>% sfnetworks::activate(edges) %>% sf::st_as_sf(), sf::st_cast(comp_buffer, "MULTILINESTRING", group_or_split = FALSE)) %>%
+      dplyr::group_by(complexID, to) %>%
+      dplyr::tally() %>%
+      dplyr::filter(n == 1)
+
+    # Move end vertex of one complex edge to new point location
+
+    # Create and return repaired network
+
   }
 
+}
 
-      div_join <- river_net %>%
-        sfnetworks::activate(edges) %>%
-        data.frame() %>%
-        dplyr::left_join(div_riv %>% dplyr::select(c(divID))) %>%
-        sf::st_as_sf()
-      invisible(div_join)
+find_rare <- function(x, y){
+
+  counts <- table(buffer_inter[y])
+  return(as.numeric(names(counts[counts == min(counts)])))
+
+}
