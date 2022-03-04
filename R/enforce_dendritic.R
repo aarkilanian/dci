@@ -5,7 +5,7 @@ enforce_dendritic <- function(river_net){
 
   # Correct complex confluences
   net_final <- correct_complex(net_temp)
-  return(net_final)
+  invisible(net_final)
 
 }
 
