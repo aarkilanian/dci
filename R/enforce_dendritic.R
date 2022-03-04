@@ -115,8 +115,9 @@ correct_complex <- function(river_net){
 
     }
 
-    # Return modified rivers
-    invisivle(rivers)
+    # Return modified river network
+    new_net <- sfnetworks::sfnetwork(rivers, length_as_weight = TRUE)
+    invisible(new_net)
 
   }
 
