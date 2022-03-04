@@ -86,20 +86,21 @@ new_rivnet <- function(rivers,
   # Correct non-dendritic topologies
   rivers <- enforce_dendritic(river_net, output_errors)
 
-  # Return errors if specified
-  if(output_errors & "sf" %in% class(rivers)){
-    message("Topological errors found in rivers.")
-    return(rivers)
-  }
-
   # If specified, snap nodes to river edges
   if(snap){
     nodes <- sf::st_snap(nodes, rivers, snap.tolerance)
   }
 
-  # Combine nodes and edges into sfnetwork object
+  # Combine nodes and edges into final sfnetwork object
   sfnet <- sfnetworks::as_sfnetwork(nodes = nodes, edges = rivers)
   rivnet <- structure(sfnet, class = c("rivnet", class(sfnet)))
+
+  # Apply binary labelling
+  rivnet <- binary_labelling(rivnet)
+
+  # Apply membership labelling
+  rivnet <- member_labelling(rivnet)
+
   invisible(rivnet)
 
 }
