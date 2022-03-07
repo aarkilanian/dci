@@ -16,7 +16,9 @@ correct_divergences <- function(river_net){
     sfnetworks::activate(edges) %>%
     sf::st_as_sf() %>%
     dplyr::group_by(from) %>%
-    dplyr::filter(weight == max(weight))
+    dplyr::filter(weight == max(weight)) %>%
+    # In case of equal weights, keep the first
+    dplyr::filter(dplyr::row_number() == 1)
 
   # If no rivers are corrected return unchanged network
   num_div <- nrow(river_net %>% sfnetworks::activate(edges) %>% tibble::as_tibble()) - nrow(riv_corrected)
@@ -105,7 +107,7 @@ correct_complex <- function(river_net){
       # Get point geometry
       new_point <- sf::st_geometry(new_nodes[i,])
       # Get number of coordinates on river line
-      num_coord <- length(old_geometry[[1]])
+      num_coord <- length(old_river[[1]])
       # Update final coordinates with new point
       new_river <- old_river
       new_river[[1]][num_coord - num_coord/2] <- new_point[[1]][1]
@@ -116,7 +118,7 @@ correct_complex <- function(river_net){
     }
 
     # Return modified river network
-    new_net <- sfnetworks::sfnetwork(rivers, length_as_weight = TRUE)
+    new_net <- sfnetworks::as_sfnetwork(rivers, length_as_weight = TRUE)
     invisible(new_net)
 
   }
