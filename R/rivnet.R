@@ -82,9 +82,9 @@ new_rivnet <- function(rivers,
   river_net <- sfnetworks::as_sfnetwork(rivers)
 
   # Correct river splitting
-  rivers <- resplit_rivers(river_net)
+  river_net <- resplit_rivers(river_net)
   # Correct non-dendritic topologies
-  rivers <- enforce_dendritic(river_net, output_errors)
+  river_net <- enforce_dendritic(river_net)
 
   # If specified, snap nodes to river edges
   if(snap){
@@ -93,7 +93,6 @@ new_rivnet <- function(rivers,
 
   # Combine nodes and edges into final sfnetwork object
   sfnet <- sfnetworks::as_sfnetwork(nodes = nodes, edges = rivers)
-  rivnet <- structure(sfnet, class = c("rivnet", class(sfnet)))
 
   # Apply binary labelling
   rivnet <- binary_labelling(rivnet)
@@ -101,6 +100,8 @@ new_rivnet <- function(rivers,
   # Apply membership labelling
   rivnet <- member_labelling(rivnet)
 
+  # Define rivnet class
+  rivnet <- structure(rivnet, class = c("rivnet", class(rivnet)))
   invisible(rivnet)
 
 }
