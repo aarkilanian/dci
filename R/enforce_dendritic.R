@@ -68,8 +68,7 @@ correct_complex <- function(river_net){
     dplyr::mutate(degree = tidygraph::centrality_degree()) %>%
     sf::st_as_sf() %>%
     dplyr::filter(degree >= 4) %>%
-    dplyr::select(degree) %>%
-    dplyr::mutate(complexID = 1:dplyr::n())
+    dplyr::select(degree)
 
   # If confluences have over 4 inputs recommend manual correction
   if(any(complex_nodes$degree > 4)){
@@ -79,8 +78,12 @@ correct_complex <- function(river_net){
   # If no errors return unchanged network
   if(length(complex_nodes$degree) == 0){
     message("No complex confluences found.")
-    invisible(river_net)
+    invisible(river_net %>% sfnetworks::activate(edges) %>% sf::st_as_sf())
   } else {
+
+    # Add ID to complex nodes
+    complex_nodes <- complex_nodes %>%
+      dplyr::mutate(complexID = 1:dplyr::n())
 
     # Create small buffer around confluence point
     comp_buffer <- sf::st_buffer(complex_nodes, dist = buff)
