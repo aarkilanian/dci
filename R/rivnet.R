@@ -7,7 +7,8 @@ new_rivnet <- function(rivers,
                        bar_perm = NULL,
                        extra.pts = NULL,
                        snap = FALSE,
-                       snap.tolerance = 100){
+                       snap.tolerance = 5,
+                       correct.topology = TRUE){
 
 
 
@@ -70,27 +71,36 @@ new_rivnet <- function(rivers,
   # Combine nodes together
   user_nodes <- dplyr::bind_rows(barriers, sinks, extra.pts)
 
-  ### Prepare network edges
-  #
-  # Remove Z/M dimension from rivers
-  rivers <- sf::st_zm(rivers)
-  # Convert to rivers to linestring geometries only
-  rivers <- sf::st_cast(rivers, "LINESTRING")
-  # Create initial sfnetwork object and topology
-  river_net <- sfnetworks::as_sfnetwork(rivers, length_as_weight = TRUE)
+  # Prepare rivers
+  rivers <- rivers %>%
+    # Remove Z/M dimensions
+    sf::st_zm() %>%
+    # Cast all fatures to linestring geometries
+    sf::st_cast("LINESTRING")
 
-  # Correct river splitting
-  river_net <- resplit_rivers(river_net)
-  # Correct non-dendritic topologies
-  river_net <- enforce_dendritic(river_net)
-
-  # If specified, snap nodes to river edges
-  if(snap){
-    nodes <- sf::st_snap(nodes, rivers, snap.tolerance)
+  # Clean up topology if requested
+  if(correct.topology == TRUE){
+    # Perform necessary corrections
+    rivers <- enforce_dendritic(rivers)
   }
 
-  # Combine nodes and edges into final sfnetwork object
-  sfnet <- sfnetworks::as_sfnetwork(nodes = nodes, edges = rivers)
+  # Snap nodes to rivers
+  nodes_snap <- user_nodes %>%
+    st_snap(rivers, tolerance = snap.tolerance)
+
+  # Split rivers according to node locations
+  rivers_resplit <- sf::st_collection_extract(lwgeom::st_split(rivers, nodes_snap), "LINESTRING") %>%
+    dplyr::select(-c(from,to)) %>%
+    dplyr::mutate(rivID = 1:dplyr::n()) %>%
+    sf::st_as_sf()
+
+  # Create final sfnetwork
+  river_net <- as_sfnetwork(rivers_resplit)
+
+  # Join special nodes' attributes to network nodes
+  river_net <- river_net %>%
+    activate(nodes) %>%
+    st_join(nodes_snap, largest=TRUE)
 
   # Apply binary labelling
   rivnet <- binary_labelling(rivnet)
