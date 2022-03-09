@@ -95,7 +95,7 @@ correct_complex <- function(river_net){
 
       # Determine closest river to new confluence
       distances <- sf::st_distance(new_nodes[confluence,], candidates)
-      ind <- which(distances == min(distances[distances > 0]))
+      ind <- which(distances == min(distances[distances > units::as_units(0, "m")]))
       modify_rivers[confluence] <- candidates$rivID[ind]
     }
 
