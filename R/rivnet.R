@@ -95,10 +95,10 @@ new_rivnet <- function(rivers,
     sf::st_as_sf()
 
   # Create final sfnetwork
-  river_net <- as_sfnetwork(rivers_resplit)
+  rivnet <- as_sfnetwork(rivers_resplit)
 
   # Join special nodes' attributes to network nodes
-  river_net <- river_net %>%
+  rivnet <- rivnet %>%
     activate(nodes) %>%
     st_join(nodes_snap, largest=TRUE)
 
