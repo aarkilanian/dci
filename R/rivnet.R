@@ -9,68 +9,66 @@ new_rivnet <- function(rivers,
                        snap = FALSE,
                        snap.tolerance = 100){
 
-  ### Prepare network nodes
-  #
-  ## Prepare barriers
-  #
-  # Remove Z/M dimension from barriers
-  barriers <- sf::st_zm(barriers)
-  # Assign unique ID to barriers
-  barriers$id <- 1:nrow(barriers)
-  # Store given attributes and remove them
-  barriers_old <- barriers
-  barriers <- dplyr::select(barriers, id)
+
+
+  # Prepare barriers
+  barriers <- barriers %>%
+    # Remove Z/M dimension
+    sf::st_zm(barriers) %>%
+    # Match river projection
+    sf::st_transform(sf::st_crs(rivers)) %>%
+    # Assign barrier IDs
+    dplyr::mutate(id = dplyr::row_number()) %>%
+    # Assign barrier type
+    dplyr::mutate(type = "Barrier")
   # Assign 0% permeability to barriers by default if other permeability is not supplied
-  if(is.null(bar_perm)){
+  if(is.null(bar.perm)){
     barriers$perm <- 0
     # If barrier permeabilities are supplied attempt to add them to the barriers
   } else {
     # Convert barrier permeabilities to double type
-    bar_perm <- as.double(bar.perm)
-    # Assign permeabilities to barriers
-    barriers$perm <- bar.perm
+    barriers$perm <- as.double(barriers[[bar.perm]])
   }
-  # Assign a type to barrier nodes
-  barriers$nodeType <- "Barrier"
-  # Rename barriers to nodes
-  nodes <- barriers
-  #
-  ## Prepare sinks
-  #
-  # If supplied combine sinks to barriers
+  # Select only created columns
+  barriers <- barriers %>%
+    dplyr::select(id, perm, type)
+
+  # Prepare sinks
   if(!is.null(sinks)){
-    # Remove Z/M dimension from sinks
-    sinks <- sf::st_zm(sinks)
-    # Assign unique ID to sinks
-    sinks$id <- 1:nrow(sinks)
-    # Store given attributes and remove them
-    sinks_old <- sinks
-    sinks <- dplyr::select(sinks, id)
-    # Add permeability of 1
-    sinks$perm <- 1
-    # Assign a type to sink nodes
-    sinks$nodeType <- "Sink"
-    # Combine sinks with existing nodes
-    nodes <- rbind(nodes, sinks)
+    sinks <- sinks %>%
+      # Remove Z/M dimensions
+      sf::st_zm() %>%
+      # Match river projection
+      sf::st_transform(sf::st_crs(rivers)) %>%
+      # Assign sink IDs
+      dplyr::mutate(id = dplyr::row_number()) %>%
+      # Assign sink type
+      dplyr::mutate(type = "Sink") %>%
+      # Assign permeability of 1
+      dplyr::mutate(perm = 1) %>%
+      # Select only newly created columns
+      dplyr::select(id, perm, type)
   }
-  #
-  ## Prepare extra points
-  #
+
+  # Prepare extra points
   if(!is.null(extra.pts)){
     # Remove Z/M dimension from sinks
-    extra.pts <- sf::st_zm(extra.pts)
-    # Assign unique ID to points
-    extra.pts$id <- 1:nrow(extra.pts)
-    # Store given attributes and remove them
-    extra.pts_old <- extra.pts
-    extra.pts <- dplyr::select(extra.pts, id)
-    # Add permeability of 1
-    extra.pts$perm <- 1
-    # Assign a type to extra nodes
-    extra.pts$nodeType <- "Extra"
-    # Combine extra points with existing nodes
-    nodes <- rbind(nodes, extra.pts)
+    extra.pts <- extra.pts %>%
+      sf::st_zm() %>%
+      # Match river projection
+      sf::st_transform(sf::st_crs(rivers)) %>%
+      # Assign extra IDs
+      dplyr::mutate(id = dplyr::row_number()) %>%
+      # Assign extra type
+      dplyr::mutate(type = "Extra") %>%
+      # Assign permeability of 1
+      dplyr::mutate(perm = 1) %>%
+      # Select only newly created columns
+      dplyr::select(id, perm, type)
   }
+
+  # Combine nodes together
+  user_nodes <- dplyr::bind_rows(barriers, sinks, extra.pts)
 
   ### Prepare network edges
   #
@@ -79,7 +77,7 @@ new_rivnet <- function(rivers,
   # Convert to rivers to linestring geometries only
   rivers <- sf::st_cast(rivers, "LINESTRING")
   # Create initial sfnetwork object and topology
-  river_net <- sfnetworks::as_sfnetwork(rivers)
+  river_net <- sfnetworks::as_sfnetwork(rivers, length_as_weight = TRUE)
 
   # Correct river splitting
   river_net <- resplit_rivers(river_net)
