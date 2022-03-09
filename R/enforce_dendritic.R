@@ -12,8 +12,8 @@ enforce_dendritic <- function(rivers){
   net_temp <- correct_divergences(river_net)
 
   # Correct complex confluences
-  net_final <- correct_complex(net_temp)
-  invisible(net_final)
+  riv_final <- correct_complex(net_temp)
+  invisible(riv_final)
 
 }
 
@@ -138,9 +138,8 @@ correct_complex <- function(river_net){
 
     }
 
-    # Return modified river network
-    new_net <- sfnetworks::as_sfnetwork(rivers, length_as_weight = TRUE)
-    invisible(new_net)
+    # Return modified rivers
+    invisible(rivers)
 
   }
 
