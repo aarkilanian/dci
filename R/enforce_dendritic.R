@@ -6,7 +6,7 @@ enforce_dendritic <- function(rivers){
     # Remove river fragments with less than 10 nodes
     dplyr::mutate(component = tidygraph::group_components()) %>%
     dplyr::group_by(component) %>%
-    dplyr::filter(n() > 10)
+    dplyr::filter(dplyr::n() > 10)
 
   # Correct divergences
   net_temp <- correct_divergences(river_net)
@@ -31,7 +31,7 @@ correct_divergences <- function(river_net){
     sfnetworks::activate(nodes) %>%
     dplyr::mutate(component = tidygraph::group_components()) %>%
     dplyr::group_by(component) %>%
-    dplyr::filter(n() > 10) %>%
+    dplyr::filter(dplyr::n() > 10) %>%
     tidygraph::ungroup()
 
   # Get number of removed rivers
@@ -53,7 +53,7 @@ correct_divergences <- function(river_net){
 correct_complex <- function(river_net){
 
   # Set buffer distance
-  buff <- 0.25
+  buff <- 1
 
   # Generate unique river IDs
   river_net <- river_net %>%
