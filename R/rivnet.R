@@ -90,7 +90,6 @@ new_rivnet <- function(rivers,
 
   # Split rivers according to node locations
   rivers_resplit <- sf::st_collection_extract(lwgeom::st_split(rivers, nodes_snap), "LINESTRING") %>%
-    dplyr::select(-c(from,to)) %>%
     dplyr::mutate(rivID = 1:dplyr::n()) %>%
     sf::st_as_sf()
 
@@ -100,10 +99,16 @@ new_rivnet <- function(rivers,
   # Join special nodes' attributes to network nodes
   rivnet <- rivnet %>%
     activate(nodes) %>%
-    st_join(nodes_snap, largest=TRUE)
+    st_join(nodes_snap, largest=TRUE) %>%
+    # Set node type of topological nodes
+    dplyr::mutate(type = dplyr::if_else(is.na(type), "Topo", type)) %>%
+    # Set topological node permeability
+    dplyr::mutate(perm = dplyr::if_else(is.na(perm), 1, perm)) %>%
+    # Add unique node IDs
+    dplyr::mutate(nodeID = dplyr::row_number())
 
-  # Apply binary labelling
-  rivnet <- binary_labelling(rivnet)
+  # Apply binary labeling
+  rivnet <- binary_labeling(rivnet)
 
   # Apply membership labelling
   rivnet <- member_labelling(rivnet)
