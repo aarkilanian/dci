@@ -84,12 +84,8 @@ new_rivnet <- function(rivers,
     rivers <- enforce_dendritic(rivers)
   }
 
-  # Snap nodes to rivers
-  nodes_snap <- user_nodes %>%
-    st_snap(rivers, tolerance = snap.tolerance)
-
   # Split rivers according to node locations
-  rivers_resplit <- sf::st_collection_extract(lwgeom::st_split(rivers, nodes_snap), "LINESTRING") %>%
+  rivers_resplit <- sf::st_collection_extract(lwgeom::st_split(rivers, user_nodes), "LINESTRING") %>%
     dplyr::mutate(rivID = 1:dplyr::n()) %>%
     sf::st_as_sf()
 
