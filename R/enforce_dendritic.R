@@ -107,7 +107,8 @@ correct_complex <- function(river_net){
       dplyr::group_by(complexID, to) %>%
       dplyr::tally() %>%
       dplyr::filter(n == 1) %>%
-      dplyr::select(complexID)
+      dplyr::left_join(as.data.frame(buff_intersect) %>% dplyr::select(to, rivID), by = c("to")) %>%
+      dplyr::select(complexID, rivID)
 
     # Find closest rivers to new points
     modify_rivers <- integer(length = nrow(complex_nodes))
@@ -124,20 +125,50 @@ correct_complex <- function(river_net){
     }
 
     # Move endpoints of closest river lines
+    # Split outlet rivers et new confluence locations
     for(i in 1:length(modify_rivers)){
 
+      # Move river to new confluence
       # Get river geometry
       old_river <- sf::st_geometry(rivers[which(rivers$rivID == modify_rivers[i]),])
       # Get point geometry
       new_point <- sf::st_geometry(new_nodes[i,])
+      point_x <- new_point[[1]][1]
+      point_y <- new_point[[1]][2]
       # Get number of coordinates on river line
       num_coord <- length(old_river[[1]])
       # Update final coordinates with new point
       new_river <- old_river
-      new_river[[1]][num_coord - num_coord/2] <- new_point[[1]][1]
-      new_river[[1]][num_coord] <- new_point[[1]][2]
+      new_river[[1]][num_coord/2] <- point_x
+      new_river[[1]][num_coord] <- point_y
       # Replace old geometry in rivers
       sf::st_geometry(rivers[which(rivers$rivID == modify_rivers[i]),]) <- sf::st_sfc(new_river)
+
+      # Split outlet river at confluence
+      # Get river geometry
+      old_river <- sf::st_geometry(rivers[rivers$rivID == new_nodes$rivID[i],])
+      num_coord <- length(old_river[[1]])
+      start_x <- old_river[[1]][1]
+      start_y <- old_river[[1]][num_coord/2 + 1]
+      # Create first line segment from old confluence to new confluence
+      new_river1 <- sf::st_sfc(sf::st_linestring(matrix(c(start_x,
+                                               point_x,
+                                               start_y,
+                                               point_y), 2)), crs = sf::st_crs(rivers)) %>%
+        sf::st_sf() %>%
+        dplyr::mutate(rivID = new_nodes$rivID[i])
+      # Create second line segment from new confluence to the end of original
+      new_river2 <- sf::st_geometry(old_river)
+      new_river2[[1]][1] <- point_x
+      new_river2[[1]][num_coord/2 + 1] <- point_y
+      new_river2 <- sf::st_sf(new_river2) %>%
+        dplyr::mutate(rivID = nrow(rivers) + 1) %>%
+        dplyr::rename(geometry = new_river2)
+      new_river2$rivID[1] <- nrow(rivers) + 1
+      # Remove old river and add new ones
+      rivers <- rivers %>%
+        dplyr::filter(!(rivID == new_nodes$rivID[i])) %>%
+        dplyr::bind_rows(new_river1, new_river2)
 
     }
 
