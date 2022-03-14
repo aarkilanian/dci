@@ -85,16 +85,24 @@ new_rivnet <- function(rivers,
   }
 
   # Split rivers at user node locations
-  rivers_split <- split_rivers_at_points(rivers, pts = user_nodes) %>%
+  rivers <- split_rivers_at_points(rivers, pts = user_nodes) %>%
     dplyr::mutate(rivID = 1:dplyr::n())
 
   # Create final sfnetwork
-  rivnet <- sfnetworks::as_sfnetwork(rivers_resplit)
+  rivnet <- sfnetworks::as_sfnetwork(rivers)
+
+  # Determine user nodes
+  within_dist <- user_nodes %>%
+    sf::st_is_within_distance(rivnet %>% sfnetworks::activate(nodes), dist = 10, sparse = T) %>%
+    unlist()
+  user_nodes$key <- within_dist
 
   # Join special nodes' attributes to network nodes
   rivnet <- rivnet %>%
     sfnetworks::activate(nodes) %>%
-    sf::st_join(user_nodes, largest=TRUE) %>%
+    dplyr::mutate(rowID = dplyr::row_number()) %>%
+    dplyr::left_join(as.data.frame(user_nodes) %>% dplyr::select(-geometry), by = c("rowID" = "key")) %>%
+    dplyr::select(-rowID) %>%
     # Set node type of topological nodes
     dplyr::mutate(type = dplyr::if_else(is.na(type), "Topo", type)) %>%
     # Set topological node permeability
