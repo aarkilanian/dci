@@ -84,18 +84,17 @@ new_rivnet <- function(rivers,
     rivers <- enforce_dendritic(rivers)
   }
 
-  # Split rivers according to node locations
-  rivers_resplit <- sf::st_collection_extract(lwgeom::st_split(rivers, user_nodes), "LINESTRING") %>%
-    dplyr::mutate(rivID = 1:dplyr::n()) %>%
-    sf::st_as_sf()
+  # Split rivers at user node locations
+  rivers_split <- split_rivers_at_points(rivers, pts = user_nodes) %>%
+    dplyr::mutate(rivID = 1:dplyr::n())
 
   # Create final sfnetwork
-  rivnet <- as_sfnetwork(rivers_resplit)
+  rivnet <- sfnetworks::as_sfnetwork(rivers_resplit)
 
   # Join special nodes' attributes to network nodes
   rivnet <- rivnet %>%
-    activate(nodes) %>%
-    st_join(nodes_snap, largest=TRUE) %>%
+    sfnetworks::activate(nodes) %>%
+    sf::st_join(user_nodes, largest=TRUE) %>%
     # Set node type of topological nodes
     dplyr::mutate(type = dplyr::if_else(is.na(type), "Topo", type)) %>%
     # Set topological node permeability
