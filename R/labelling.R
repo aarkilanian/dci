@@ -9,55 +9,41 @@ binary_labeling <- function(rivnet){
     dplyr::mutate(membership = "0")
 
   # Apply labeling function over network
-  rivnet2 <- rivnet %>%
+  rivnet2 <- sub_rivnet %>%
     sfnetworks::activate(nodes) %>%
-    dplyr::mutate(node.label = tidygraph::map_bfs(root = which(.N()$type == "Sink"),
+    dplyr::mutate(node.label = tidygraph::map_bfs_int(root = which(.N()$type == "Sink"),
                                     .f = node_labeler, mode = "all"))
 
 }
 
-membership_labeling <- function(){
+node_labeler <- function(node, parent, path, ...){
 
-}
-
-node_labeler <- function(node, parent, ...){
-
-  # Get type of current node
   cur.type <- .N()$type[node]
+  print(length(path$result))
 
-  # Get ID of current node
-  cur.ID <- .N()$nodeID[node]
-
-  # Special condition for sink node
   if(cur.type == "Sink"){
-    node.label <- "0"
-
-    # Write to external table
-    ex.nodes$node.label[which(ex.nodes$nodeID == cur.ID)] <<- node.label
-
-    # Return label
-    return(node.label)
+    node.label <- 0
+    return(as.integer(node.label))
   }
 
-  # Get parent node ID
-  par.ID <- .N()$nodeID[parent]
+  res_list <- path$result[[length(path$result)]]
+  res_vec <- as.vector(res_list)
+  res_last <- res_vec[length(res_vec)]
 
-  # Get parent node label from external table
-  par.label <- ex.nodes[ex.nodes$nodeID == par.ID,]$node.label
+  # Check for second child
+  if(nrow(path) > 2){
+    dup_vec <- as.vector(path$result[[length(path$result) - 1]])
+    dup_len <- length(dup_vec)
+    res_len <- length(res_vec)
+    if(length(path$result) == length()){
+      print("second baby")
+      node.label <- as.integer(res_last) * 10
+      return(as.integer(node.label))
+    }
+  }
 
-  # Check number of other nodes with same parent
-  num.parents <- nrow(ex.nodes[ex.nodes$parent == par.ID,])
-  print(num.parents)
+  node.label <- as.integer(res_last) + 1
+  return(as.integer(node.label))
 
-  # Generate label
-  node.label <- paste0(par.label, num.parents)
 
-  # Write parent name to external table
-  ex.nodes$parent[which(ex.nodes$nodeID == cur.ID)] <<- par.ID
-
-  # Write label to external table
-  ex.nodes$node.label[which(ex.nodes$nodeID == cur.ID)] <<- node.label
-
-  # Return label
-  return(as.character(node.label))
 }
