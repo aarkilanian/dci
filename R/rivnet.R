@@ -4,79 +4,13 @@ new_rivnet <- function(rivers,
                        barriers,
                        sinks = NULL,
                        riv.weight = NULL,
-                       bar_perm = NULL,
-                       extra.pts = NULL,
+                       others = NULL,
                        snap = FALSE,
                        snap.tolerance = 5,
                        correct.topology = TRUE){
 
-
-
-  # Prepare barriers
-  barriers <- barriers %>%
-    # Remove Z/M dimension
-    sf::st_zm(barriers) %>%
-    # Match river projection
-    sf::st_transform(sf::st_crs(rivers)) %>%
-    # Assign barrier IDs
-    dplyr::mutate(id = dplyr::row_number()) %>%
-    # Assign barrier type
-    dplyr::mutate(type = "Barrier")
-  # Assign 0% permeability to barriers by default if other permeability is not supplied
-  if(is.null(bar.perm)){
-    barriers$perm <- 0
-    # If barrier permeabilities are supplied attempt to add them to the barriers
-  } else {
-    # Convert barrier permeabilities to double type
-    barriers$perm <- as.double(barriers[[bar.perm]])
-  }
-  # Select only created columns
-  barriers <- barriers %>%
-    dplyr::select(id, perm, type)
-
-  # Prepare sinks
-  if(!is.null(sinks)){
-    sinks <- sinks %>%
-      # Remove Z/M dimensions
-      sf::st_zm() %>%
-      # Match river projection
-      sf::st_transform(sf::st_crs(rivers)) %>%
-      # Assign sink IDs
-      dplyr::mutate(id = dplyr::row_number()) %>%
-      # Assign sink type
-      dplyr::mutate(type = "Sink") %>%
-      # Assign permeability of 1
-      dplyr::mutate(perm = 1) %>%
-      # Select only newly created columns
-      dplyr::select(id, perm, type)
-  }
-
-  # Prepare extra points
-  if(!is.null(extra.pts)){
-    # Remove Z/M dimension from sinks
-    extra.pts <- extra.pts %>%
-      sf::st_zm() %>%
-      # Match river projection
-      sf::st_transform(sf::st_crs(rivers)) %>%
-      # Assign extra IDs
-      dplyr::mutate(id = dplyr::row_number()) %>%
-      # Assign extra type
-      dplyr::mutate(type = "Extra") %>%
-      # Assign permeability of 1
-      dplyr::mutate(perm = 1) %>%
-      # Select only newly created columns
-      dplyr::select(id, perm, type)
-  }
-
   # Combine nodes together
-  user_nodes <- dplyr::bind_rows(barriers, sinks, extra.pts)
-
-  # Prepare rivers
-  rivers <- rivers %>%
-    # Remove Z/M dimensions
-    sf::st_zm() %>%
-    # Cast all fatures to linestring geometries
-    sf::st_cast("LINESTRING")
+  user_nodes <- dplyr::bind_rows(barriers, sinks, others)
 
   # Clean up topology if requested
   if(correct.topology == TRUE){
