@@ -1,12 +1,12 @@
-enforce_dendritic <- function(rivers){
+enforce_dendritic <- function(rivers, min_comp = 10){
 
   # Create river network
   river_net <- rivers %>%
     sfnetworks::as_sfnetwork(length_as_weight = TRUE) %>%
-    # Remove river fragments with less than 10 nodes
+    # Retain only components with set minimum nodes
     dplyr::mutate(component = tidygraph::group_components()) %>%
     dplyr::group_by(component) %>%
-    dplyr::filter(dplyr::n() > 10)
+    dplyr::filter(dplyr::n() > min_comp)
 
   # Correct divergences
   net_temp <- correct_divergences(river_net)
