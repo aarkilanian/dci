@@ -26,24 +26,8 @@ new_rivnet <- function(rivers,
   # Create final sfnetwork
   rivnet <- sfnetworks::as_sfnetwork(rivers)
 
-  # Determine user nodes
-  within_dist <- user_nodes %>%
-    sf::st_is_within_distance(rivnet %>% sfnetworks::activate(nodes), dist = 10, sparse = T) %>%
-    unlist()
-  user_nodes$key <- within_dist
-
-  # Join special nodes' attributes to network nodes
-  rivnet <- rivnet %>%
-    sfnetworks::activate(nodes) %>%
-    dplyr::mutate(rowID = dplyr::row_number()) %>%
-    dplyr::left_join(as.data.frame(user_nodes) %>% dplyr::select(-geometry), by = c("rowID" = "key")) %>%
-    dplyr::select(-rowID) %>%
-    # Set node type of topological nodes
-    dplyr::mutate(type = dplyr::if_else(is.na(type), "Topo", type)) %>%
-    # Set topological node permeability
-    dplyr::mutate(perm = dplyr::if_else(is.na(perm), 1, perm)) %>%
-    # Add unique node IDs
-    dplyr::mutate(nodeID = dplyr::row_number())
+  # Join special node attributes
+  rivnet <- join_attributes(rivnet, user_nodes, snap_tolerance)
 
   # Apply binary labeling
   rivnet <- node_labeling(rivnet)
