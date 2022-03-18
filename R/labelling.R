@@ -1,49 +1,91 @@
 binary_labeling <- function(rivnet){
 
-  # Extract node table
-  ex.nodes <- rivnet %>%
-    sfnetworks::activate(nodes) %>%
-    data.frame() %>%
-    dplyr::mutate(node.label = "1") %>%
-    dplyr::mutate(parent = "0") %>%
-    dplyr::mutate(membership = "0")
+  # Store labels during creation
+  old_parent <- 0
 
   # Apply labeling function over network
-  rivnet2 <- sub_rivnet %>%
+  rivnet <- rivnet %>%
     sfnetworks::activate(nodes) %>%
-    dplyr::mutate(node.label = tidygraph::map_bfs_int(root = which(.N()$type == "Sink"),
+    dplyr::mutate(node.label = tidygraph::map_bfs(root = which(.N()$type == "Sink"),
                                     .f = node_labeler, mode = "all"))
+
+  # Create member IDs vector
+  num_bars <- nrow(rivnet %>% sfnetworks::activate(nodes) %>% dplyr::filter(type == "Barrier") %>% as.data.frame())
+  member_IDs <- 1:num_bars
+
+  # Apply membership labeling over network
+  rivnet <- rivnet %>%
+    sfnetworks::activate(nodes) %>%
+    dplyr::mutate(node.membership = tidygraph::map_dfs_int(root = which(.N()$type == "Sink"),
+                                                       .f = membership_labeler, mode = "all"))
+
+  # Return labeled network
+  invisible(rivnet)
 
 }
 
 node_labeler <- function(node, parent, path, ...){
 
   cur.type <- .N()$type[node]
-  print(length(path$result))
 
   if(cur.type == "Sink"){
-    node.label <- 0
-    return(as.integer(node.label))
+    node.label <- c(FALSE)
+    return(node.label)
   }
 
-  res_list <- path$result[[length(path$result)]]
-  res_vec <- as.vector(res_list)
-  res_last <- res_vec[length(res_vec)]
+  # Get parent label
+  par_label <- as.vector(path$result[[length(path$result)]])
 
-  # Check for second child
-  if(nrow(path) > 2){
-    dup_vec <- as.vector(path$result[[length(path$result) - 1]])
-    dup_len <- length(dup_vec)
-    res_len <- length(res_vec)
-    if(length(path$result) == length()){
-      print("second baby")
-      node.label <- as.integer(res_last) * 10
-      return(as.integer(node.label))
-    }
+  if(is.na(old_parent)){
+
+    # Store current parent as old parent
+    old_parent <<- parent
+
+    # Assign node label based on parent
+    node.label <- append(par_label, FALSE)
+    return(node.label)
+
+  } else if(old_parent == parent){
+
+    # Store current parent as old parent
+    old_parent <<- parent
+
+    # Assign node label based on parent
+    node.label <- append(par_label, TRUE)
+    return(node.label)
+
+  } else{
+
+    # Store current parent as old parent
+    old_parent <<- parent
+
+    # Assign node label based on parent
+    node.label <- append(par_label, FALSE)
+    return(node.label)
+
   }
 
-  node.label <- as.integer(res_last) + 1
-  return(as.integer(node.label))
+}
 
+membership_labeler <- function(node, parent, path, ...){
+
+  member <- member_IDs[1]
+
+  # If current node is a barrier use new member ID
+  if(.N()$type[node] == "Barrier"){
+
+    # Remove used label
+    member_IDs <<- member_IDs[-1]
+
+    # Use new label
+    member <- member_IDs[1]
+    return(member)
+
+  } else{
+
+    # Reuse label
+    return(member)
+
+  }
 
 }
