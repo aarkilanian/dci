@@ -10,7 +10,10 @@ new_rivnet <- function(rivers,
                        correct.topology = TRUE){
 
   # Combine nodes together
-  user_nodes <- dplyr::bind_rows(barriers, sinks, others)
+
+  user_nodes <- dplyr::bind_rows(barriers, sinks, others) %>%
+    # Match river projection
+    sf::st_transform(sf::st_crs(rivers))
 
   # Clean up topology if requested
   if(correct.topology == TRUE){
@@ -19,7 +22,7 @@ new_rivnet <- function(rivers,
   }
 
   # Split rivers at user node locations
-  rivers <- split_rivers_at_points(rivers, pts = user_nodes) %>%
+  rivers <- split_rivers_at_points(rivers, user_nodes, tolerance = 10) %>%
     dplyr::mutate(rivID = 1:dplyr::n())
 
   # Create final sfnetwork

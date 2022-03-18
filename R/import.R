@@ -38,8 +38,6 @@ import_points <- function(path, type, perm = NULL, sf = FALSE){
     barriers <- points %>%
       # Remove Z/M dimension
       sf::st_zm(barriers) %>%
-      # Match river projection
-      sf::st_transform(sf::st_crs(rivers)) %>%
       # Assign barrier IDs
       dplyr::mutate(id = dplyr::row_number()) %>%
       # Assign barrier type
@@ -63,11 +61,10 @@ import_points <- function(path, type, perm = NULL, sf = FALSE){
 
   if(type == "Sink"){
 
+    # Prepare sinks
     sinks <- points %>%
       # Remove Z/M dimensions
       sf::st_zm() %>%
-      # Match river projection
-      sf::st_transform(sf::st_crs(rivers)) %>%
       # Assign sink IDs
       dplyr::mutate(id = dplyr::row_number()) %>%
       # Assign sink type
@@ -86,13 +83,12 @@ import_points <- function(path, type, perm = NULL, sf = FALSE){
 
     # Prepare other points
     others <- points %>%
+      # Remove Z/M dimensions
       sf::st_zm() %>%
-      # Match river projection
-      sf::st_transform(sf::st_crs(rivers)) %>%
-      # Assign extra IDs
+      # Assign other IDs
       dplyr::mutate(id = dplyr::row_number()) %>%
-      # Assign extra type
-      dplyr::mutate(type = "Extra") %>%
+      # Assign other type
+      dplyr::mutate(type = "Other") %>%
       # Assign permeability of 1
       dplyr::mutate(perm = 1) %>%
       # Select only newly created columns
