@@ -5,7 +5,7 @@ new_rivnet <- function(rivers,
                        sinks = NULL,
                        riv_weight = NULL,
                        others = NULL,
-                       snap_tolerance = 1,
+                       snap_tolerance = 10,
                        correct_topology = TRUE){
 
   # Match river projection
