@@ -4,16 +4,16 @@ split_rivers_at_points <- function(rivers, pts, tolerance){
   pts <- pts %>%
     dplyr::filter(type != "Sink")
 
-  # Find nearest river features
-  riv_ind <- sf::st_nearest_feature(pts, rivers)
+  # Create container
+  num_disc <- 0
 
-  for(i in 1:length(riv_ind)){
+  for(i in 1:nrow(pts)){
 
     # Update nearest river features
-    riv_ind[i] <- sf::st_nearest_feature(pts[i,], rivers)
+    riv_ind <- sf::st_nearest_feature(pts[i,], rivers)
 
     # Place points on rivers
-    riv_pts <- sf::st_line_sample(rivers[riv_ind[i],], density = 1/1) %>%
+    riv_pts <- sf::st_line_sample(rivers[riv_ind,], density = 1/1) %>%
       sf::st_sf() %>%
       sf::st_cast("POINT") %>%
       dplyr::mutate(group = 1)
@@ -27,15 +27,13 @@ split_rivers_at_points <- function(rivers, pts, tolerance){
     if(!is.null(tolerance)){
       min_dist <- distances[nrst_ind]
       if(as.double(min_dist) > tolerance){
-        if(!riv_ind_dup[i]){
-        dplyr::bind_rows(split_rivs, old_rivs[i,])
-        }
+        num_disc <- num_disc + 1
         next()
       }
     }
 
     # Create first segment
-    riv_start <- sf::st_geometry(rivers[riv_ind[i],])
+    riv_start <- sf::st_geometry(rivers[riv_ind,])
     riv_len <- length(riv_start[[1]])
     riv_start <- sf::st_sfc(sf::st_point(c(riv_start[[1]][1], riv_start[[1]][riv_len/2 + 1])), crs = sf::st_crs(rivers))
     sf::st_geometry(riv_pts[1,]) <- sf::st_geometry(riv_start)
@@ -46,7 +44,7 @@ split_rivers_at_points <- function(rivers, pts, tolerance){
       dplyr::ungroup()
 
     # Create second segment
-    riv_end <- sf::st_geometry(rivers[riv_ind[i],])
+    riv_end <- sf::st_geometry(rivers[riv_ind,])
     riv_end <- sf::st_sfc(sf::st_point(c(riv_end[[1]][riv_len/2], riv_end[[1]][riv_len])), crs = sf::st_crs(rivers))
     sf::st_geometry(riv_pts[nrow(riv_pts),]) <- sf::st_geometry(riv_end)
     river2 <- riv_pts[nrst_ind:nrow(riv_pts),] %>%
@@ -56,7 +54,7 @@ split_rivers_at_points <- function(rivers, pts, tolerance){
       dplyr::ungroup()
 
     # Remove old river
-    rivers <- rivers[-riv_ind[i],]
+    rivers <- rivers[-riv_ind,]
 
     # Add new rivers
     rivers <- rivers %>%
@@ -64,10 +62,12 @@ split_rivers_at_points <- function(rivers, pts, tolerance){
 
   }
 
+  if(num_disc > 0){
+    message(paste0(num_disc, " features have been removed."))
+  }
   invisible(rivers)
 
 }
-
 
 join_attributes <- function(rivnet, nodes, tolerance){
 
