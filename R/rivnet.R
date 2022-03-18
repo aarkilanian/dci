@@ -3,26 +3,24 @@
 new_rivnet <- function(rivers,
                        barriers,
                        sinks = NULL,
-                       riv.weight = NULL,
+                       riv_weight = NULL,
                        others = NULL,
-                       snap = FALSE,
-                       snap.tolerance = 5,
-                       correct.topology = TRUE){
+                       snap_tolerance = 1,
+                       correct_topology = TRUE){
 
   # Combine nodes together
-
   user_nodes <- dplyr::bind_rows(barriers, sinks, others) %>%
     # Match river projection
     sf::st_transform(sf::st_crs(rivers))
 
   # Clean up topology if requested
-  if(correct.topology == TRUE){
+  if(correct_topology == TRUE){
     # Perform necessary corrections
     rivers <- enforce_dendritic(rivers)
   }
 
   # Split rivers at user node locations
-  rivers <- split_rivers_at_points(rivers, user_nodes, tolerance = 10) %>%
+  rivers <- split_rivers_at_points(rivers, user_nodes, snap_tolerance) %>%
     dplyr::mutate(rivID = 1:dplyr::n())
 
   # Create final sfnetwork
