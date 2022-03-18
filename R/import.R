@@ -37,7 +37,7 @@ import_points <- function(path, type, perm = NULL, sf = FALSE){
     # Prepare barriers
     barriers <- points %>%
       # Remove Z/M dimension
-      sf::st_zm(barriers) %>%
+      sf::st_zm() %>%
       # Assign barrier IDs
       dplyr::mutate(id = dplyr::row_number()) %>%
       # Assign barrier type
@@ -55,7 +55,7 @@ import_points <- function(path, type, perm = NULL, sf = FALSE){
       dplyr::select(id, perm, type)
 
     # Return barriers
-    invisible(barriers)
+    return(barriers)
 
   }
 
@@ -75,7 +75,7 @@ import_points <- function(path, type, perm = NULL, sf = FALSE){
       dplyr::select(id, perm, type)
 
     # Return sinks
-    invisible(sinks)
+    return(sinks)
 
   }
 
@@ -95,7 +95,7 @@ import_points <- function(path, type, perm = NULL, sf = FALSE){
       dplyr::select(id, perm, type)
 
     # Return others
-    invisible(others)
+    return(others)
 
   }
 
