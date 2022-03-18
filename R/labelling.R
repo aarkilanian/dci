@@ -9,6 +9,13 @@ binary_labeling <- function(rivnet){
     dplyr::mutate(node.label = tidygraph::map_bfs(root = which(.N()$type == "Sink"),
                                     .f = node_labeler, mode = "all"))
 
+  # Return labeled network
+  invisible(rivnet)
+
+}
+
+membership_labeling <- function(rivnet){
+
   # Create member IDs vector
   num_bars <- nrow(rivnet %>% sfnetworks::activate(nodes) %>% dplyr::filter(type == "Barrier") %>% as.data.frame())
   member_IDs <- 1:num_bars
@@ -17,7 +24,7 @@ binary_labeling <- function(rivnet){
   rivnet <- rivnet %>%
     sfnetworks::activate(nodes) %>%
     dplyr::mutate(node.membership = tidygraph::map_dfs_int(root = which(.N()$type == "Sink"),
-                                                       .f = membership_labeler, mode = "all"))
+                                                           .f = membership_labeler, mode = "all"))
 
   # Return labeled network
   invisible(rivnet)
