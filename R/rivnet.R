@@ -8,10 +8,15 @@ new_rivnet <- function(rivers,
                        snap_tolerance = 1,
                        correct_topology = TRUE){
 
+  # Match river projection
+  barriers <- sf::st_transform(barriers, sf::st_crs(rivers))
+  sinks <- sf::st_transform(sinks, sf::st_crs(rivers))
+  if(!is.null(others)){
+    others <- sf::st_transform(others, sf::st_crs(rivers))
+  }
+
   # Combine nodes together
-  user_nodes <- dplyr::bind_rows(barriers, sinks, others) %>%
-    # Match river projection
-    sf::st_transform(sf::st_crs(rivers))
+  user_nodes <- dplyr::bind_rows(barriers, sinks, others)
 
   # Clean up topology if requested
   if(correct_topology == TRUE){
