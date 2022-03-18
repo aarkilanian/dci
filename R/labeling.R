@@ -6,7 +6,7 @@ node_labeling <- function(rivnet){
   # Apply labeling function over network
   rivnet <- rivnet %>%
     sfnetworks::activate(nodes) %>%
-    dplyr::mutate(node.label = tidygraph::map_bfs(root = which(.N()$type == "Sink"),
+    dplyr::mutate(node.label = tidygraph::map_bfs(root = which(tidygraph::.N()$type == "Sink"),
                                     .f = node_labeler, mode = "all"))
 
   # Return labeled network
@@ -23,7 +23,7 @@ membership_labeling <- function(rivnet){
   # Apply membership labeling over network
   rivnet <- rivnet %>%
     sfnetworks::activate(nodes) %>%
-    dplyr::mutate(node.membership = tidygraph::map_dfs_int(root = which(.N()$type == "Sink"),
+    dplyr::mutate(node.membership = tidygraph::map_dfs_int(root = which(tidygraph::.N()$type == "Sink"),
                                                            .f = membership_labeler, mode = "all"))
 
   # Return labeled network
@@ -33,7 +33,7 @@ membership_labeling <- function(rivnet){
 
 node_labeler <- function(node, parent, path, ...){
 
-  cur.type <- .N()$type[node]
+  cur.type <- tidygraph::.N()$type[node]
 
   if(cur.type == "Sink"){
     node.label <- c(FALSE)
@@ -79,7 +79,7 @@ membership_labeler <- function(node, parent, path, ...){
   member <- member_IDs[1]
 
   # If current node is a barrier use new member ID
-  if(.N()$type[node] == "Barrier"){
+  if(tidygraph::.N()$type[node] == "Barrier"){
 
     # Remove used label
     member_IDs <<- member_IDs[-1]
