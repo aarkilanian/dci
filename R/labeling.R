@@ -1,4 +1,4 @@
-binary_labeling <- function(rivnet){
+node_labeling <- function(rivnet){
 
   # Store labels during creation
   old_parent <- 0

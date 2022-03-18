@@ -48,10 +48,10 @@ new_rivnet <- function(rivers,
     dplyr::mutate(nodeID = dplyr::row_number())
 
   # Apply binary labeling
-  rivnet <- binary_labeling(rivnet)
+  rivnet <- node_labeling(rivnet)
 
   # Apply membership labelling
-  rivnet <- member_labelling(rivnet)
+  rivnet <- membership_labeling(rivnet)
 
   # Define rivnet class
   rivnet <- structure(rivnet, class = c("rivnet", class(rivnet)))
