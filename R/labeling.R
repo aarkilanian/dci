@@ -1,13 +1,16 @@
 node_labeling <- function(rivnet){
 
-  # Store labels during creation
-  old_parent <- 0
+  # Create new env
+  labelenv <- new.env(parent = emptyenv())
+
+  # Create variable to keep track of created labels outside loop
+  assign('past_label', c(FALSE), labelenv)
 
   # Apply labeling function over network
   rivnet <- rivnet %>%
     sfnetworks::activate(nodes) %>%
     dplyr::mutate(node.label = tidygraph::map_bfs(root = which(tidygraph::.N()$type == "Sink"),
-                                    .f = node_labeler, mode = "all"))
+                                    .f = node_labeler, env = labelenv, mode = "all"))
 
   # Return labeled network
   invisible(rivnet)
@@ -16,82 +19,104 @@ node_labeling <- function(rivnet){
 
 membership_labeling <- function(rivnet){
 
-  # Create member IDs vector
-  num_bars <- nrow(rivnet %>% sfnetworks::activate(nodes) %>% dplyr::filter(type == "Barrier") %>% as.data.frame())
-  member_IDs <- 1:num_bars
+  # Retrieve number of barriers
+  num_bar <- rivnet %>%
+    sfnetworks::activate(nodes) %>%
+    as.data.frame() %>%
+    dplyr::filter(type == "Barrier") %>%
+    nrow()
 
-  # Apply membership labeling over network
+  # Create new env
+  memberenv <- new.env(parent = emptyenv())
+
+  # Create variable in new environment to hold member IDs
+  assign("labels", 1:(num_bar*2), envir = memberenv)
+
+  # Apply labeling function over network
   rivnet <- rivnet %>%
     sfnetworks::activate(nodes) %>%
-    dplyr::mutate(node.membership = tidygraph::map_dfs_int(root = which(tidygraph::.N()$type == "Sink"),
-                                                           .f = membership_labeler, mode = "all"))
-
-  # Return labeled network
-  invisible(rivnet)
-
+    dplyr::mutate(member.label = tidygraph::map_dfs_int(root = which(tidygraph::.N()$type == "Sink"),
+                                                    .f = membership_labeler, env = memberenv, mode = "all"))
 }
 
-node_labeler <- function(node, parent, path, ...){
+node_labeler <- function(node, parent, path, env, ...){
 
   cur.type <- tidygraph::.N()$type[node]
 
   if(cur.type == "Sink"){
-    node.label <- c(FALSE)
-    return(node.label)
+    # Create sink label
+    node_label <- c(FALSE)
+
+    # Write to external variable
+    assign("past_label", node_label, envir = env)
+
+    # Return label
+    return(node_label)
   }
 
   # Get parent label
   par_label <- as.vector(path$result[[length(path$result)]])
 
-  if(is.na(old_parent)){
+  # Create new label
+  node_label <- append(par_label, FALSE)
 
-    # Store current parent as old parent
-    old_parent <<- parent
+  # Retrieve last issued label
+  old_label <- get("past_label", envir = env)
+  print(old_label)
 
-    # Assign node label based on parent
-    node.label <- append(par_label, FALSE)
-    return(node.label)
+  # If same append TRUE to parent label and return
+  if(identical(node_label, old_label)){
+    node_label <- append(par_label, TRUE)
 
-  } else if(old_parent == parent){
+    # Assign new label to old label environment
+    assign("past_label", node_label, envir = env)
 
-    # Store current parent as old parent
-    old_parent <<- parent
+    # Return label
+    return(node_label)
 
-    # Assign node label based on parent
-    node.label <- append(par_label, TRUE)
-    return(node.label)
-
+    # If different return original label
   } else{
 
-    # Store current parent as old parent
-    old_parent <<- parent
+    # Assign new label to old label environment
+    assign("past_label", node_label, envir = env)
 
-    # Assign node label based on parent
-    node.label <- append(par_label, FALSE)
-    return(node.label)
-
+    # Return label
+    return(node_label)
   }
-
 }
 
-membership_labeler <- function(node, parent, path, ...){
+membership_labeler <- function(node, parent, path, env, ...){
 
-  member <- member_IDs[1]
+  cur.type <- tidygraph::.N()$type[node]
+
+  if(cur.type == "Sink"){
+    # Create sink label
+    member_label <- 0
+
+    # Return label
+    return(member_label)
+  }
+
+  parent_label <- as.integer(as.vector(path$result[length(path$result)]))
 
   # If current node is a barrier use new member ID
   if(tidygraph::.N()$type[node] == "Barrier"){
 
-    # Remove used label
-    member_IDs <<- member_IDs[-1]
+    # Retrieve label list
+    old_labels <- get("labels", envir = env)
 
-    # Use new label
-    member <- member_IDs[1]
-    return(member)
+    # Choose new label
+    member_label <- old_labels[1]
+
+    # Remove label from list
+    assign("labels", old_labels[-1], envir = env)
+
+    return(member_label)
 
   } else{
 
     # Reuse label
-    return(member)
+    return(parent_label)
 
   }
 
