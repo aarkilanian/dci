@@ -55,14 +55,13 @@ node_labeler <- function(node, parent, path, env, ...){
   }
 
   # Get parent label
-  par_label <- as.vector(path$result[[length(path$result)]])
+  par_label <- path$result[[length(path$result)]]
 
   # Create new label
   node_label <- append(par_label, FALSE)
 
   # Retrieve last issued label
   old_label <- get("past_label", envir = env)
-  print(old_label)
 
   # If same append TRUE to parent label and return
   if(identical(node_label, old_label)){
