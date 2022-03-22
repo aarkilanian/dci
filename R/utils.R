@@ -35,8 +35,11 @@ split_rivers_at_points <- function(rivers, pts, tolerance){
     # Create first segment
     riv_start <- sf::st_geometry(rivers[riv_ind,])
     riv_len <- length(riv_start[[1]])
+    # Extract river start point
     riv_start <- sf::st_sfc(sf::st_point(c(riv_start[[1]][1], riv_start[[1]][riv_len/2 + 1])), crs = sf::st_crs(rivers))
+    # Move first point on river line to start location
     sf::st_geometry(riv_pts[1,]) <- sf::st_geometry(riv_start)
+    # Convert river points to line
     river1 <- riv_pts[1:nrst_ind,] %>%
       dplyr::group_by(group) %>%
       dplyr::summarise(do_union = FALSE) %>%
