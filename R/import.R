@@ -6,9 +6,12 @@ import_rivers <- function(path, weight = NULL, sf = FALSE){
   if(!sf){
 
     # Read in river with sf
-    rivers <- sf::read_sf(path)
-
+    rivers <- tryCatch(sf::read_sf(path),
+      error = function(e) rlang::abort("invalid spatial data provided")
+    )
   }
+
+  # Check for valid sf object
 
   # Prepare rivers
   rivers <- rivers %>%
@@ -28,8 +31,11 @@ import_points <- function(path, type, perm = NULL, sf = FALSE){
 
   # Read shapefile from path if not sf object
   if(!sf){
-    # Read in point data
-    points <- sf::read_sf(path)
+
+    # Read in river with sf
+    points <- tryCatch(sf::read_sf(path),
+                       error = function(e) rlang::abort("invalid spatial data provided")
+    )
   }
 
   if(type == "Barrier"){
