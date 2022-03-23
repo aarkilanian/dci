@@ -1,0 +1,56 @@
+<!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
+<qgis version="3.24.0-Tisler">
+  <identifier>RH_L</identifier>
+  <parentidentifier></parentidentifier>
+  <language>FRA</language>
+  <type>dataset</type>
+  <title>RH_L</title>
+  <abstract>La classe d’entité RH_L correspond aux lignes du réseau géométrique. Elles représentent la continuité de l’écoulement à travers tous les types d’entités aquatiques (cours d’eau, lacs, milieux humides, etc.). La géométrie des lignes centrales coïncide avec celle des surfaces de la classe d’entités RH_S.
+Les sommets des segments (vertex) sont géométriquement constitué de quatre types de coordonnées exprimées en mètres soit x, y, z et m. Le réseau comporte des valeurs en x, y ainsi qu’une valeur m qui correspond à une distance relative utilisée pour localiser des évènements hydro dans le réseau hydrographique. Actuellement, les sommets des segments n’ont pas de valeur z dans la géométrie,mais cette donnée sera ajoutée dans une version ultérieure de la GRHQ.
+La classe RH_L contient les segments qui assurent la continuité du réseau hydrographique. Certains d’entre eux ne sont pas des cours d’eau de surface, mais des raccords servant à la connectivité, sans correspondance visible sur le terrain et dont le tracé n’est que théorique. Ces segments portent la valeur de code producteur « MDDELCC ».
+
+RH_L – Segments du réseau hydrologique</abstract>
+  <keywords vocabulary="Search keys">
+    <keyword>RH_L</keyword>
+    <keyword>Réseau hydrographique</keyword>
+    <keyword>Réseau hydrologique</keyword>
+    <keyword>Segment</keyword>
+    <keyword>Ligne</keyword>
+    <keyword>Segment linéaire</keyword>
+    <keyword>Cours d'eau</keyword>
+    <keyword>Cours d'eau linéaire</keyword>
+    <keyword>Filamentaire</keyword>
+    <keyword>Canal</keyword>
+  </keywords>
+  <links/>
+  <fees></fees>
+  <constraints type="Limitations of use">Les données géographiques partagées dans leur forme originale ou modifiée, demeurent assujetties aux droits d’auteur du gouvernement du Québec.
+</constraints>
+  <rights>Gouvernement du Québec. &#xd;
+Ministère du Développement durable, de l'Environnement et de la Lutte contre les changements climatiques (MDDELCC)&#xd;
+Direction de l'Expertise en Biodiversité (DEC) &#xd;
+et &#xd;
+Ministère de l'Énergie et des Ressources naturelles (MERN)&#xd;
+Direction générale de l'information géographique (DGIG).&#xd;
+&#xd;
+Gouvernement du Canada.&#xd;
+Ressources naturelles Canada, Secteur des sciences de la Terre&#xd;
+Centre canadien de cartographie et d’observation de la Terre (CCCOT).</rights>
+  <encoding></encoding>
+  <crs>
+    <spatialrefsys nativeFormat="Wkt">
+      <wkt></wkt>
+      <proj4></proj4>
+      <srsid>0</srsid>
+      <srid>0</srid>
+      <authid></authid>
+      <description></description>
+      <projectionacronym></projectionacronym>
+      <ellipsoidacronym></ellipsoidacronym>
+      <geographicflag>false</geographicflag>
+    </spatialrefsys>
+  </crs>
+  <extent>
+    <spatial maxx="0" minx="0" maxy="0" maxz="0" crs="EPSG:4326" minz="0" dimensions="2" miny="0"/>
+  </extent>
+</qgis>
