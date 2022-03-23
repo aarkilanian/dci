@@ -29,7 +29,9 @@ new_rivnet <- function(rivers,
     dplyr::mutate(rivID = 1:dplyr::n())
 
   # Create final sfnetwork
-  rivnet <- sfnetworks::as_sfnetwork(rivers)
+  suppressWarnings(
+    rivnet <- sfnetworks::as_sfnetwork(rivers)
+  )
 
   # Join special node attributes
   rivnet <- join_attributes(rivnet, user_nodes, snap_tolerance)
