@@ -67,7 +67,7 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
 
 }
 
-join_attributes <- function(rivnet, nodes, tolerance){
+join_attributes <- function(rivnet, nodes){
 
   # Determine user nodes
   within_dist <- nodes %>%
