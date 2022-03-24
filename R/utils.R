@@ -1,11 +1,10 @@
-split_rivers_at_points <- function(rivers, pts, tolerance){
+split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
 
   # Remove sinks if present
+  if("Sink" %in% pts$type){
   pts <- pts %>%
     dplyr::filter(type != "Sink")
-
-  # Create container
-  num_disc <- 0
+}
 
   for(i in 1:nrow(pts)){
 
@@ -27,7 +26,6 @@ split_rivers_at_points <- function(rivers, pts, tolerance){
     if(!is.null(tolerance)){
       min_dist <- distances[nrst_ind]
       if(as.double(min_dist) > tolerance){
-        num_disc <- num_disc + 1
         next()
       }
     }
@@ -56,18 +54,15 @@ split_rivers_at_points <- function(rivers, pts, tolerance){
       sf::st_cast("LINESTRING") %>%
       dplyr::ungroup()
 
-    # Remove old river
-    rivers <- rivers[-riv_ind,]
-
     # Add new rivers
     rivers <- rivers %>%
       dplyr::bind_rows(river1, river2)
 
+    # Remove old river
+    rivers <- rivers[-riv_ind,]
+
   }
 
-  if(num_disc > 0){
-    message(paste0(num_disc, " features have been removed."))
-  }
   invisible(rivers)
 
 }
