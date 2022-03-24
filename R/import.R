@@ -17,7 +17,7 @@ import_rivers <- function(path, weight = NULL, sf = FALSE){
   rivers <- rivers %>%
     # Remove Z/M dimensions
     sf::st_zm() %>%
-    # Cast all fatures to linestring geometries
+    # Cast all features to linestring geometries
     sf::st_cast("LINESTRING")
 
   # Return rivers
