@@ -9,6 +9,8 @@ import_rivers <- function(path, weight = NULL, sf = FALSE){
     rivers <- tryCatch(sf::read_sf(path),
       error = function(e) rlang::abort("invalid spatial data provided")
     )
+  } else{
+    rivers <- path
   }
 
   # Check for valid sf object
