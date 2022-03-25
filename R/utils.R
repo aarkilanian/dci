@@ -9,7 +9,16 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
   for(i in 1:nrow(pts)){
 
     # Update nearest river features
-    riv_ind <- sf::st_nearest_feature(pts[i,], rivers)
+    riv_distances <- sf::st_distance(rivers, pts[i,])
+    riv_ind <- which.min(riv_distances)
+
+    # Skip if distance is above threshold
+    if(!is.null(tolerance)){
+      min_dist <- riv_distances[riv_ind]
+      if(as.double(min_dist) > tolerance){
+        next()
+      }
+    }
 
     # Place points on rivers
     riv_pts <- sf::st_line_sample(rivers[riv_ind,], density = 1/1) %>%
@@ -18,17 +27,7 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
       dplyr::mutate(group = 1)
 
     # Find nearest point
-    distances <- sf::st_distance(pts[i,], riv_pts)
-    nrst_ind <- which.min(distances)
-    nrst <- riv_pts[nrst_ind,]
-
-    # Skip if distance is above threshold
-    if(!is.null(tolerance)){
-      min_dist <- distances[nrst_ind]
-      if(as.double(min_dist) > tolerance){
-        next()
-      }
-    }
+    nrst_ind <- which.min(sf::st_distance(pts[i,], riv_pts))
 
     # Create first segment
     riv_start <- sf::st_geometry(rivers[riv_ind,])
