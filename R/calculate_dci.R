@@ -1,12 +1,15 @@
 calculate_dci <- function(net, form = NULL){
 
   # No valid network
-  if(is.null(net) | !("rivnet" %in% class(net))){
-    stop("A valid river network is required.")
+  if(!("rivnet" %in% class(net))){
+    stop("A valid rivnet object is required.")
   }
 
   # No valld form
   if(is.null(form)){
+    stop("A valid form of the DCI must be requested.")
+  }
+  if(!(form %in% c("potamodromous", "diadromous"))){
     stop("A valid form of the DCI must be requested.")
   }
 
@@ -25,7 +28,7 @@ calculate_dci <- function(net, form = NULL){
   # Identify sink
   if(form == "diadromous"){
     net_sink <- net_nodes[net_nodes$type == "Sink",]$member.label
-    if(no_sink){
+    if(length(net_sink) == 0){
       stop("No valid sink found in river network.")
     }
   }
@@ -60,17 +63,17 @@ calculate_dci <- function(net, form = NULL){
   seg_weights$segweight <- seg_weights$segweight / totweight
 
   # Potamodromous case
-  if(form == "potamodromous") DCIs <- calculate_dci_pot(all_members, net)
+  if(form == "potamodromous") DCIs <- calculate_dci_pot(all_members, seg_weights, net, net_nodes)
 
   # Diadromous case
-  if(form == "diadromous") DCIs <- calculate_dci_dia(all_members, net)
+  if(form == "diadromous") DCIs <- calculate_dci_dia(all_members, seg_weights, net, net_nodes)
 
   # Return calculated DCI values
   return(DCIs)
 
 }
 
-calculate_dci_pot <- function(all_members, seg_weights, net){
+calculate_dci_pot <- function(all_members, seg_weights, net, net_nodes){
 
   # Determine segment pairs
   from_segment <- rep(all_members,
@@ -102,7 +105,7 @@ calculate_dci_pot <- function(all_members, seg_weights, net){
 
 }
 
-calculate_dci_dia <- function(all_members, seg_weights, net){
+calculate_dci_dia <- function(all_members, seg_weights, net, net_nodes){
 
   # Identify sink segment
   sink_seg <- net %>%
