@@ -22,6 +22,14 @@ calculate_dci <- function(net, form = NULL){
     sfnetworks::activate(nodes) %>%
     as.data.frame()
 
+  # Identify sink
+  if(form == "diadromous"){
+    net_sink <- net_nodes[net_nodes$type == "Sink",]$member.label
+    if(no_sink){
+      stop("No valid sink found in river network.")
+    }
+  }
+
   # Move edge weights to nodes
   # Weights from edges associated w/ upstream nodes
   net_nodes <- net_nodes %>%
@@ -51,9 +59,18 @@ calculate_dci <- function(net, form = NULL){
   # Calculate relative length of segments
   seg_weights$segweight <- seg_weights$segweight / totweight
 
-  if(form == "potamodromous"){
+  # Potamodromous case
+  if(form == "potamodromous") DCIs <- calculate_dci_pot(all_members, net)
 
-  }
+  # Diadromous case
+  if(form == "diadromous") DCIs <- calculate_dci_dia(all_members, net)
+
+  # Return calculated DCI values
+  return(DCIs)
+
+}
+
+calculate_dci_pot <- function(all_members, seg_weights, net){
 
   # Determine segment pairs
   from_segment <- rep(all_members,
@@ -66,8 +83,8 @@ calculate_dci <- function(net, form = NULL){
 
   # Gather DCI inputs and calculate sub-segmental DCI
   DCIs_sub <- data.frame(from = from_segment,
-                                 to = to_segment,
-                                 perm) %>%
+                         to = to_segment,
+                         perm) %>%
     dplyr::left_join(seg_weights, by = c("from" = "member.label")) %>%
     dplyr::rename(from_len = segweight) %>%
     dplyr::left_join(seg_weights, by = c("to" = "member.label")) %>%
@@ -80,16 +97,44 @@ calculate_dci <- function(net, form = NULL){
     dplyr::summarise(DCIs = sum(DCIs)) %>%
     dplyr::rename(segment = from)
 
-  # Return DCIs summa
+  # Return DCIs summary
   return(DCIs)
 
 }
 
-calculate_dci_pot <- function(){
+calculate_dci_dia <- function(all_members, seg_weights, net){
 
-}
+  # Identify sink segment
+  sink_seg <- net %>%
+    sfnetworks::activate(nodes) %>%
+    dplyr::filter(type == "Sink") %>%
+    dplyr::pull(member.label)
 
-calculate_dci_dia <- function(){
+  # Determine segment pairs
+  from_segment <- rep(sink_seg, times = length(all_members))
+  to_segment <- all_members
+
+  # Calculate permeability between each pair of segments
+  perm <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
+
+  # Gather DCI inputs and calculate sub-segmental DCI
+  DCIs_sub <- data.frame(from = from_segment,
+                         to = to_segment,
+                         perm) %>%
+    dplyr::left_join(seg_weights, by = c("from" = "member.label")) %>%
+    dplyr::rename(from_len = segweight) %>%
+    dplyr::left_join(seg_weights, by = c("to" = "member.label")) %>%
+    dplyr::rename(to_len = segweight) %>%
+    dplyr::mutate(DCIs = from_len * to_len * perm * 100)
+
+  # Group DCI results by from segment to obtain segmental DCI
+  DCIs <- DCIs_sub %>%
+    dplyr::group_by(from) %>%
+    dplyr::summarise(DCIs = sum(DCIs)) %>%
+    dplyr::rename(segment = from)
+
+  # Return DCIs summary
+  return(DCIs)
 
 }
 
