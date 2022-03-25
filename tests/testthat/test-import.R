@@ -23,3 +23,23 @@ test_that("rivers are imported correctly", {
   expect_equal(nrow(import_rivers(test_path("testdata", "test_riv.shp"), sf = FALSE)), nrow(rivers))
 
 })
+
+test_that("Points are imported correctly", {
+
+  # Create points
+  bars <- sf::st_as_sf(sf::st_sfc(sf::st_point(c(1,1)),
+                                  sf::st_point(c(2,2)),
+                                  sf::st_point(c(3,3))))
+  expect_equal(nrow(import_points(bars, type = "Barrier", sf = TRUE)), 3)
+
+  # Create permeability values
+  bars$permeability <- c(0,0.5,1)
+  bars_imported <- import_points(bars, perm = "permeability", type = "Barrier", sf = TRUE)
+  expect_equal(bars_imported$perm, bars$permeability)
+
+  # Test sink
+  expect_equal(nrow(import_points(bars, type = "Sink", sf = TRUE)), 3)
+
+  # Test other
+  expect_equal(nrow(import_points(bars, type = "Other", sf = TRUE)), 3)
+})
