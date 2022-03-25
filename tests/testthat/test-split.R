@@ -76,3 +76,20 @@ test_that("Start and end point are preserved", {
   expect_true(identical(new_end$geometry, riv_end$geometry))
 
 })
+
+test_that("Points outside tolerance do not participate in splitting", {
+
+  # Make test river and points
+  riv <- sf::st_as_sf(sf::st_sfc(sf::st_linestring(matrix(c(1,16,1,1), 2)))) %>%
+    dplyr::rename("geometry" = "x") %>%
+    sf::st_as_sf(wkt = "geometry")
+  riv <- sf::st_as_sf(riv, wkt = "x")
+  pnt <- sf::st_as_sf(sf::st_sfc(sf::st_point(c(5,1)), sf::st_point(c(10,10)))) %>%
+    dplyr::rename("geometry" = "x") %>%
+    sf::st_as_sf(wkt = "geometry")
+
+  # Multiple point, single river
+  split_riv <- split_rivers_at_points(riv, pnt, tolerance = 5)
+  expect_equal(nrow(split_riv) - nrow(riv), 1)
+
+})
