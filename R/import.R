@@ -38,6 +38,8 @@ import_points <- function(path, type, perm = NULL, sf = FALSE){
     points <- tryCatch(sf::read_sf(path),
                        error = function(e) rlang::abort("invalid spatial data provided")
     )
+  } else{
+    points <- path
   }
 
   if(type == "Barrier"){
