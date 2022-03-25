@@ -1,4 +1,14 @@
-calculate_dci <- function(net){
+calculate_dci <- function(net, form = NULL){
+
+  # No valid network
+  if(is.null(net) | !("rivnet" %in% class(net))){
+    stop("A valid river network is required.")
+  }
+
+  # No valld form
+  if(is.null(form)){
+    stop("A valid form of the DCI must be requested.")
+  }
 
   # Extract edges
   net_edges <- net %>%
@@ -41,6 +51,10 @@ calculate_dci <- function(net){
   # Calculate relative length of segments
   seg_weights$segweight <- seg_weights$segweight / totweight
 
+  if(form == "potamodromous"){
+
+  }
+
   # Determine segment pairs
   from_segment <- rep(all_members,
                       each = length(all_members))
@@ -68,6 +82,14 @@ calculate_dci <- function(net){
 
   # Return DCIs summa
   return(DCIs)
+
+}
+
+calculate_dci_pot <- function(){
+
+}
+
+calculate_dci_dia <- function(){
 
 }
 
