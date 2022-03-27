@@ -50,7 +50,7 @@ test_that("Error when complex confluence has more than 3 inputs", {
   net <- sfnetworks::as_sfnetwork(rivers)
 
   # Run test
-  expect_error(correct_complex(net), "Complex confluences with over 3 input tributaries have been detected. Use the standalone 'enforce_dendritic()' and correct returned errors manually.", fixed = TRUE)
+  expect_error(correct_complex(net), "Complex confluences with over 3 input tributaries have been detected. Use the standalone `enforce_dendritic()` and correct returned errors manually.", fixed = TRUE)
 
 })
 
