@@ -66,13 +66,23 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
 
 }
 
-join_attributes <- function(rivnet, nodes, tolerance){
+join_attributes <- function(rivnet, nodes, tolerance = NULL){
 
-  # Determine user nodes
-  within_dist <- nodes %>%
-    sf::st_is_within_distance(rivnet %>% sfnetworks::activate(nodes), dist = tolerance, sparse = T) %>%
-    unlist()
-  nodes$key <- within_dist
+  # Find nearest river network node
+  nrst <- nodes %>%
+    sf::st_nearest_feature(rivnet %>% sfnetworks::activate(nodes) %>% sf::st_as_sf())
+  nodes$key <- nrst
+
+  if(!is.null(tolerance)){
+
+    # Get distance to nearest node
+    net_nodes <- rivnet %>% sfnetworks::activate(nodes) %>% sf::st_as_sf()
+    nrst_dist <- sf::st_distance(nodes, net_nodes[nrst,])
+    nrst_dist <- diag(nrst_dist)
+    within_tolerance <- nrst_dist <= tolerance
+    nodes <- nodes[within_tolerance,]
+
+  } else nodes <- nodes
 
   # Join special nodes' attributes to network nodes
   rivnet <- rivnet %>%
