@@ -2,10 +2,34 @@
 rivnet <- function(rivers,
                    barriers,
                    sinks = NULL,
-                   riv_weight = NULL,
                    others = NULL,
+                   riv_weight = NULL,
                    snap_tolerance = 10,
                    correct_topology = TRUE){
+
+  # Check rivers
+  if(!("rivers" %in% class(rivers))){
+    stop("Rivers must first be imported with `import_rivers`")
+  }
+
+  # Check barriers
+  if(!("barriers" %in% class(barriers))){
+    stop("Barriers must first be imported with `import_points`")
+  }
+
+  # Check sinks
+  if(!is.null(sinks)){
+    if(!("sinks" %in% class(sinks))){
+      stop("Sinks must first be imported with `import_points`")
+    }
+  }
+
+  # Check other points
+  if(!(is.null(others))){
+    if(!("sinks" %in% class(sinks))){
+      stop("Sinks must first be imported with `import_points`")
+    }
+  }
 
   # Match river projection
   barriers <- sf::st_transform(barriers, sf::st_crs(rivers))
