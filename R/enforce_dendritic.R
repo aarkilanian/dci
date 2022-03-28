@@ -1,4 +1,4 @@
-enforce_dendritic <- function(rivers, min_comp = 10){
+enforce_dendritic <- function(rivers, min_comp = 10, divergence = TRUE, complex = TRUE){
 
   # Create river network
   river_net <- rivers %>%
@@ -9,11 +9,17 @@ enforce_dendritic <- function(rivers, min_comp = 10){
     dplyr::filter(dplyr::n() > min_comp)
 
   # Correct divergences
-  net_temp <- correct_divergences(river_net)
+  if(divergence){
+    river_net <- correct_divergences(river_net)
+  }
 
   # Correct complex confluences
-  riv_final <- correct_complex(net_temp)
-  invisible(riv_final)
+  if(complex){
+    river_net <- correct_complex(river_net)
+  }
+
+  if("sfnetwork" %in% class(river_net)) invisible(river_net %>% sfnetworks::activate(edges) %>% sf::st_as_sf())
+  else invisible(river_net)
 
 }
 
