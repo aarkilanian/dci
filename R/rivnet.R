@@ -3,9 +3,8 @@ rivnet <- function(rivers,
                    barriers,
                    sinks = NULL,
                    others = NULL,
-                   riv_weight = NULL,
-                   snap_tolerance = 10,
-                   correct_topology = TRUE){
+                   tolerance = 10,
+                   force = FALSE){
 
   # Check rivers
   if(!("rivers" %in% class(rivers))){
@@ -26,8 +25,8 @@ rivnet <- function(rivers,
 
   # Check other points
   if(!(is.null(others))){
-    if(!("sinks" %in% class(sinks))){
-      stop("Sinks must first be imported with `import_points`")
+    if(!("others" %in% class(sinks))){
+      stop("Other points must first be imported with `import_points`")
     }
   }
 
@@ -42,13 +41,13 @@ rivnet <- function(rivers,
   user_nodes <- dplyr::bind_rows(barriers, sinks, others)
 
   # Clean up topology if requested
-  if(correct_topology == TRUE){
+  if(force == FALSE){
     # Perform necessary corrections
     rivers <- enforce_dendritic(rivers)
   }
 
   # Split rivers at user node locations
-  rivers <- split_rivers_at_points(rivers, user_nodes, snap_tolerance) %>%
+  rivers <- split_rivers_at_points(rivers, user_nodes, tolerance) %>%
     dplyr::mutate(rivID = 1:dplyr::n())
 
   # Create final sfnetwork
@@ -57,7 +56,7 @@ rivnet <- function(rivers,
   )
 
   # Join special node attributes
-  rivnet <- join_attributes(rivnet, user_nodes, snap_tolerance)
+  rivnet <- join_attributes(rivnet, user_nodes, tolerance)
 
   # Apply binary labeling
   rivnet <- node_labeling(rivnet)
