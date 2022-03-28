@@ -24,6 +24,10 @@ import_rivers <- function(path, weight = NULL, sf = FALSE){
         stop("Supplied weight field cannot be assigned because: ", e, call. = FALSE)
       }
     )
+    # Check that weight is between 0 and 1
+    if(any(abs(user_weight) > 1)){
+      stop("Weight values must be between 0 and 1.")
+    }
   }
 
   # Prepare rivers
