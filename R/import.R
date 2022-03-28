@@ -1,7 +1,5 @@
 import_rivers <- function(path, weight = NULL, sf = FALSE){
 
-  # Check that weight is valid
-
   # Read shapefile from path if not sf object
   if(!sf){
 
@@ -18,12 +16,29 @@ import_rivers <- function(path, weight = NULL, sf = FALSE){
     stop("Invalid geometries detected in rivers")
   }
 
+  # Check that weight is valid
+  if(!(is.null(weight))){
+    user_weight <- tryCatch(
+      as.double(rivers[[weight]]),
+      error = function(e) {
+        stop("Supplied weight field cannot be assigned because: ", e, call. = FALSE)
+      }
+    )
+  }
+
   # Prepare rivers
   rivers <- rivers %>%
     # Remove Z/M dimensions
     sf::st_zm() %>%
     # Cast all features to linestring geometries
-    sf::st_cast("LINESTRING")
+    sf::st_cast("LINESTRING") %>%
+    # Calculate river lengths
+    dplyr::mutate(riv_length = sf::st_length())
+
+  # Add weighting to rivers
+  if(!(is.null(user_weight))){
+    rivers$weight <- user_weight
+  }
 
   # Return rivers
   rivers <- structure(rivers, class = c("rivers", class(rivers)))
