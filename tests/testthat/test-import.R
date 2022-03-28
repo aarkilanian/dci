@@ -24,6 +24,26 @@ test_that("rivers are imported correctly", {
 
 })
 
+test_that("Invalid permeability throws error", {
+
+  # Create points
+  bars <- sf::st_as_sf(sf::st_sfc(sf::st_point(c(1,1)),
+                                  sf::st_point(c(2,2)),
+                                  sf::st_point(c(3,3))))
+  # Create permeability with characters
+  test_perm_chr <- c("20 %", "20 %", "40 %")
+  # Create permeability outside range
+  test_perm_rng <- c(0.2, 1.5, 3)
+
+  # Run character vector test
+  expect_error(import_points(path = bars, type = "Barrier", perm = test_perm_chr, sf = TRUE),
+               "Supplied permeability field cannot be assigned because: ")
+  # Run outside range test
+  expect_error(import_points(path = bars, type = "Barrier", perm = test_perm_rng, sf = TRUE),
+               "^Supplied permeability field cannot be assigned because:")
+
+})
+
 test_that("Points are imported correctly", {
 
   # Create points
