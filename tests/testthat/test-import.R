@@ -5,6 +5,24 @@ test_that("non-valid import path returns error", {
 
 })
 
+test_that("Invalid river weighting throws error", {
+
+  # Create test rivers
+  rivers <- sf::st_as_sf(sf::st_sfc(sf::st_linestring(matrix(c(1,2,2,2), 2)),
+                                    sf::st_linestring(matrix(c(2,2,4,2), 2)),
+                                    sf::st_linestring(matrix(c(2,2,1,2), 2)),
+                                    sf::st_linestring(matrix(c(2,10,2,2), 2)),
+                                    sf::st_linestring(matrix(c(10,10,2,1), 2)),
+                                    sf::st_linestring(matrix(c(10,10,2,5), 2))
+  ))
+  # Create test weighting field
+  riv_weight <- c("d", "l", "j", "g", "d", "a")
+
+  # Run test
+  expect_error(import_rivers(rivers, riv_weight, sf = TRUE), "^Supplied weight field cannot be assigned because:")
+
+})
+
 test_that("rivers are imported correctly", {
 
   # Create test rivers
