@@ -13,7 +13,10 @@ import_rivers <- function(path, weight = NULL, sf = FALSE){
     rivers <- path
   }
 
-  # Check for valid sf object
+  # Check for valid and empty geometries
+  if(any(!(sf::st_is_valid(rivers))) | any(sf::st_is_empty(rivers))){
+    stop("Invalid geometries detected in rivers")
+  }
 
   # Prepare rivers
   rivers <- rivers %>%
@@ -41,6 +44,25 @@ import_points <- function(path, type, perm = NULL, sf = FALSE){
     )
   } else{
     points <- path
+  }
+
+  # Check for valid and empty geometries
+  if(any(!(sf::st_is_valid(points))) | any(sf::st_is_empty(points))){
+    stop("Invalid geometries detected in points")
+  }
+
+  # Check that permeability is valid
+  if(!is.null(perm)){
+    user_perm <- tryCatch(
+      as.double(points[[perm]]),
+      error = function(e) {
+        stop("Supplied permeability field cannot be assigned because: ", e, call. = FALSE)
+      }
+    )
+    # Check that permeability is between 0 and 1
+    if(any(abs(user_perm) > 1)){
+      stop("Permeability values must be between 0 and 1.")
+    }
   }
 
   if(type == "Barrier"){
