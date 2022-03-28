@@ -15,11 +15,14 @@ test_that("Invalid river weighting throws error", {
                                     sf::st_linestring(matrix(c(10,10,2,1), 2)),
                                     sf::st_linestring(matrix(c(10,10,2,5), 2))
   ))
-  # Create test weighting field
-  riv_weight <- c("d", "l", "j", "g", "d", "a")
+  # Create test weighting field with characters
+  riv_weight_chr <- c("d", "l", "j", "g", "d", "a")
+  # Create test weighting field  outisde range
+  riv_weight_rng <- c(1,4,3,5,43,5)
 
   # Run test
-  expect_error(import_rivers(rivers, riv_weight, sf = TRUE), "^Supplied weight field cannot be assigned because:")
+  expect_error(import_rivers(rivers, riv_weight_chr, sf = TRUE), "^Supplied weight field cannot be assigned because:")
+  expect_error(import_rivers(rivers, riv_weight_rng, sf = TRUE), "Weight values must be between 0 and 1.")
 
 })
 
