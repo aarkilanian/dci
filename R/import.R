@@ -23,6 +23,7 @@ import_rivers <- function(path, weight = NULL, sf = FALSE){
     sf::st_cast("LINESTRING")
 
   # Return rivers
+  rivers <- structure(rivers, class = c("rivers", class(rivers)))
   invisible(rivers)
 
 }
@@ -65,6 +66,7 @@ import_points <- function(path, type, perm = NULL, sf = FALSE){
       dplyr::select(id, perm, type)
 
     # Return barriers
+    barriers <- structure(barriers, class = c("barriers", class(barriers)))
     return(barriers)
 
   }
@@ -85,6 +87,7 @@ import_points <- function(path, type, perm = NULL, sf = FALSE){
       dplyr::select(id, perm, type)
 
     # Return sinks
+    sinks <- structure(sinks, class = c("sinks", class(sinks)))
     return(sinks)
 
   }
@@ -105,6 +108,7 @@ import_points <- function(path, type, perm = NULL, sf = FALSE){
       dplyr::select(id, perm, type)
 
     # Return others
+    others <- structure(others, class = c("others", class(others)))
     return(others)
 
   }
