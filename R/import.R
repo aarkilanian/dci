@@ -35,13 +35,13 @@ import_rivers <- function(path, weight = NULL, sf = FALSE){
     # Remove Z/M dimensions
     sf::st_zm() %>%
     # Cast all features to linestring geometries
-    sf::st_cast("LINESTRING") %>%
-    # Calculate river lengths
-    dplyr::mutate(riv_length = sf::st_length())
+    sf::st_cast("LINESTRING")
+  # Calculate river lengths
+  rivers$riv_length <- sf::st_length(rivers)
 
   # Add weighting to rivers
   if(!(is.null(user_weight))){
-    rivers$weight <- user_weight
+    rivers$riv_weight <- user_weight
   }
 
   # Return rivers
