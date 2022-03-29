@@ -1,3 +1,16 @@
+#' Prepare rivers for \code{\link{rivnet}} connectivity analyses
+#'
+#'Read and prepare geospatial river lines data for dci.
+#'
+#' @param path A character string or \code{\link{sf}} object, the path to a shapefile of river lines or \code{\link{sf}} object of rivers.
+#'
+#' @param weight An optional double vector, river weights ranging from 0 to 1. Set to NULL by default.
+#'
+#' @return Object of class rivers prepared for input to \code{\link{rivnet}}
+#'
+#' @export
+#'
+#' @examples
 import_rivers <- function(path, weight = NULL){
 
   # Check for path type
@@ -54,6 +67,19 @@ import_rivers <- function(path, weight = NULL){
 
 }
 
+#' Prepare point data for \code{\link{rivnet}} connectivity analyses
+#'
+#'Read and prepare geospatial point data for dci.
+#'
+#' @param path A character string or \code{\link{sf}} object, the path to a shapefile of points or \code{\link{sf}} object of points.
+#' @param type A character string, either of “barrier”, “sink”, or “other” specifying the type of point.
+#' @param perm An optional double vector, barrier permeabilities ranging from 0 to 1. These will be ignored for non-barrier points. Set to NULL by default.
+#'
+#' @return Object of class barriers, sinks, or others prepared for input to \code{\link{rivnet}}
+#'
+#' @export
+#'
+#' @examples
 import_points <- function(path, type, perm = NULL){
 
   # Check for path type
@@ -90,7 +116,7 @@ import_points <- function(path, type, perm = NULL){
     }
   }
 
-  if(type == "Barrier"){
+  if(type == "barriers"){
 
     # Prepare barriers
     barriers <- points %>%
@@ -118,7 +144,7 @@ import_points <- function(path, type, perm = NULL){
 
   }
 
-  if(type == "Sink"){
+  if(type == "sinks"){
 
     # Prepare sinks
     sinks <- points %>%
@@ -139,7 +165,7 @@ import_points <- function(path, type, perm = NULL){
 
   }
 
-  if(type == "Other"){
+  if(type == "others"){
 
     # Prepare other points
     others <- points %>%
