@@ -1,4 +1,8 @@
-import_rivers <- function(path, weight = NULL, sf = FALSE){
+import_rivers <- function(path, weight = NULL){
+
+  # Check for path type
+  if(is.character(path)) sf <- FALSE
+  else sf <- TRUE
 
   # Read shapefile from path if not sf object
   if(!sf){
@@ -50,9 +54,11 @@ import_rivers <- function(path, weight = NULL, sf = FALSE){
 
 }
 
-import_points <- function(path, type, perm = NULL, sf = FALSE){
+import_points <- function(path, type, perm = NULL){
 
-  # Check for valid type
+  # Check for path type
+  if(is.character(path)) sf <- FALSE
+  else sf <- TRUE
 
   # Read shapefile from path if not sf object
   if(!sf){
