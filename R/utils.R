@@ -30,13 +30,13 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
     }
 
     # Place points on rivers
-    riv_pts <- sf::st_line_sample(rivers[riv_ind,], density = 1/1) %>%
+    riv_pts <- sf::st_line_sample(rivers[riv_ind,], density = 1) %>%
       sf::st_sf() %>%
       sf::st_cast("POINT") %>%
       dplyr::mutate(group = 1)
 
-    # Find nearest point
-    nrst_ind <- which.min(sf::st_distance(pts[i,], riv_pts))
+    # Find nearest point (except start and end)
+    nrst_ind <- which.min(sf::st_distance(pts[i,], riv_pts[-c(1, length(riv_pts)),]))
 
     # Create first segment
     riv_start <- sf::st_geometry(rivers[riv_ind,])
@@ -97,7 +97,7 @@ join_attributes <- function(net, nodes, tolerance = NULL){
     net_nodes <- net %>% sfnetworks::activate(nodes) %>% sf::st_as_sf()
     nrst_dist <- sf::st_distance(nodes, net_nodes[nrst,])
     nrst_dist <- diag(nrst_dist)
-    within_tolerance <- nrst_dist <= tolerance
+    within_tolerance <- as.double(nrst_dist) <= tolerance
     nodes <- nodes[within_tolerance,]
 
   } else nodes <- nodes
