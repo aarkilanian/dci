@@ -33,16 +33,10 @@ import_rivers <- function(path, weight = NULL){
 
   # Check that weight is valid
   if(!(is.null(weight))){
-    user_weight <- tryCatch(
-      as.double(rivers[[weight]]),
-      error = function(e) {
-        stop("Supplied weight field cannot be assigned because: ", e, call. = FALSE)
-      }
-    )
+    if(!(is.numeric(rivers[[weight]]))) stop("Weight values must be numeric.")
+    user_weight <- as.double(rivers[[weight]])
     # Check that weight is between 0 and 1
-    if(any(abs(user_weight) > 1)){
-      stop("Weight values must be between 0 and 1.")
-    }
+    if(any(abs(user_weight) > 1)) stop("Weight values must be between 0 and 1.")
   }
 
   # Prepare rivers
