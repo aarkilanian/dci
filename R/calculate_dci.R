@@ -24,7 +24,7 @@ calculate_dci <- function(net, form = NULL){
 
   # Extract edges
   net_edges <- net %>%
-    sfnetworks::activate(edges) %>%
+    activate(edges) %>%
     as.data.frame() %>%
     dplyr::select(from, weight) %>%
     dplyr::mutate(weight = as.double(weight))
