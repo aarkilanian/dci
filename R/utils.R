@@ -75,6 +75,15 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
 
 }
 
+#' Join variables from network nodes to \code{\link{rivnet}} object.
+#'
+#' @param rivnet A \code{\link{rivnet}} object.
+#'
+#' @param nodes An \code{\link[sf]{sf}} object of binded "barrier", "sink", or "other" points.
+#'
+#' @inheritParams split_rivers_at_points
+#'
+#' @noRd
 join_attributes <- function(rivnet, nodes, tolerance = NULL){
 
   # Find nearest river network node
