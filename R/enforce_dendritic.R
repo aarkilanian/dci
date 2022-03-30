@@ -16,12 +16,10 @@
 #'
 #' @param complex A logical value, when \code{TRUE}, the default, complex confluences are corrected.
 #'
-#' @param export A logical value, when \code{FALSE}, the default, errors are automatically corrected. When \code{TRUE} errors are identified and returned.
-#'
 #' @return If \code{export} is \code{FALSE}, a \code{rivers} object with corrected dendritic topology. If \code{export} is \code{TRUE}, a \code{rivers} object with divergent river pairs given shared \code{divID} and rivers participating in complex confluences are given shared \code{complexID}.
 #'
 #' @export
-enforce_dendritic <- function(rivers, min_comp = 10, divergence = TRUE, complex = TRUE, export = FALSE){
+enforce_dendritic <- function(rivers, min_comp = 10, divergence = TRUE, complex = TRUE){
   # Create river network
   net <- rivers %>%
     sfnetworks::as_sfnetwork(length_as_weight = TRUE) %>%
