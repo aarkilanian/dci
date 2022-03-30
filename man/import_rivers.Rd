@@ -2,7 +2,7 @@
 % Please edit documentation in R/import.R
 \name{import_rivers}
 \alias{import_rivers}
-\title{Prepare rivers for \code{\link{rivnet}} connectivity analyses}
+\title{Prepare rivers for \code{\link{river_net}} connectivity analyses}
 \usage{
 import_rivers(path, weight = NULL)
 }
@@ -12,7 +12,7 @@ import_rivers(path, weight = NULL)
 \item{weight}{An optional double vector, river weights ranging from 0 to 1. Set to NULL by default.}
 }
 \value{
-Object of class rivers prepared for input to \code{\link{rivnet}}
+Object of class rivers prepared for input to \code{\link{river_net}}
 }
 \description{
 Read and prepare geospatial river lines data for dci.

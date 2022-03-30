@@ -2,7 +2,7 @@
 % Please edit documentation in R/import.R
 \name{import_points}
 \alias{import_points}
-\title{Prepare point data for \code{\link{rivnet}} connectivity analyses}
+\title{Prepare point data for \code{\link{river_net}} connectivity analyses}
 \usage{
 import_points(path, type, perm = NULL)
 }
@@ -14,7 +14,7 @@ import_points(path, type, perm = NULL)
 \item{perm}{An optional double vector, barrier permeabilities ranging from 0 to 1. These will be ignored for non-barrier points. Set to NULL by default.}
 }
 \value{
-Object of class barriers, sinks, or others prepared for input to \code{\link{rivnet}}
+Object of class barriers, sinks, or others prepared for input to \code{\link{river_net}}
 }
 \description{
 Read and prepare geospatial point data for dci.

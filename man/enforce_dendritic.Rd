@@ -13,7 +13,7 @@ enforce_dendritic(
 )
 }
 \arguments{
-\item{rivers}{A \code{\link{rivers}} object returned by \code{\link{import_rivers}}.}
+\item{rivers}{A \code{rivers} object returned by \code{\link{import_rivers}}.}
 
 \item{min_comp}{An integer value, the minimum number of river line segments in a network component. Isolated networks with less than this specified number of edges will be discarded. Set to 10 by default.}
 
