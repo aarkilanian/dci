@@ -2,4 +2,5 @@
 
 export(import_points)
 export(import_rivers)
+export(rivnet)
 importFrom(magrittr,"%>%")

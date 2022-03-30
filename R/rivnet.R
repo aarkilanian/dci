@@ -1,10 +1,28 @@
-# Constructor function
+#' Create a rivnet object
+#'
+#' \code{dci} is a geospatial network structure of river data. It extends the tidy representation of geospatial network data from the \code{\link[sfnetworks]{sfnetwork}} data structure.
+#'
+#' @param rivers A \link{\code{rivers}} object returned by \link{\code{import_rivers}}.
+#'
+#' @param barriers A \link{\code{barriers}} object returned by \link{\code{import_points}}.
+#'
+#' @param sinks A \link{\code{sinks}} object returned by \link{\code{import_points}}. This data is optional.
+#'
+#' @param others A \link{\code{others}} object returned by \link{\code{import_points}}. This data is optional.
+#'
+#' @param tolerance An integer value, the maximum snapping distance in map units of supplied points relative to river lines. Points outside this distance will be discarded. Defaults to 10 map units.
+#'
+#' @param check A logical value, if \code{TRUE}, the default, dendritic topology of the river network is enforced with \code{\link{enforce_dendritic}}.
+#'
+#' @return An object of class \emph{rivnet} representing the river network formed by the geospatial lines and points provided.
+#'
+#' @export
 rivnet <- function(rivers,
                    barriers,
                    sinks = NULL,
                    others = NULL,
                    tolerance = 10,
-                   force = FALSE){
+                   check = TRUE){
 
   # Check rivers
   if(!("rivers" %in% class(rivers))){
@@ -41,7 +59,7 @@ rivnet <- function(rivers,
   user_nodes <- dplyr::bind_rows(barriers, sinks, others)
 
   # Clean up topology if requested
-  if(force == FALSE){
+  if(check == TRUE){
     # Perform necessary corrections
     rivers <- enforce_dendritic(rivers)
   }
