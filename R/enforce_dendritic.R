@@ -8,7 +8,7 @@
 #'
 #' If errors are being corrected manually, all divergent pairs must be reduced to only one river and complex confluences modified such that only 2 rivers join together.
 #'
-#' @inheritParams rivnet
+#' @inheritParams river_net
 #'
 #' @param min_comp An integer value, the minimum number of river line segments in a network component. Isolated networks with less than this specified number of edges will be discarded. Set to 10 by default.
 #'
@@ -23,7 +23,7 @@
 #' @export
 enforce_dendritic <- function(rivers, min_comp = 10, divergence = TRUE, complex = TRUE, export = FALSE){
   # Create river network
-  river_net <- rivers %>%
+  net <- rivers %>%
     sfnetworks::as_sfnetwork(length_as_weight = TRUE) %>%
     # Retain only components with set minimum nodes
     dplyr::mutate(component = tidygraph::group_components()) %>%
@@ -31,20 +31,20 @@ enforce_dendritic <- function(rivers, min_comp = 10, divergence = TRUE, complex 
     dplyr::filter(dplyr::n() > min_comp)
   # Correct divergences
   if(divergence){
-    river_net <- correct_divergences(river_net)
+    net <- correct_divergences(net)
   }
   # Correct complex confluences
   if(complex){
-    river_net <- correct_complex(river_net)
+    net <- correct_complex(net)
   }
   # Return corrected rivers
-  if("sfnetwork" %in% class(river_net)) invisible(river_net %>% sfnetworks::activate(edges) %>% sf::st_as_sf())
-  else invisible(river_net)
+  if("sfnetwork" %in% class(net)) invisible(net %>% sfnetworks::activate(edges) %>% sf::st_as_sf())
+  else invisible(net)
 }
 
-correct_divergences <- function(river_net){
+correct_divergences <- function(net){
   # Find and correct divergences. Always keep longest stream
-  riv_corrected <- river_net %>%
+  riv_corrected <- net %>%
     sfnetworks::activate(edges) %>%
     dplyr::group_by(from) %>%
     dplyr::filter(weight == max(weight)) %>%
@@ -57,7 +57,7 @@ correct_divergences <- function(river_net){
     dplyr::filter(dplyr::n() > 10) %>%
     tidygraph::ungroup()
   # Get number of removed rivers
-  num_div <- nrow(river_net %>%
+  num_div <- nrow(net %>%
                     sfnetworks::activate(edges) %>%
                     tibble::as_tibble()) - nrow(riv_corrected %>%
                                                   sfnetworks::activate(edges) %>%
@@ -65,17 +65,17 @@ correct_divergences <- function(river_net){
   # Print number of corrected divergences
   if(num_div == 0){
     message("No divergences detected.")
-    invisible(river_net)
+    invisible(net)
   } else {
     message(paste0(num_div, " divergences corrected."))
     invisible(riv_trimmed)
   }
 }
 
-correct_complex <- function(river_net){
+correct_complex <- function(net){
 
   # Identify complex confluences
-  complex_nodes <- river_net %>%
+  complex_nodes <- net %>%
     tidygraph::convert(tidygraph::to_undirected) %>%
     sfnetworks::activate(nodes) %>%
     dplyr::mutate(nodeID = dplyr::n()) %>%
@@ -90,11 +90,11 @@ correct_complex <- function(river_net){
   # If no errors return unchanged network
   if(length(complex_nodes$degree) == 0){
     message("No complex confluences found.")
-    invisible(river_net %>% sfnetworks::activate(edges) %>% sf::st_as_sf())
+    invisible(net %>% sfnetworks::activate(edges) %>% sf::st_as_sf())
   } else {
 
     # Extract network rivers
-    rivers <- river_net %>%
+    rivers <- net %>%
       sfnetworks::activate(edges) %>%
       sf::st_as_sf() %>%
       dplyr::mutate(rivID = 1:dplyr::n())

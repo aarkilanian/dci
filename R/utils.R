@@ -1,6 +1,6 @@
 #' Split river lines around point locations
 #'
-#' @inheritParams rivnet
+#' @inheritParams river_net
 #'
 #' @param pts An \code{\link[sf]{sf}} object, points at which to split river lines.
 #'
@@ -75,26 +75,26 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
 
 }
 
-#' Join variables from network nodes to \code{\link{rivnet}} object.
+#' Join variables from network nodes to \code{\link{river_net}} object.
 #'
-#' @param rivnet A \code{\link{rivnet}} object.
+#' @param net A \code{\link{river_net}} object.
 #'
 #' @param nodes An \code{\link[sf]{sf}} object of binded "barrier", "sink", or "other" points.
 #'
 #' @inheritParams split_rivers_at_points
 #'
 #' @noRd
-join_attributes <- function(rivnet, nodes, tolerance = NULL){
+join_attributes <- function(net, nodes, tolerance = NULL){
 
   # Find nearest river network node
   nrst <- nodes %>%
-    sf::st_nearest_feature(rivnet %>% sfnetworks::activate(nodes) %>% sf::st_as_sf())
+    sf::st_nearest_feature(net %>% sfnetworks::activate(nodes) %>% sf::st_as_sf())
   nodes$key <- nrst
 
   if(!is.null(tolerance)){
 
     # Get distance to nearest node
-    net_nodes <- rivnet %>% sfnetworks::activate(nodes) %>% sf::st_as_sf()
+    net_nodes <- net %>% sfnetworks::activate(nodes) %>% sf::st_as_sf()
     nrst_dist <- sf::st_distance(nodes, net_nodes[nrst,])
     nrst_dist <- diag(nrst_dist)
     within_tolerance <- nrst_dist <= tolerance
@@ -103,7 +103,7 @@ join_attributes <- function(rivnet, nodes, tolerance = NULL){
   } else nodes <- nodes
 
   # Join special nodes' attributes to network nodes
-  rivnet <- rivnet %>%
+  net <- net %>%
     sfnetworks::activate(nodes) %>%
     dplyr::mutate(rowID = dplyr::row_number()) %>%
     dplyr::left_join(as.data.frame(nodes) %>% dplyr::select(-geometry), by = c("rowID" = "key")) %>%
@@ -116,5 +116,5 @@ join_attributes <- function(rivnet, nodes, tolerance = NULL){
     dplyr::mutate(nodeID = dplyr::row_number())
 
   # Return joined network
-  invisible(rivnet)
+  invisible(net)
 }

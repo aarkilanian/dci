@@ -1,13 +1,13 @@
 test_that("Invalid network returns error", {
 
-  expect_error(calculate_dci(1), "A valid rivnet object is required.")
+  expect_error(calculate_dci(1), "A valid river_net object is required.")
 
 })
 
 test_that("Invalid DCI form request returns error", {
 
   ex <- 1
-  class(ex) <- "rivnet"
+  class(ex) <- "river_net"
   expect_error(calculate_dci(ex), "A valid form of the DCI must be requested.")
   expect_error(calculate_dci(ex, form = "invalid"), "A valid form of the DCI must be requested.")
 

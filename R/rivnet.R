@@ -17,7 +17,7 @@
 #' @return An object of class \emph{rivnet} representing the river network formed by the geospatial lines and points provided.
 #'
 #' @export
-rivnet <- function(rivers,
+river_net <- function(rivers,
                    barriers,
                    sinks = NULL,
                    others = NULL,
@@ -43,7 +43,7 @@ rivnet <- function(rivers,
 
   # Check other points
   if(!(is.null(others))){
-    if(!("others" %in% class(sinks))){
+    if(!("others" %in% class(others))){
       stop("Other points must first be imported with `import_points`")
     }
   }
@@ -70,21 +70,21 @@ rivnet <- function(rivers,
 
   # Create final sfnetwork
   suppressWarnings(
-    rivnet <- sfnetworks::as_sfnetwork(rivers)
+    net <- sfnetworks::as_sfnetwork(rivers)
   )
 
   # Join special node attributes
-  rivnet <- join_attributes(rivnet, user_nodes, tolerance)
+  net <- join_attributes(net, user_nodes, tolerance)
 
   # Apply binary labeling
-  rivnet <- node_labeling(rivnet)
+  net <- node_labeling(net)
 
   # Apply membership labelling
-  rivnet <- membership_labeling(rivnet)
+  net <- membership_labeling(net)
 
-  # Define rivnet class
-  rivnet <- structure(rivnet, class = c("rivnet", class(rivnet)))
-  invisible(rivnet)
+  # Define river_net class
+  net <- structure(net, class = c("river_net", class(net)))
+  invisible(net)
 
 }
 

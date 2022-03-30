@@ -57,7 +57,7 @@ import_rivers <- function(path, weight = NULL){
   rivers$riv_length <- sf::st_length(rivers)
 
   # Add weighting to rivers
-  if(!(is.null(user_weight))){
+  if(!(is.null(weight))){
     rivers$riv_weight <- user_weight
   }
 

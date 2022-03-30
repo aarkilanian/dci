@@ -1,8 +1,17 @@
+#' Calculate DCI for a \code{\link{river_net}} object
+#'
+#' @param net A \code{\link{river_net}} object, the river network over which the dendritic connectivity index will be calculated.
+#'
+#' @param form A character string, either "potamodromous" or "diadromous" specifying the form of the DCI to be calculated.
+#'
+#' @return A \code{\link{data.frame}} of segment-level DCI values.
+#'
+#' @export
 calculate_dci <- function(net, form = NULL){
 
   # No valid network
-  if(!("rivnet" %in% class(net))){
-    stop("A valid rivnet object is required.")
+  if(!("river_net" %in% class(net))){
+    stop("A valid river_net object is required.")
   }
 
   # No valld form
@@ -14,14 +23,14 @@ calculate_dci <- function(net, form = NULL){
   }
 
   # Extract edges
-  net_edges <- net %>%
+  net_edges <- river_net %>%
     sfnetworks::activate(edges) %>%
     as.data.frame() %>%
     dplyr::select(from, weight) %>%
     dplyr::mutate(weight = as.double(weight))
 
   # Extract nodes
-  net_nodes <- net %>%
+  net_nodes <- river_net %>%
     sfnetworks::activate(nodes) %>%
     as.data.frame()
 
@@ -63,17 +72,17 @@ calculate_dci <- function(net, form = NULL){
   seg_weights$segweight <- seg_weights$segweight / totweight
 
   # Potamodromous case
-  if(form == "potamodromous") DCIs <- calculate_dci_pot(all_members, seg_weights, net, net_nodes)
+  if(form == "potamodromous") DCIs <- calculate_dci_pot(all_members, seg_weights, river_net, net_nodes)
 
   # Diadromous case
-  if(form == "diadromous") DCIs <- calculate_dci_dia(all_members, seg_weights, net, net_nodes)
+  if(form == "diadromous") DCIs <- calculate_dci_dia(all_members, seg_weights, river_net, net_nodes)
 
   # Return calculated DCI values
   return(DCIs)
 
 }
 
-calculate_dci_pot <- function(all_members, seg_weights, net, net_nodes){
+calculate_dci_pot <- function(all_members, seg_weights, river_net, net_nodes){
 
   # Determine segment pairs
   from_segment <- rep(all_members,
@@ -105,10 +114,10 @@ calculate_dci_pot <- function(all_members, seg_weights, net, net_nodes){
 
 }
 
-calculate_dci_dia <- function(all_members, seg_weights, net, net_nodes){
+calculate_dci_dia <- function(all_members, seg_weights, river_net, net_nodes){
 
   # Identify sink segment
-  sink_seg <- net %>%
+  sink_seg <- river_net %>%
     sfnetworks::activate(nodes) %>%
     dplyr::filter(type == "Sink") %>%
     dplyr::pull(member.label)
