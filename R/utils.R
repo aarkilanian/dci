@@ -1,3 +1,12 @@
+#' Split river lines around point locations
+#'
+#' @inheritParams rivnet
+#'
+#' @param pts An \code{\link[sf]{sf}} object, points at which to split river lines.
+#'
+#' @param tolerance An integer value, the maximum distance in map units from rivers to given points. Set to NULL by default.
+#'
+#' @noRd
 split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
 
   # Remove sinks if present
