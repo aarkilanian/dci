@@ -31,7 +31,7 @@ calculate_dci <- function(net, form = NULL){
 
   # Extract nodes
   net_nodes <- net %>%
-    sfnetworks::activate(nodes) %>%
+    activate(nodes) %>%
     as.data.frame()
 
   # Identify sink
@@ -118,7 +118,7 @@ calculate_dci_dia <- function(all_members, seg_weights, net, net_nodes){
 
   # Identify sink segment
   sink_seg <- net %>%
-    sfnetworks::activate(nodes) %>%
+    activate(nodes) %>%
     dplyr::filter(type == "Sink") %>%
     dplyr::pull(member.label)
 

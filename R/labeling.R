@@ -13,7 +13,7 @@ node_labeling <- function(rivnet){
 
   # Apply labeling function over network
   rivnet <- rivnet %>%
-    sfnetworks::activate(nodes) %>%
+    activate(nodes) %>%
     dplyr::mutate(node.label = tidygraph::map_bfs(root = which(tidygraph::.N()$type == "Sink"),
                                     .f = node_labeler, env = labelenv, mode = "all"))
 
@@ -31,7 +31,7 @@ membership_labeling <- function(rivnet){
 
   # Retrieve number of barriers
   num_bar <- rivnet %>%
-    sfnetworks::activate(nodes) %>%
+    activate(nodes) %>%
     as.data.frame() %>%
     dplyr::filter(type == "Barrier") %>%
     nrow()
@@ -44,7 +44,7 @@ membership_labeling <- function(rivnet){
 
   # Apply labeling function over network
   rivnet <- rivnet %>%
-    sfnetworks::activate(nodes) %>%
+    activate(nodes) %>%
     dplyr::mutate(member.label = tidygraph::map_dfs_int(root = which(tidygraph::.N()$type == "Sink"),
                                                     .f = membership_labeler, env = memberenv, mode = "all"))
 }

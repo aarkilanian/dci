@@ -86,13 +86,13 @@ join_attributes <- function(net, nodes, tolerance = NULL){
 
   # Find nearest river network node
   nrst <- nodes %>%
-    sf::st_nearest_feature(net %>% sfnetworks::activate(nodes) %>% sf::st_as_sf())
+    sf::st_nearest_feature(net %>% activate(nodes) %>% sf::st_as_sf())
   nodes$key <- nrst
 
   if(!is.null(tolerance)){
 
     # Get distance to nearest node
-    net_nodes <- net %>% sfnetworks::activate(nodes) %>% sf::st_as_sf()
+    net_nodes <- net %>% activate(nodes) %>% sf::st_as_sf()
     nrst_dist <- sf::st_distance(nodes, net_nodes[nrst,])
     nrst_dist <- diag(nrst_dist)
     within_tolerance <- as.double(nrst_dist) <= tolerance
@@ -102,7 +102,7 @@ join_attributes <- function(net, nodes, tolerance = NULL){
 
   # Join special nodes' attributes to network nodes
   net <- net %>%
-    sfnetworks::activate(nodes) %>%
+    activate(nodes) %>%
     dplyr::mutate(rowID = dplyr::row_number()) %>%
     dplyr::left_join(as.data.frame(nodes) %>% dplyr::select(-geometry), by = c("rowID" = "key")) %>%
     dplyr::select(-rowID) %>%

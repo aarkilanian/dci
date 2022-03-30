@@ -38,29 +38,29 @@ enforce_dendritic <- function(rivers, min_comp = 10, divergence = TRUE, complex 
     net <- correct_complex(net)
   }
   # Return corrected rivers
-  if("sfnetwork" %in% class(net)) invisible(net %>% sfnetworks::activate(edges) %>% sf::st_as_sf())
+  if("sfnetwork" %in% class(net)) invisible(net %>% activate(edges) %>% sf::st_as_sf())
   else invisible(net)
 }
 
 correct_divergences <- function(net){
   # Find and correct divergences. Always keep longest stream
   riv_corrected <- net %>%
-    sfnetworks::activate(edges) %>%
+    activate(edges) %>%
     dplyr::group_by(from) %>%
     dplyr::filter(weight == max(weight)) %>%
     tidygraph::ungroup()
   # Remove small components (<10 nodes) left over
   riv_trimmed <- riv_corrected %>%
-    sfnetworks::activate(nodes) %>%
+    activate(nodes) %>%
     dplyr::mutate(component = tidygraph::group_components()) %>%
     dplyr::group_by(component) %>%
     dplyr::filter(dplyr::n() > 10) %>%
     tidygraph::ungroup()
   # Get number of removed rivers
   num_div <- nrow(net %>%
-                    sfnetworks::activate(edges) %>%
+                    activate(edges) %>%
                     tibble::as_tibble()) - nrow(riv_corrected %>%
-                                                  sfnetworks::activate(edges) %>%
+                                                  activate(edges) %>%
                                                   tibble::as_tibble())
   # Print number of corrected divergences
   if(num_div == 0){
@@ -77,7 +77,7 @@ correct_complex <- function(net){
   # Identify complex confluences
   complex_nodes <- net %>%
     tidygraph::convert(tidygraph::to_undirected) %>%
-    sfnetworks::activate(nodes) %>%
+    activate(nodes) %>%
     dplyr::mutate(nodeID = dplyr::n()) %>%
     dplyr::mutate(degree = tidygraph::centrality_degree()) %>%
     sf::st_as_sf() %>%
@@ -90,12 +90,12 @@ correct_complex <- function(net){
   # If no errors return unchanged network
   if(length(complex_nodes$degree) == 0){
     message("No complex confluences found.")
-    invisible(net %>% sfnetworks::activate(edges) %>% sf::st_as_sf())
+    invisible(net %>% activate(edges) %>% sf::st_as_sf())
   } else {
 
     # Extract network rivers
     rivers <- net %>%
-      sfnetworks::activate(edges) %>%
+      activate(edges) %>%
       sf::st_as_sf() %>%
       dplyr::mutate(rivID = 1:dplyr::n())
     sf::st_agr(rivers) <- "constant"
