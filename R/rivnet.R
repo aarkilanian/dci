@@ -1,6 +1,6 @@
 #' Create a rivnet object
 #'
-#' \code{rivnet} is a geospatial network structure of river data. It extends the tidy representation of geospatial network data from the \code{\link[sfnetworks]{sfnetwork}} data structure.
+#' \code{river_net} is a geospatial network structure of river data. It extends the tidy representation of geospatial network data from the \code{\link[sfnetworks]{sfnetwork}} data structure.
 #'
 #' @param rivers A \code{\link{rivers}} object returned by \code{\link{import_rivers}}.
 #'
