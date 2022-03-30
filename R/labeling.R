@@ -1,3 +1,8 @@
+#' Label nodes with logical vector binary IDs
+#'
+#' @param rivnet rivnet object
+#'
+#' @noRd
 node_labeling <- function(rivnet){
 
   # Create new env
@@ -17,6 +22,11 @@ node_labeling <- function(rivnet){
 
 }
 
+#' Label nodes with integer segment member ID
+#'
+#' @param rivnet rivnet object
+#'
+#' @noRd
 membership_labeling <- function(rivnet){
 
   # Retrieve number of barriers
@@ -39,6 +49,11 @@ membership_labeling <- function(rivnet){
                                                     .f = membership_labeler, env = memberenv, mode = "all"))
 }
 
+#' Node labeling function passed to \code{\link[tidygraph]{map_bfs}}
+#'
+#' @param rivnet rivnet object
+#'
+#' @noRd
 node_labeler <- function(node, parent, path, env, ...){
 
   cur.type <- tidygraph::.N()$type[node]
@@ -84,6 +99,11 @@ node_labeler <- function(node, parent, path, env, ...){
   }
 }
 
+#' Membership labeling function passed to \code{\link[tidygraph]{map_bfs}}
+#'
+#' @param rivnet rivnet object
+#'
+#' @noRd
 membership_labeler <- function(node, parent, path, env, ...){
 
   cur.type <- tidygraph::.N()$type[node]
