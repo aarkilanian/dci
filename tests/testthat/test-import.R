@@ -26,24 +26,6 @@ test_that("Invalid river weighting throws error", {
 
 })
 
-test_that("rivers are imported correctly", {
-
-  # Create test rivers
-  rivers <- sf::st_as_sf(sf::st_sfc(sf::st_linestring(matrix(c(1,2,2,2), 2)),
-                                    sf::st_linestring(matrix(c(2,2,4,2), 2)),
-                                    sf::st_linestring(matrix(c(2,2,1,2), 2)),
-                                    sf::st_linestring(matrix(c(2,10,2,2), 2)),
-                                    sf::st_linestring(matrix(c(10,10,2,1), 2)),
-                                    sf::st_linestring(matrix(c(10,10,2,5), 2))
-  ))
-
-  expect_equal(nrow(import_rivers(rivers)), nrow(rivers))
-
-  # Run test
-  expect_equal(nrow(import_rivers(test_path("testdata", "rivers.shp"))), 11)
-
-})
-
 test_that("Invalid permeability throws error", {
 
   # Create points
