@@ -40,8 +40,7 @@ test_that("rivers are imported correctly", {
   expect_equal(nrow(import_rivers(rivers, sf = TRUE)), nrow(rivers))
 
   # Write test rivers to shapefile
-  sf::st_write(rivers, test_path("testdata", "test_riv.shp"), append = FALSE)
-  expect_equal(nrow(import_rivers(test_path("testdata", "test_riv.shp"), sf = FALSE)), nrow(rivers))
+  expect_equal(nrow(import_rivers(test_path("testdata", "rivers.shp"), sf = FALSE)), nrow(rivers))
 
 })
 

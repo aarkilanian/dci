@@ -54,7 +54,7 @@ test_that("Can find path between segments", {
 test_that("Can gather permeabilities", {
 
   # Import test river and nodes
-  net <- readRDS(test_path("testdata", "test_net.rds"))
+  net <- readRDS(test_path("testdata", "testnet.rds"))
   nodes <- net %>%
     sfnetworks::activate(nodes) %>%
     as.data.frame()
@@ -67,7 +67,7 @@ test_that("Can gather permeabilities", {
 test_that("Potamodromous DCI works", {
 
   # Load rivnet
-  net <- readRDS(test_path("testdata", "test_net.rds"))
+  net <- readRDS(test_path("testdata", "testnet.rds"))
 
   # Run test
   dci <- calculate_dci(net, form = "potamodromous")
@@ -78,7 +78,7 @@ test_that("Potamodromous DCI works", {
 test_that("Diadromous DCI works", {
 
   # Load rivnet
-  net <- readRDS(test_path("testdata", "test_net.rds"))
+  net <- readRDS(test_path("testdata", "testnet.rds"))
 
   # Run test
   dci <- calculate_dci(net, form = "diadromous")

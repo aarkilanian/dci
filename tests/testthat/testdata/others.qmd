@@ -1,5 +1,5 @@
 <!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
-<qgis version="3.22.3-Białowieża">
+<qgis version="3.24.0-Tisler">
   <identifier></identifier>
   <parentidentifier></parentidentifier>
   <language></language>
@@ -10,7 +10,7 @@
   <fees></fees>
   <encoding></encoding>
   <crs>
-    <spatialrefsys>
+    <spatialrefsys nativeFormat="Wkt">
       <wkt></wkt>
       <proj4></proj4>
       <srsid>0</srsid>

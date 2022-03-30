@@ -1,7 +1,7 @@
 test_that("Correct node labels created", {
 
   # Load rivnet
-  net <- readRDS(test_path("testdata", "test_net.rds"))
+  net <- readRDS(test_path("testdata", "testnet.rds"))
 
   # Run test
   net_label <- node_labeling(net)
@@ -13,7 +13,7 @@ test_that("Correct node labels created", {
 test_that("Correct member labels created", {
 
   # Load rivnet
-  net <- readRDS(test_path("testdata", "test_net.rds"))
+  net <- readRDS(test_path("testdata", "testnet.rds"))
 
   # Run test
   net_label <- membership_labeling(net)
