@@ -1,3 +1,21 @@
+#' Enforce dendritic river topology
+#'
+#' This function provides an interface to tools which can correct non-dendritic geometries in a river network. This tool can correct divergent rivers and complex confluences.
+#'
+#' Divergent rivers are parts of a river network where a single tributary splits into two after a confluence. In a dendritic network small upstream rivers can only combine at confluences into a single river.
+#'
+#' Complex confluences occur when confluences have over 2 input tributaries. In a dendritic network two tributaries only must combine into one at confluences.
+#'
+#' @inheritParams rivnet
+#'
+#' @param min_comp An integer value, the minimum number of river line segments in a network component. Isolated networks with less than this specified number of edges will be discarded. Set to 10 by default.
+#'
+#' @param divergence A logical value, when \code{TRUE}, the default, divergences are corrected.
+#'
+#' @param complex A logical value, when \code{TRUE}, the default, complex confluences are corrected.
+#'
+#' @return A \code{rivers} object with corrected dendritic topology.
+#' @export
 enforce_dendritic <- function(rivers, min_comp = 10, divergence = TRUE, complex = TRUE){
   # Create river network
   river_net <- rivers %>%
