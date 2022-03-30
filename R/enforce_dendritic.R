@@ -6,6 +6,8 @@
 #'
 #' Complex confluences occur when confluences have over 2 input tributaries. In a dendritic network two tributaries only must combine into one at confluences.
 #'
+#' If errors are being corrected manually, all divergent pairs must be reduced to only one river and complex confluences modified such that only 2 rivers join together.
+#'
 #' @inheritParams rivnet
 #'
 #' @param min_comp An integer value, the minimum number of river line segments in a network component. Isolated networks with less than this specified number of edges will be discarded. Set to 10 by default.
@@ -14,9 +16,12 @@
 #'
 #' @param complex A logical value, when \code{TRUE}, the default, complex confluences are corrected.
 #'
-#' @return A \code{rivers} object with corrected dendritic topology.
+#' @param export A logical value, when \code{FALSE}, the default, errors are automatically corrected. When \code{TRUE} errors are identified and returned.
+#'
+#' @return If \code{export} is \code{FALSE}, a \code{rivers} object with corrected dendritic topology. If \code{export} is \code{TRUE}, a \code{rivers} object with divergent river pairs given shared \code{divID} and rivers participating in complex confluences are given shared \code{complexID}.
+#'
 #' @export
-enforce_dendritic <- function(rivers, min_comp = 10, divergence = TRUE, complex = TRUE){
+enforce_dendritic <- function(rivers, min_comp = 10, divergence = TRUE, complex = TRUE, export = FALSE){
   # Create river network
   river_net <- rivers %>%
     sfnetworks::as_sfnetwork(length_as_weight = TRUE) %>%
