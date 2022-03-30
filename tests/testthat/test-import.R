@@ -16,13 +16,13 @@ test_that("Invalid river weighting throws error", {
                                     sf::st_linestring(matrix(c(10,10,2,5), 2))
   ))
   # Create test weighting field with characters
-  riv_weight_chr <- c("d", "l", "j", "g", "d", "a")
+  rivers$weight_chr <- c("d", "l", "j", "g", "d", "a")
   # Create test weighting field  outisde range
-  riv_weight_rng <- c(1,4,3,5,43,5)
+  rivers$weight_rng <- c(1,4,3,5,43,5)
 
   # Run test
-  expect_error(import_rivers(rivers, riv_weight_chr, sf = TRUE), "^Supplied weight field cannot be assigned because:")
-  expect_error(import_rivers(rivers, riv_weight_rng, sf = TRUE), "Weight values must be between 0 and 1.")
+  expect_error(import_rivers(rivers, "weight_chr"), "Weight values must be numeric.")
+  expect_error(import_rivers(rivers, "weight_rng"), "Weight values must be between 0 and 1.")
 
 })
 
@@ -37,10 +37,10 @@ test_that("rivers are imported correctly", {
                                     sf::st_linestring(matrix(c(10,10,2,5), 2))
   ))
 
-  expect_equal(nrow(import_rivers(rivers, sf = TRUE)), nrow(rivers))
+  expect_equal(nrow(import_rivers(rivers)), nrow(rivers))
 
-  # Write test rivers to shapefile
-  expect_equal(nrow(import_rivers(test_path("testdata", "rivers.shp"), sf = FALSE)), nrow(rivers))
+  # Run test
+  expect_equal(nrow(import_rivers(test_path("testdata", "rivers.shp"))), 11)
 
 })
 
@@ -56,10 +56,10 @@ test_that("Invalid permeability throws error", {
   test_perm_rng <- c(0.2, 1.5, 3)
 
   # Run character vector test
-  expect_error(import_points(path = bars, type = "Barrier", perm = test_perm_chr, sf = TRUE),
+  expect_error(import_points(path = bars, type = "Barrier", perm = test_perm_chr),
                "Supplied permeability field cannot be assigned because: ")
   # Run outside range test
-  expect_error(import_points(path = bars, type = "Barrier", perm = test_perm_rng, sf = TRUE),
+  expect_error(import_points(path = bars, type = "Barrier", perm = test_perm_rng),
                "^Supplied permeability field cannot be assigned because:")
 
 })
@@ -70,16 +70,16 @@ test_that("Points are imported correctly", {
   bars <- sf::st_as_sf(sf::st_sfc(sf::st_point(c(1,1)),
                                   sf::st_point(c(2,2)),
                                   sf::st_point(c(3,3))))
-  expect_equal(nrow(import_points(bars, type = "Barrier", sf = TRUE)), 3)
+  expect_equal(nrow(import_points(bars, type = "barriers")), 3)
 
   # Create permeability values
   bars$permeability <- c(0,0.5,1)
-  bars_imported <- import_points(bars, perm = "permeability", type = "Barrier", sf = TRUE)
+  bars_imported <- import_points(bars, perm = "permeability", type = "barriers")
   expect_equal(bars_imported$perm, bars$permeability)
 
   # Test sink
-  expect_equal(nrow(import_points(bars, type = "Sink", sf = TRUE)), 3)
+  expect_equal(nrow(import_points(bars, type = "sinks")), 3)
 
   # Test other
-  expect_equal(nrow(import_points(bars, type = "Other", sf = TRUE)), 3)
+  expect_equal(nrow(import_points(bars, type = "others")), 3)
 })
