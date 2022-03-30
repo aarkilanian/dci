@@ -1,14 +1,14 @@
 #' Create a rivnet object
 #'
-#' \code{dci} is a geospatial network structure of river data. It extends the tidy representation of geospatial network data from the \code{\link[sfnetworks]{sfnetwork}} data structure.
+#' \code{rivnet} is a geospatial network structure of river data. It extends the tidy representation of geospatial network data from the \code{\link[sfnetworks]{sfnetwork}} data structure.
 #'
-#' @param rivers A \link{\code{rivers}} object returned by \link{\code{import_rivers}}.
+#' @param rivers A \code{\link{rivers}} object returned by \code{\link{import_rivers}}.
 #'
-#' @param barriers A \link{\code{barriers}} object returned by \link{\code{import_points}}.
+#' @param barriers A \code{\link{barriers}} object returned by \code{\link{import_points}}.
 #'
-#' @param sinks A \link{\code{sinks}} object returned by \link{\code{import_points}}. This data is optional.
+#' @param sinks A \code{\link{sinks}} object returned by \code{\link{import_points}}. This data is optional.
 #'
-#' @param others A \link{\code{others}} object returned by \link{\code{import_points}}. This data is optional.
+#' @param others A \code{\link{others}} object returned by \code{\link{import_points}}. This data is optional.
 #'
 #' @param tolerance An integer value, the maximum snapping distance in map units of supplied points relative to river lines. Points outside this distance will be discarded. Defaults to 10 map units.
 #'
