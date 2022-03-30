@@ -2,19 +2,19 @@
 #'
 #' \code{river_net} is a geospatial network structure of river data. It extends the tidy representation of geospatial network data from the \code{\link[sfnetworks]{sfnetwork}} data structure.
 #'
-#' @param rivers A \code{\link{rivers}} object returned by \code{\link{import_rivers}}.
+#' @param rivers A \code{rivers} object returned by \code{\link{import_rivers}}.
 #'
-#' @param barriers A \code{\link{barriers}} object returned by \code{\link{import_points}}.
+#' @param barriers A \code{barriers} object returned by \code{\link{import_points}}.
 #'
-#' @param sinks A \code{\link{sinks}} object returned by \code{\link{import_points}}. This data is optional.
+#' @param sinks A \code{sinks} object returned by \code{\link{import_points}}. This data is optional.
 #'
-#' @param others A \code{\link{others}} object returned by \code{\link{import_points}}. This data is optional.
+#' @param others A \code{others} object returned by \code{\link{import_points}}. This data is optional.
 #'
 #' @param tolerance An integer value, the maximum snapping distance in map units of supplied points relative to river lines. Points outside this distance will be discarded. Defaults to 10 map units.
 #'
 #' @param check A logical value, if \code{TRUE}, the default, dendritic topology of the river network is enforced with \code{\link{enforce_dendritic}}.
 #'
-#' @return An object of class \emph{rivnet} representing the river network formed by the geospatial lines and points provided.
+#' @return An object of class \code{\link{river_net}} representing the river network formed by the geospatial lines and points provided.
 #'
 #' @export
 river_net <- function(rivers,

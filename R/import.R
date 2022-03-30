@@ -1,4 +1,4 @@
-#' Prepare rivers for \code{\link{rivnet}} connectivity analyses
+#' Prepare rivers for \code{\link{river_net}} connectivity analyses
 #'
 #'Read and prepare geospatial river lines data for dci.
 #'
@@ -6,7 +6,7 @@
 #'
 #' @param weight An optional double vector, river weights ranging from 0 to 1. Set to NULL by default.
 #'
-#' @return Object of class rivers prepared for input to \code{\link{rivnet}}
+#' @return Object of class rivers prepared for input to \code{\link{river_net}}
 #'
 #' @export
 import_rivers <- function(path, weight = NULL){
@@ -59,7 +59,7 @@ import_rivers <- function(path, weight = NULL){
 
 }
 
-#' Prepare point data for \code{\link{rivnet}} connectivity analyses
+#' Prepare point data for \code{\link{river_net}} connectivity analyses
 #'
 #'Read and prepare geospatial point data for dci.
 #'
@@ -67,7 +67,7 @@ import_rivers <- function(path, weight = NULL){
 #' @param type A character string, either of “barrier”, “sink”, or “other” specifying the type of point.
 #' @param perm An optional double vector, barrier permeabilities ranging from 0 to 1. These will be ignored for non-barrier points. Set to NULL by default.
 #'
-#' @return Object of class barriers, sinks, or others prepared for input to \code{\link{rivnet}}
+#' @return Object of class barriers, sinks, or others prepared for input to \code{\link{river_net}}
 #'
 #' @export
 import_points <- function(path, type, perm = NULL){
