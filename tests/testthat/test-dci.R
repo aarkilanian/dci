@@ -16,7 +16,7 @@ test_that("Invalid DCI form request returns error", {
 test_that("Invalid sink returns error", {
 
   # Load rivnet
-  net <- readRDS(test_path("testdata", "test_net.rds"))
+  net <- readRDS(test_path("testdata", "testnet.rds"))
 
   # Remove sink
   net <- net %>%
