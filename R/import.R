@@ -9,8 +9,6 @@
 #' @return Object of class rivers prepared for input to \code{\link{rivnet}}
 #'
 #' @export
-#'
-#' @examples
 import_rivers <- function(path, weight = NULL){
 
   # Check for path type
@@ -78,8 +76,6 @@ import_rivers <- function(path, weight = NULL){
 #' @return Object of class barriers, sinks, or others prepared for input to \code{\link{rivnet}}
 #'
 #' @export
-#'
-#' @examples
 import_points <- function(path, type, perm = NULL){
 
   # Check for path type
