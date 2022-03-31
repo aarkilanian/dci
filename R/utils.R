@@ -8,34 +8,27 @@
 #'
 #' @noRd
 split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
-
   # Remove sinks if present
   if("Sink" %in% pts$type){
   pts <- pts %>%
     dplyr::filter(type != "Sink")
 }
-
   for(i in 1:nrow(pts)){
-
     # Update nearest river features
     riv_distances <- sf::st_distance(rivers, pts[i,])
     riv_ind <- which.min(riv_distances)
-
     # Skip if distance is above threshold
     if(!is.null(tolerance)){
       min_dist <- riv_distances[riv_ind]
       if(as.double(min_dist) > tolerance) next()
     }
-
     # Place points on rivers
     riv_pts <- sf::st_line_sample(rivers[riv_ind,], density = 1/1) %>%
       sf::st_sf() %>%
       sf::st_cast("POINT") %>%
       dplyr::mutate(group = 1)
-
     # Find nearest point (except start and end)
     nrst_ind <- which.min(sf::st_distance(pts[i,], riv_pts[-c(1, length(riv_pts)),])) + 2
-
     # Create first segment
     riv_start <- sf::st_geometry(rivers[riv_ind,])
     riv_len <- length(riv_start[[1]])
@@ -49,7 +42,6 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
       dplyr::summarise(do_union = FALSE) %>%
       sf::st_cast("LINESTRING") %>%
       dplyr::ungroup()
-
     # Create second segment
     riv_end <- sf::st_geometry(rivers[riv_ind,])
     riv_end <- sf::st_sfc(sf::st_point(c(riv_end[[1]][riv_len/2], riv_end[[1]][riv_len])), crs = sf::st_crs(rivers))
@@ -59,18 +51,13 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
       dplyr::summarise(do_union = FALSE) %>%
       sf::st_cast("LINESTRING") %>%
       dplyr::ungroup()
-
     # Add new rivers
     rivers <- rivers %>%
       dplyr::bind_rows(river1, river2)
-
     # Remove old river
     rivers <- rivers[-riv_ind,]
-
   }
-
   invisible(rivers)
-
 }
 
 #' Join variables from network nodes to \code{\link{river_net}} object.
@@ -83,23 +70,18 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
 #'
 #' @noRd
 join_attributes <- function(net, nodes, tolerance = NULL){
-
   # Find nearest river network node
   nrst <- nodes %>%
     sf::st_nearest_feature(net %>% activate(nodes) %>% sf::st_as_sf())
   nodes$key <- nrst
-
   if(!is.null(tolerance)){
-
     # Get distance to nearest node
     net_nodes <- net %>% activate(nodes) %>% sf::st_as_sf()
     nrst_dist <- sf::st_distance(nodes, net_nodes[nrst,])
     nrst_dist <- diag(nrst_dist)
     within_tolerance <- as.double(nrst_dist) <= tolerance
     nodes <- nodes[within_tolerance,]
-
   } else nodes <- nodes
-
   # Join special nodes' attributes to network nodes
   net <- net %>%
     activate(nodes) %>%
@@ -112,7 +94,6 @@ join_attributes <- function(net, nodes, tolerance = NULL){
     dplyr::mutate(perm = dplyr::if_else(is.na(perm), 1, perm)) %>%
     # Add unique node IDs
     dplyr::mutate(nodeID = dplyr::row_number())
-
   # Return joined network
   invisible(net)
 }

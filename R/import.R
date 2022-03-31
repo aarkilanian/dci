@@ -10,14 +10,11 @@
 #'
 #' @export
 import_rivers <- function(path, weight = NULL){
-
   # Check for path type
   if(is.character(path)) sf <- FALSE
   else sf <- TRUE
-
   # Read shapefile from path if not sf object
   if(!sf){
-
     # Read in river with sf
     rivers <- tryCatch(sf::read_sf(path),
       error = function(e) rlang::abort("invalid spatial data provided")
@@ -25,12 +22,10 @@ import_rivers <- function(path, weight = NULL){
   } else{
     rivers <- path
   }
-
   # Check for valid and empty geometries
   if(any(!(sf::st_is_valid(rivers))) | any(sf::st_is_empty(rivers))){
     stop("Invalid geometries detected in rivers")
   }
-
   # Check that weight is valid
   if(!(is.null(weight))){
     if(!(is.numeric(rivers[[weight]]))) stop("Weight values must be numeric.")
@@ -38,7 +33,6 @@ import_rivers <- function(path, weight = NULL){
     # Check that weight is between 0 and 1
     if(any(abs(user_weight) > 1)) stop("Weight values must be between 0 and 1.")
   }
-
   # Prepare rivers
   rivers <- rivers %>%
     # Remove Z/M dimensions
@@ -47,16 +41,13 @@ import_rivers <- function(path, weight = NULL){
     sf::st_cast("LINESTRING")
   # Calculate river lengths
   rivers$riv_length <- sf::st_length(rivers)
-
   # Add weighting to rivers
   if(!(is.null(weight))){
     rivers$riv_weight <- user_weight
   }
-
   # Return rivers
   rivers <- structure(rivers, class = c("rivers", class(rivers)))
   invisible(rivers)
-
 }
 
 #' Prepare point data for \code{\link{river_net}} connectivity analyses
@@ -71,14 +62,11 @@ import_rivers <- function(path, weight = NULL){
 #'
 #' @export
 import_points <- function(path, type, perm = NULL){
-
   # Check for path type
   if(is.character(path)) sf <- FALSE
   else sf <- TRUE
-
   # Read shapefile from path if not sf object
   if(!sf){
-
     # Read in river with sf
     points <- tryCatch(sf::read_sf(path),
                        error = function(e) rlang::abort("invalid spatial data provided")
@@ -86,12 +74,10 @@ import_points <- function(path, type, perm = NULL){
   } else{
     points <- path
   }
-
   # Check for valid and empty geometries
   if(any(!(sf::st_is_valid(points))) | any(sf::st_is_empty(points))){
     stop("Invalid geometries detected in points")
   }
-
   # Check that permeability is valid
   if(!is.null(perm)){
     user_perm <- tryCatch(
@@ -105,9 +91,7 @@ import_points <- function(path, type, perm = NULL){
       stop("Permeability values must be between 0 and 1.")
     }
   }
-
   if(type == "barriers"){
-
     # Prepare barriers
     barriers <- points %>%
       # Remove Z/M dimension
@@ -127,15 +111,11 @@ import_points <- function(path, type, perm = NULL){
     # Select only created columns
     barriers <- barriers %>%
       dplyr::select(id, perm, type)
-
     # Return barriers
     barriers <- structure(barriers, class = c("barriers", class(barriers)))
     return(barriers)
-
   }
-
   if(type == "sinks"){
-
     # Prepare sinks
     sinks <- points %>%
       # Remove Z/M dimensions
@@ -148,15 +128,11 @@ import_points <- function(path, type, perm = NULL){
       dplyr::mutate(perm = 1) %>%
       # Select only newly created columns
       dplyr::select(id, perm, type)
-
     # Return sinks
     sinks <- structure(sinks, class = c("sinks", class(sinks)))
     return(sinks)
-
   }
-
   if(type == "others"){
-
     # Prepare other points
     others <- points %>%
       # Remove Z/M dimensions
@@ -169,11 +145,8 @@ import_points <- function(path, type, perm = NULL){
       dplyr::mutate(perm = 1) %>%
       # Select only newly created columns
       dplyr::select(id, perm, type)
-
     # Return others
     others <- structure(others, class = c("others", class(others)))
     return(others)
-
   }
-
 }
