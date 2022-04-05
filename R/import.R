@@ -6,10 +6,12 @@
 #'
 #' @param weight An optional double vector, river weights ranging from 0 to 1. Set to NULL by default.
 #'
+#' @param min_comp An integer value, the minimum number of river nodes in a network component. Isolated networks with less than this specified number of nodes will be discarded. Set to 10 by default.
+#'
 #' @return Object of class rivers prepared for input to \code{\link{river_net}}
 #'
 #' @export
-import_rivers <- function(path, weight = NULL){
+import_rivers <- function(path, weight = NULL, min_comp = 10){
   # Check for path type
   if(is.character(path)) sf <- FALSE
   else sf <- TRUE
@@ -22,6 +24,12 @@ import_rivers <- function(path, weight = NULL){
   } else{
     rivers <- path
   }
+  # Prepare rivers
+  rivers <- rivers %>%
+    # Remove Z/M dimensions
+    sf::st_zm() %>%
+    # Cast all features to linestring geometries
+    sf::st_cast("LINESTRING")
   # Check for valid and empty geometries
   if(any(!(sf::st_is_valid(rivers))) | any(sf::st_is_empty(rivers))){
     stop("Invalid geometries detected in rivers")
@@ -33,12 +41,14 @@ import_rivers <- function(path, weight = NULL){
     # Check that weight is between 0 and 1
     if(any(abs(user_weight) > 1)) stop("Weight values must be between 0 and 1.")
   }
-  # Prepare rivers
-  rivers <- rivers %>%
-    # Remove Z/M dimensions
-    sf::st_zm() %>%
-    # Cast all features to linestring geometries
-    sf::st_cast("LINESTRING")
+  # Discard small component fragments
+  net <- rivers %>%
+    sfnetworks::as_sfnetwork(length_as_weight = TRUE) %>%
+    # Retain only components with set minimum nodes
+    dplyr::mutate(component = tidygraph::group_components()) %>%
+    dplyr::group_by(component) %>%
+    dplyr::filter(dplyr::n() > min_comp)
+  rivers <- net %>% activate(edges) %>% sf::st_as_sf()
   # Calculate river lengths
   rivers$riv_length <- sf::st_length(rivers)
   # Add weighting to rivers

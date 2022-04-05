@@ -10,8 +10,6 @@
 #'
 #' @inheritParams river_net
 #'
-#' @param min_comp An integer value, the minimum number of river line segments in a network component. Isolated networks with less than this specified number of edges will be discarded. Set to 10 by default.
-#'
 #' @param divergence A logical value, when \code{TRUE}, the default, divergences are corrected.
 #'
 #' @param complex A logical value, when \code{TRUE}, the default, complex confluences are corrected.
@@ -19,14 +17,10 @@
 #' @return If \code{export} is \code{FALSE}, a \code{rivers} object with corrected dendritic topology. If \code{export} is \code{TRUE}, a \code{rivers} object with divergent river pairs given shared \code{divID} and rivers participating in complex confluences are given shared \code{complexID}.
 #'
 #' @export
-enforce_dendritic <- function(rivers, min_comp = 10, divergence = TRUE, complex = TRUE){
+enforce_dendritic <- function(rivers, divergence = TRUE, complex = TRUE){
   # Create river network
   net <- rivers %>%
-    sfnetworks::as_sfnetwork(length_as_weight = TRUE) %>%
-    # Retain only components with set minimum nodes
-    dplyr::mutate(component = tidygraph::group_components()) %>%
-    dplyr::group_by(component) %>%
-    dplyr::filter(dplyr::n() > min_comp)
+    sfnetworks::as_sfnetwork(length_as_weight = TRUE)
   # Correct divergences
   if(divergence){
     net <- correct_divergences(net)
