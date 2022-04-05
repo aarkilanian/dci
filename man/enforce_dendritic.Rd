@@ -4,24 +4,14 @@
 \alias{enforce_dendritic}
 \title{Enforce dendritic river topology}
 \usage{
-enforce_dendritic(
-  rivers,
-  min_comp = 10,
-  divergence = TRUE,
-  complex = TRUE,
-  export = FALSE
-)
+enforce_dendritic(rivers, divergence = TRUE, complex = TRUE)
 }
 \arguments{
 \item{rivers}{A \code{rivers} object returned by \code{\link{import_rivers}}.}
 
-\item{min_comp}{An integer value, the minimum number of river line segments in a network component. Isolated networks with less than this specified number of edges will be discarded. Set to 10 by default.}
-
 \item{divergence}{A logical value, when \code{TRUE}, the default, divergences are corrected.}
 
 \item{complex}{A logical value, when \code{TRUE}, the default, complex confluences are corrected.}
-
-\item{export}{A logical value, when \code{FALSE}, the default, errors are automatically corrected. When \code{TRUE} errors are identified and returned.}
 }
 \value{
 If \code{export} is \code{FALSE}, a \code{rivers} object with corrected dendritic topology. If \code{export} is \code{TRUE}, a \code{rivers} object with divergent river pairs given shared \code{divID} and rivers participating in complex confluences are given shared \code{complexID}.

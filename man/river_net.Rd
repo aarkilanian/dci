@@ -2,7 +2,7 @@
 % Please edit documentation in R/river_net.R
 \name{river_net}
 \alias{river_net}
-\title{Create a rivnet object}
+\title{Create a \code{river_net} object}
 \usage{
 river_net(
   rivers,
