@@ -11,7 +11,7 @@
 #' @return Object of class rivers prepared for input to \code{\link{river_net}}
 #'
 #' @export
-import_rivers <- function(path, weight = NULL, min_comp = 10){
+import_rivers <- function(path, weight = NULL, min_comp = 10, quiet = FALSE){
   # Check for path type
   if(is.character(path)) sf <- FALSE
   else sf <- TRUE
@@ -58,6 +58,10 @@ import_rivers <- function(path, weight = NULL, min_comp = 10){
   # Add weighting to rivers
   if(!(is.null(weight))){
     rivers$riv_weight <- user_weight
+  }
+  # Plot rivers if quiet is set to FALSE
+  if(quiet == FALSE){
+    plot(sf::st_geometry(rivers))
   }
   # Return rivers
   rivers <- structure(rivers, class = c("rivers", class(rivers)))
