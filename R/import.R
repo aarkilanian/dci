@@ -24,6 +24,10 @@ import_rivers <- function(path, weight = NULL, min_comp = 10){
   } else{
     rivers <- path
   }
+  # Check that spatial data is lines
+  if(!any(sf::st_geometry_type(rivers) %in% c("LINESTRING", "MULTILINESTRING"))){
+    stop("Provided data contains geometries other than LINESTRING and MULTILINESTRING")
+  }
   # Prepare rivers
   rivers <- rivers %>%
     # Remove Z/M dimensions
