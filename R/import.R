@@ -79,7 +79,7 @@ import_rivers <- function(path, weight = NULL, min_comp = 10, quiet = FALSE){
 #' @return Object of class barriers, sinks, or others prepared for input to \code{\link{river_net}}
 #'
 #' @export
-import_points <- function(path, type, perm = NULL){
+import_points <- function(path, type, perm = NULL, quiet = FALSE){
   # Check for path type
   if(is.character(path)) sf <- FALSE
   else sf <- TRUE
@@ -129,6 +129,10 @@ import_points <- function(path, type, perm = NULL){
     # Select only created columns
     barriers <- barriers %>%
       dplyr::select(id, perm, type)
+    # Print prepared barriers
+    if(quiet == FALSE){
+      plot(sf::st_geometry(barriers))
+    }
     # Return barriers
     barriers <- structure(barriers, class = c("barriers", class(barriers)))
     return(barriers)
@@ -146,6 +150,10 @@ import_points <- function(path, type, perm = NULL){
       dplyr::mutate(perm = 1) %>%
       # Select only newly created columns
       dplyr::select(id, perm, type)
+    # Print prepared sinks
+    if(quiet == FALSE){
+      plot(sf::st_geometry(sinks))
+    }
     # Return sinks
     sinks <- structure(sinks, class = c("sinks", class(sinks)))
     return(sinks)
@@ -163,6 +171,10 @@ import_points <- function(path, type, perm = NULL){
       dplyr::mutate(perm = 1) %>%
       # Select only newly created columns
       dplyr::select(id, perm, type)
+    # Print prepared others
+    if(quiet == FALSE){
+      plot(sf::st_geometry(others))
+    }
     # Return others
     others <- structure(others, class = c("others", class(others)))
     return(others)
