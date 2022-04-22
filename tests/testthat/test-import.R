@@ -45,6 +45,28 @@ test_that("Cannot import rivers from file with geometries other than LINESTRING 
 
 })
 
+test_that("Specifying point IDs works as expected", {
+
+  # Create points
+  bars <- sf::st_as_sf(sf::st_sfc(sf::st_point(c(1,1)),
+                                  sf::st_point(c(2,2)),
+                                  sf::st_point(c(3,3))))
+  # Generate IDs (character)
+  bars$charid <- c("a", "b", "c")
+  # Generate IDs (integers)
+  bars$intid <- c(1, 2, 3)
+
+  # Run test
+  import_char <- import_points(bars, type = "barriers", id = "charid")
+  import_int <- import_points(bars, type = "barriers", id = "intid")
+  import_sink <- import_points(bars, type = "sinks", id = "intid")
+  import_other <- import_points(bars, type = "others", id = "intid")
+  expect_equal(import_char$user_id, as.character(bars$charid))
+  expect_equal(import_int$user_id, as.character(bars$intid))
+  expect_equal(import_sink$user_id, as.character(bars$intid))
+  expect_equal(import_other$user_id, as.character(bars$intid))
+})
+
 test_that("Invalid permeability throws error", {
 
   # Create points

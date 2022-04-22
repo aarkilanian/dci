@@ -24,16 +24,19 @@ import_rivers <- function(path, weight = NULL, min_comp = 10, quiet = FALSE){
   } else{
     rivers <- path
   }
+
   # Check that spatial data is lines
   if(!any(sf::st_geometry_type(rivers) %in% c("LINESTRING", "MULTILINESTRING"))){
     stop("Provided data contains geometries other than LINESTRING and MULTILINESTRING")
   }
+
   # Prepare rivers
   rivers <- rivers %>%
     # Remove Z/M dimensions
     sf::st_zm() %>%
     # Cast all features to linestring geometries
     sf::st_cast("LINESTRING")
+
   # Check for valid and empty geometries
   if(any(!(sf::st_is_valid(rivers))) | any(sf::st_is_empty(rivers))){
     stop("Invalid geometries detected in rivers")
@@ -45,6 +48,7 @@ import_rivers <- function(path, weight = NULL, min_comp = 10, quiet = FALSE){
     # Check that weight is between 0 and 1
     if(any(abs(user_weight) > 1)) stop("Weight values must be between 0 and 1.")
   }
+
   # Discard small component fragments
   net <- rivers %>%
     sfnetworks::as_sfnetwork(length_as_weight = TRUE) %>%
@@ -59,10 +63,12 @@ import_rivers <- function(path, weight = NULL, min_comp = 10, quiet = FALSE){
   if(!(is.null(weight))){
     rivers$riv_weight <- user_weight
   }
+
   # Plot rivers if quiet is set to FALSE
   if(quiet == FALSE){
     plot(sf::st_geometry(rivers))
   }
+
   # Return rivers
   rivers <- structure(rivers, class = c("rivers", class(rivers)))
   invisible(rivers)
@@ -79,7 +85,7 @@ import_rivers <- function(path, weight = NULL, min_comp = 10, quiet = FALSE){
 #' @return Object of class barriers, sinks, or others prepared for input to \code{\link{river_net}}
 #'
 #' @export
-import_points <- function(path, type, perm = NULL, quiet = FALSE){
+import_points <- function(path, type, id = NULL, perm = NULL, quiet = FALSE){
   # Check for path type
   if(is.character(path)) sf <- FALSE
   else sf <- TRUE
@@ -109,6 +115,15 @@ import_points <- function(path, type, perm = NULL, quiet = FALSE){
       stop("Permeability values must be between 0 and 1.")
     }
   }
+  # Check that id is valid
+  if(!is.null(id)){
+    user_id <- tryCatch(
+      as.character(points[[id]]),
+      error = function(e) {
+        stop("Cannot convert id values to character strings: ", e, call. = FALSE)
+      }
+    )
+  }
   if(type == "barriers"){
     # Prepare barriers
     barriers <- points %>%
@@ -129,6 +144,10 @@ import_points <- function(path, type, perm = NULL, quiet = FALSE){
     # Select only created columns
     barriers <- barriers %>%
       dplyr::select(id, perm, type)
+    # Add user provided ID
+    if(!is.null(id)){
+      barriers$user_id <- user_id
+    }
     # Print prepared barriers
     if(quiet == FALSE){
       plot(sf::st_geometry(barriers))
@@ -150,6 +169,10 @@ import_points <- function(path, type, perm = NULL, quiet = FALSE){
       dplyr::mutate(perm = 1) %>%
       # Select only newly created columns
       dplyr::select(id, perm, type)
+    # Add user provided ID
+    if(!is.null(id)){
+      sinks$user_id <- user_id
+    }
     # Print prepared sinks
     if(quiet == FALSE){
       plot(sf::st_geometry(sinks))
@@ -171,6 +194,10 @@ import_points <- function(path, type, perm = NULL, quiet = FALSE){
       dplyr::mutate(perm = 1) %>%
       # Select only newly created columns
       dplyr::select(id, perm, type)
+    # Add user provided ID
+    if(!is.null(id)){
+      others$user_id <- user_id
+    }
     # Print prepared others
     if(quiet == FALSE){
       plot(sf::st_geometry(others))
