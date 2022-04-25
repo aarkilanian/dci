@@ -7,7 +7,7 @@
 #' @return A \code{\link{data.frame}} of segment-level DCI values.
 #'
 #' @export
-calculate_dci <- function(net, form = NULL, threshold = NULL){
+calculate_dci <- function(net, form = NULL, threshold = NULL, weighted = FALSE){
 
   # No valid network
   if(!("river_net" %in% class(net))){
@@ -25,10 +25,12 @@ calculate_dci <- function(net, form = NULL, threshold = NULL){
   # Extract edges
   net_edges <- net %>%
     activate(edges) %>%
-    as.data.frame() %>%
-    # TODO revise weight naming here
-    dplyr::select(from, weight) %>%
-    dplyr::mutate(weight = as.double(weight))
+    as.data.frame()
+
+  # No valid weighting
+  if(weighted & !("riv_weight" %in% names(net_edges))){
+    stop("No valid weighting found in river network.")
+  }
 
   # Extract nodes
   net_nodes <- net %>%
@@ -48,22 +50,29 @@ calculate_dci <- function(net, form = NULL, threshold = NULL){
   net_nodes <- net_nodes %>%
     dplyr::left_join(net_edges, by = c("nodeID" = "from"))
 
-  # Gather member IDs
-  all_members <- unique(net_nodes$member.label)
+  # If weighted
+  if(weighted){
 
-  # Calculate total weight of segments
-  seg_weights <- net_nodes %>%
-    dplyr::group_by(member.label) %>%
-    dplyr::summarise(segweight = sum(weight, na.rm = TRUE)) %>%
-    # Remove members with 0 length
-    dplyr::filter(segweight != 0)
+    # Calculate total weighted length of segments
+    seg_weights <- net_nodes %>%
+      dplyr::mutate(weighted_len = riv_length * riv_weight) %>%
+      dplyr::group_by(member.label) %>%
+      dplyr::summarise(segweight = sum(weighted_len, na.rm = TRUE)) %>%
+      # Remove members with 0 length
+      dplyr::filter(segweight != 0)
 
-  # Case when no valid weights in network
-  if(nrow(seg_weights) == 0){
-    message("The selected network has no valid weights")
+  # If not weighted
+  } else{
+
+    # Calculate total length of segments
+    seg_weights <- net_nodes %>%
+      dplyr::group_by(member.label) %>%
+      dplyr::summarise(segweight = sum(riv_length, na.rm = TRUE)) %>%
+      # Remove members with 0 length
+      dplyr::filter(segweight != 0)
   }
 
-  # Update member IDs list
+  # Gather member IDs
   all_members <- seg_weights$member.label
 
   # Calculate total weight of network
