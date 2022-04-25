@@ -7,7 +7,7 @@
 #' @return A \code{\link{data.frame}} of segment-level DCI values.
 #'
 #' @export
-calculate_dci <- function(net, form = NULL){
+calculate_dci <- function(net, form = NULL, threshold = NULL){
 
   # No valid network
   if(!("river_net" %in% class(net))){
@@ -26,6 +26,7 @@ calculate_dci <- function(net, form = NULL){
   net_edges <- net %>%
     activate(edges) %>%
     as.data.frame() %>%
+    # TODO revise weight naming here
     dplyr::select(from, weight) %>%
     dplyr::mutate(weight = as.double(weight))
 
@@ -117,6 +118,7 @@ calculate_dci_pot <- function(all_members, seg_weights, net, net_nodes){
 calculate_dci_dia <- function(all_members, seg_weights, net, net_nodes){
 
   # Identify sink segment
+  # TODO already calculated in parent function, pass argument
   sink_seg <- net %>%
     activate(nodes) %>%
     dplyr::filter(type == "Sink") %>%
@@ -141,9 +143,9 @@ calculate_dci_dia <- function(all_members, seg_weights, net, net_nodes){
 
   # Group DCI results by from segment to obtain segmental DCI
   DCIs <- DCIs_sub %>%
-    dplyr::group_by(from) %>%
+    dplyr::group_by(to) %>%
     dplyr::summarise(DCIs = sum(DCIs)) %>%
-    dplyr::rename(segment = from)
+    dplyr::rename(segment = to)
 
   # Return DCIs summary
   return(DCIs)
