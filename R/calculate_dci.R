@@ -168,17 +168,14 @@ gather_perm <- function(from, to, nodes){
     return(1)
   }
 
+  # Extract sinks and barriers
+  sinks_bars <- subset(nodes, nodes$type %in% c("Sink", "Barrier"))
+
   # Get from segment local sink
-  from_sink <- nodes %>%
-    dplyr::filter(member.label == from) %>%
-    dplyr::filter(type %in% c("Sink", "Barrier")) %>%
-    dplyr::pull(node.label)
+  from_sink <- sinks_bars[sinks_bars$member.label == from,]$node.label
 
   # Get to segment local sink
-  to_sink <- nodes %>%
-    dplyr::filter(member.label == to) %>%
-    dplyr::filter(type %in% c("Sink", "Barrier")) %>%
-    dplyr::pull(node.label)
+  to_sink <- sinks_bars[sinks_bars$member.label == to,]$node.label
 
   # Get path between segments
   path <- path_between(from_sink, to_sink)
