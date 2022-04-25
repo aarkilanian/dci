@@ -28,6 +28,21 @@ test_that("Invalid sink returns error", {
 
 })
 
+test_that("Error when no weighting is not present", {
+
+  # Load rivnet
+  net <- readRDS(test_path("testdata", "testnet.rds"))
+
+  # Remove weighting
+  net <- net %>%
+    sfnetworks::activate(edges) %>%
+    dplyr::select(-riv_weight)
+
+  # Run test
+  expect_error(calculate_dci(net, form = "diadromous", weighted = TRUE), "No valid weighting found in river network.")
+
+})
+
 test_that("Can find path to root", {
 
   # Create test node label
