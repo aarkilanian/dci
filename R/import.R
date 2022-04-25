@@ -44,14 +44,13 @@ import_rivers <- function(path, weight = NULL, min_comp = 10, quiet = FALSE){
   # Check that weight is valid
   if(!(is.null(weight))){
     if(!(is.numeric(rivers[[weight]]))) stop("Weight values must be numeric.")
-    user_weight <- as.double(rivers[[weight]])
     # Check that weight is between 0 and 1
-    if(any(abs(user_weight) > 1)) stop("Weight values must be between 0 and 1.")
+    if(any(abs(rivers[[weight]]) > 1)) stop("Weight values must be between 0 and 1.")
   }
 
   # Discard small component fragments
   net <- rivers %>%
-    sfnetworks::as_sfnetwork(length_as_weight = TRUE) %>%
+    sfnetworks::as_sfnetwork() %>%
     # Retain only components with set minimum nodes
     dplyr::mutate(component = tidygraph::group_components()) %>%
     dplyr::group_by(component) %>%
@@ -61,7 +60,8 @@ import_rivers <- function(path, weight = NULL, min_comp = 10, quiet = FALSE){
   rivers$riv_length <- sf::st_length(rivers)
   # Add weighting to rivers
   if(!(is.null(weight))){
-    rivers$riv_weight <- user_weight
+    rivers$riv_weight <- rivers[[weight]]
+    rivers <- rivers[!(names(rivers) %in% weight)]
   }
 
   # Plot rivers if quiet is set to FALSE
