@@ -57,10 +57,10 @@ import_rivers <- function(path, weight = NULL, min_comp = 10, quiet = FALSE){
     dplyr::filter(dplyr::n() > min_comp)
   rivers <- net %>% activate(edges) %>% sf::st_as_sf()
   # Calculate river lengths
-  rivers$riv_length <- sf::st_length(rivers)
+  rivers$riv_length <- as.double(sf::st_length(rivers))
   # Add weighting to rivers
   if(!(is.null(weight))){
-    rivers$riv_weight <- rivers[[weight]]
+    rivers$riv_weight <- as.double(rivers[[weight]])
     rivers <- rivers[!(names(rivers) %in% weight)]
   }
 
