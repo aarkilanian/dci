@@ -53,10 +53,11 @@ river_net <- function(rivers,
   sinks <- sf::st_transform(sinks, sf::st_crs(rivers))
   if(!is.null(others)){
     others <- sf::st_transform(others, sf::st_crs(rivers))
+    # Combine nodes
+    user_nodes <- dplyr::bind_rows(barriers, sinks, others)
+  } else{
+    user_nodes <- dplyr::bind_rows(barriers, sinks)
   }
-
-  # Combine nodes together
-  user_nodes <- dplyr::bind_rows(barriers, sinks, others)
 
   # Clean up topology if requested
   if(check == TRUE){

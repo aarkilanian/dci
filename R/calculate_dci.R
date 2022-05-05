@@ -4,10 +4,16 @@
 #'
 #' @param form A character string, either "potamodromous" or "diadromous" specifying the form of the DCI to be calculated.
 #'
+#' @param threshold An optional double value, a distance threshold in meters to cosider while calculating the DCI
+#'
+#' @param weighted A logical value, if \code{FALSE}, the default, weighting will not be considered during DCI calculation. If \code{TRUE} the weighting specified during river import with \code{\link{import_rivers}} will be used when calculating the DCI.
+#'
+#' @param points A character string, the nodes in the \code{\link{river_net}} for which DCI values should be calculated. Defaults to NULL leading to DCI results by segment.
+#'
 #' @return A \code{\link{data.frame}} of segment-level DCI values.
 #'
 #' @export
-calculate_dci <- function(net, form = NULL, threshold = NULL, weighted = FALSE){
+calculate_dci <- function(net, form = NULL, threshold = NULL, weighted = FALSE, points = NULL){
 
   # No valid network
   if(!("river_net" %in% class(net))){
@@ -82,23 +88,54 @@ calculate_dci <- function(net, form = NULL, threshold = NULL, weighted = FALSE){
   seg_weights$segweight <- seg_weights$segweight / totweight
 
   # Potamodromous case
-  if(form == "potamodromous") DCIs <- calculate_dci_pot(all_members, seg_weights, net, net_nodes)
+  if(form == "potamodromous") DCIs <- calculate_dci_pot(all_members, seg_weights, net, net_nodes, net_edges)
 
   # Diadromous case
-  if(form == "diadromous") DCIs <- calculate_dci_dia(all_members, seg_weights, net, net_nodes)
+  if(form == "diadromous") DCIs <- calculate_dci_dia(all_members, seg_weights, net, net_nodes, net_edges)
 
   # Return calculated DCI values
   return(DCIs)
 
 }
 
-calculate_dci_pot <- function(all_members, seg_weights, net, net_nodes){
+calculate_dci_pot_thresh <- function(all_members, seg_weights, net, net_nodes, net_edges, threshold, points = NULL){
 
   # Determine segment pairs
   from_segment <- rep(all_members,
                       each = length(all_members))
   to_segment <- rep(all_members,
                     times = length(all_members))
+
+  # Calculate permeability between each pair of segments
+  perm <- mapply(gather_perm_thresh, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
+
+}
+
+calculate_dci_pot <- function(all_members, seg_weights, net, net_nodes, net_edges, threshold = NULL, points = NULL){
+
+  # Determine segment pairs
+  from_segment <- rep(all_members,
+                      each = length(all_members))
+  to_segment <- rep(all_members,
+                    times = length(all_members))
+
+  # Gather distance between segments if threshold not NULL
+  if(!is.null(threshold)){
+
+    # Identify source nodes
+    net_leaves <- net %>%
+      dplyr::mutate(type = ifelse(tidygraph::node_is_leaf() & type != "Sink", "Source", type))
+
+    # Extract new nodes
+    net_nodes_leaves <- net_leaves %>%
+      sfnetworks::activate(nodes) %>%
+      as.data.frame() %>%
+      dplyr::left_join(net_edges, by = c("nodeID" = "from"))
+
+    # Calculate distance between each pair of segments
+    dists <- mapply(gather_dist, from_segment, to_segment, MoreArgs = list(nodes = net_nodes_leaves))
+
+  }
 
   # Calculate permeability between each pair of segments
   perm <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
@@ -124,7 +161,7 @@ calculate_dci_pot <- function(all_members, seg_weights, net, net_nodes){
 
 }
 
-calculate_dci_dia <- function(all_members, seg_weights, net, net_nodes){
+calculate_dci_dia <- function(all_members, seg_weights, net, net_nodes, threshold = NULL, points = NULL){
 
   # Identify sink segment
   # TODO already calculated in parent function, pass argument
@@ -187,6 +224,55 @@ gather_perm <- function(from, to, nodes){
 
   # Return permeability between segments
   return(path_perm)
+
+}
+
+gather_perm_thresh <- function(from, to, nodes, threshold){
+
+  if(from == to){
+    #
+  }
+
+}
+
+gather_dist <- function(from, to, nodes){
+
+  # Condition when from and to are the same
+  if(from == to){
+    return(1)
+  }
+
+  # Extract sinks and barriers
+  sinks_bars <- subset(nodes, nodes$type %in% c("Sink", "Barrier"))
+  # Get to segment local sink
+  to_sink <- sinks_bars[sinks_bars$member.label == to,]$node.label
+
+  # Extract sources
+  sources <- subset(nodes, nodes$type == "Source")
+  # Get from segment sources
+  from_sources <- sources[sources$member.label == from,]$node.label
+
+  # Extract node labels of from segment
+  from_nodes <- nodes[nodes$member.label == from,]$node.label
+
+  # Gather all paths from sources to destination sink
+  all_paths <- vector("list", length(from_sources))
+  for(i in 1:length(from_sources)){
+    paths <- path_between(from_sources[i], to_sink)
+  }
+
+  # Get distance of all paths
+  all_dists <- list()
+  for(i in 1:length(all_paths)){
+    all_dists[i] <- nodes %>%
+      dplyr::filter(node.label %in% all_paths[[i]]) %>%
+      dplyr::summarise(dist = sum(riv_length, na.rm = TRUE)) %>%
+      dplyr::pull(dist)
+  }
+
+  # Retrieve maximum distance
+  max_dist <- max(unlist(all_dists))
+  return(max_dist)
 
 }
 
