@@ -1,3 +1,7 @@
+# Since nodes hold the edge length of their downstream node, barriers should be removed when calculating the DCI since that length belongs to another segment. Might need to reconsider which segment these should be labelled for. Or I just assume the amount of error is well spread out and not significant on DCI results.
+
+# Back to back barriers don't seem to hold any length, should be corrected
+
 calculate_dci <- function(net, form = NULL, threshold = NULL, weighted = FALSE, sites = NULL){
 
   # No valid network
@@ -79,10 +83,10 @@ calculate_dci <- function(net, form = NULL, threshold = NULL, weighted = FALSE, 
   } else {
 
     # Potamodromous case
-    if(form == "potamodromous") DCIs <- calculate_dci_pot_thresh(all_members, weighted, threshold, totweight, net_nodes, points)
+    if(form == "potamodromous") DCIs <- calculate_dci_pot_thresh(all_members, net_nodes, weighted, threshold, totweight, sites)
 
     # Diadromous case
-    if(form == "diadromous") DCIs <- calculate_dci_dia_thresh(all_members, weighted, threshold, totweight, net_nodes, points)
+    if(form == "diadromous") DCIs <- calculate_dci_dia_thresh(all_members, weighted, threshold, totweight, net_nodes, sites)
 
     # Return calculated DCI values
     return(DCIs)
@@ -168,7 +172,7 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, net_sink, sit
     dplyr::summarise(DCIs = sum(DCIs)) %>%
     dplyr::rename(segment = to)
 
-  if(!is.null(points)){
+  if(!is.null(sites)){
 
     # Extract site nodes and join DCI values
     DCIs <- net_nodes %>%
@@ -187,7 +191,7 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, net_sink, sit
 
 }
 
-calculate_dci_pot_thresh <- function(all_members, net_nodes, weighted, threshold, totweight, points = NULL){
+calculate_dci_pot_thresh <- function(all_members, net_nodes, weighted, threshold, totweight, sites = NULL){
 
   # Determine segment pairs
   from_segment <- rep(all_members,
@@ -212,7 +216,7 @@ calculate_dci_pot_thresh <- function(all_members, net_nodes, weighted, threshold
 
 }
 
-calculate_dci_dia_thresh <- function(all_members, net_nodes, weighted, threshold, totweight, points = NULL){
+calculate_dci_dia_thresh <- function(all_members, net_nodes, weighted, threshold, totweight, sites = NULL){
 
 
 }
@@ -231,17 +235,26 @@ gather_dist <- function(from, to, nodes){
   # Get sink-to-sink path between segments
   path <- path_between(from_sink, to_sink)
 
-  # Identify segment-segment path
-  ## If first node after from sink is from another segment then from segment is upstream and the sink is the starting point
-  ## For other segment find barrier closest to sink and remove last binary digit
+  # Join node types and member labels for nodes on path
+  full_path <- nodes %>%
+    dplyr::filter(node.label %in% path) %>%
+    dplyr::select(node.label, type, member.label)
 
-  # Calculate distance of path
-  path_dist <- sum(nodes %>%
-                     dplyr::filter(node.label %in% path) %>%
-                     dplyr::pull(riv_length))
+  # Case when segments are neighbours
+  if(length(unique(full_path$member.label)) == 2){
+    return(0)
+  }
+
+  # Trim path to only segment-segment distance
+  path_ss <- full_path[!(full_path$member.label %in% c(from, to)),]$node.label
+
+  # Get segment-segment path distance
+  dist_ss <- sum(nodes %>%
+                   dplyr::filter(node.label %in% path_ss) %>%
+                   dplyr::pull(riv_length), na.rm = TRUE)
 
   # Return segment-segment distance
-  return(path_dist)
+  return(dist_ss)
 
 }
 
