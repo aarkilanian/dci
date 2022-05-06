@@ -1,4 +1,4 @@
-calculate_dci <- function(net, form = NULL, threshold = NULL, weighted = FALSE, points = NULL){
+calculate_dci <- function(net, form = NULL, threshold = NULL, weighted = FALSE, sites = NULL){
 
   # No valid network
   if(!("river_net" %in% class(net))){
@@ -50,39 +50,33 @@ calculate_dci <- function(net, form = NULL, threshold = NULL, weighted = FALSE, 
     # Calculate segment total lengths
     seg_weights <- net_nodes %>%
       dplyr::group_by(member.label) %>%
-      dplyr::summarise(segweight = sum(weighted_len, na.rm = TRUE)) %>%
+      dplyr::summarise(segweight = sum(riv_length, na.rm = TRUE)) %>%
       dplyr::filter(segweight != 0)
   }
 
+  # Gather member IDs
+  all_members <- seg_weights$member.label
+
+  # Calculate total weight of network
+  totweight <- sum(seg_weights$segweight)
+
   # If no distance threshold is supplied
   if(is.null(threshold)){
-
-    # Gather member IDs
-    all_members <- seg_weights$member.label
-
-    # Calculate total weight of network
-    totweight <- sum(seg_weights$segweight)
 
     # Calculate relative length of segments
     seg_weights$segweight <- seg_weights$segweight / totweight
 
     # Potamodromous case
-    if(form == "potamodromous") DCIs <- calculate_dci_pot(all_members, seg_weights, net, net_nodes, net_edges, points)
+    if(form == "potamodromous") DCIs <- calculate_dci_pot(all_members, net_nodes, seg_weights, sites)
 
     # Diadromous case
-    if(form == "diadromous") DCIs <- calculate_dci_dia(all_members, seg_weights, net, net_nodes, net_edges, points)
+    if(form == "diadromous") DCIs <- calculate_dci_dia(all_members, net_nodes, seg_weights, net_sink, sites)
 
     # Return calculated DCI values
     return(DCIs)
 
   # If distance threshold is supplied
   } else {
-
-    # Gather member IDs
-    all_members <- seg_weights$member.label
-
-    # Calculate total weight of network
-    totweight <- sum(seg_weights$segweight)
 
     # Potamodromous case
     if(form == "potamodromous") DCIs <- calculate_dci_pot_thresh(all_members, weighted, threshold, totweight, net_nodes, points)
@@ -96,7 +90,7 @@ calculate_dci <- function(net, form = NULL, threshold = NULL, weighted = FALSE, 
 
 }
 
-calculate_dci_pot <- function(all_members, net_nodes, seg_weights, points = NULL){
+calculate_dci_pot <- function(all_members, net_nodes, seg_weights, sites = NULL){
 
   # Determine segment pairs
   from_segment <- rep(all_members,
@@ -123,8 +117,19 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights, points = NULL
     dplyr::summarise(DCIs = sum(DCIs)) %>%
     dplyr::rename(segment = from)
 
-  if(!is.null(points)){
-    # Join relevent segment's DCI score to the points supplied
+  if(!is.null(sites)){
+
+    # Extract site nodes and join DCI values
+    DCIs <- net_nodes %>%
+      dplyr::filter(type == sites) %>%
+      dplyr::select(id, member.label, geometry.x) %>%
+      dplyr::rename("geometry" = "geometry.x") %>%
+      dplyr::left_join(DCIs, by = c("member.label" = "segment")) %>%
+      dplyr::select(-member.label)
+
+    # Convert DCI results to sf object
+    DCIs <- sf::st_as_sf(DCIs, sf_column_name = "geometry")
+
   }
 
   # Return DCIs summary
@@ -132,7 +137,7 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights, points = NULL
 
 }
 
-calculate_dci_dia <- function(all_members, net_nodes, seg_weights, points = NULL){
+calculate_dci_dia <- function(all_members, net_nodes, seg_weights, net_sink, sites = NULL){
 
   # Identify sink segment
   sink_seg <- net %>%
@@ -164,7 +169,17 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, points = NULL
     dplyr::rename(segment = to)
 
   if(!is.null(points)){
-    # Join relevent segment's DCI score to the points supplied
+
+    # Extract site nodes and join DCI values
+    DCIs <- net_nodes %>%
+      dplyr::filter(type == sites) %>%
+      dplyr::select(id, member.label, geometry.x) %>%
+      dplyr::rename("geometry" = "geometry.x") %>%
+      dplyr::left_join(DCIs, by = c("member.label" = "segment")) %>%
+      dplyr::select(-member.label)
+
+    # Convert DCI results to sf object
+    DCIs <- sf::st_as_sf(DCIs, sf_column_name = "geometry")
   }
 
   # Return DCIs summary
