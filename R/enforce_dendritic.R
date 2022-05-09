@@ -30,7 +30,7 @@ enforce_dendritic <- function(rivers, divergence = TRUE, complex = TRUE){
     net <- correct_complex(net)
   }
   # Recalculate river lengths
-  net$riv_length <- sf::st_length(net)
+  net$riv_length <- as.double(sf::st_length(net))
   # Return corrected rivers
   if("sfnetwork" %in% class(net)) invisible(net %>% activate(edges) %>% sf::st_as_sf())
   else invisible(net)

@@ -46,7 +46,7 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
     river1 <- rivers[riv_ind,]
     sf::st_geometry(river1) <- sf::st_geometry(river1_geom)
     # Recalculate length
-    river1$riv_length <- sf::st_length(river1)
+    river1$riv_length <- as.double(sf::st_length(river1))
     # Create second segment
     riv_end <- sf::st_geometry(rivers[riv_ind,])
     riv_end <- sf::st_sfc(sf::st_point(c(riv_end[[1]][riv_len/2], riv_end[[1]][riv_len])), crs = sf::st_crs(rivers))
@@ -60,7 +60,7 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
     river2 <- rivers[riv_ind,]
     sf::st_geometry(river2) <- sf::st_geometry(river2_geom)
     # Recalculate length
-    river2$riv_length <- sf::st_length(river2)
+    river2$riv_length <- as.double(sf::st_length(river2))
     # Add new rivers
     rivers <- rivers %>%
       dplyr::bind_rows(river1, river2)
