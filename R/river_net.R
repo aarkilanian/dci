@@ -62,7 +62,7 @@ river_net <- function(rivers,
   # Clean up topology if requested
   if(check == TRUE){
     # Perform necessary corrections
-    rivers2 <- enforce_dendritic(rivers)
+    rivers <- enforce_dendritic(rivers)
   }
 
   # Split rivers at user node locations
