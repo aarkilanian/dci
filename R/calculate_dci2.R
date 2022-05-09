@@ -376,13 +376,18 @@ gather_dci <- function(from, to, distance, perm, nodes, threshold){
 
   # Identify local neighborhood around entrance
   local_entrance = net %>%
-    dplyr::filter(tidygraph::node_distance_from(sf::st_nearest_feature(entrance, net), mode = "all", weights = riv_length) <= len_rem)
+    dplyr::filter(tidygraph::node_distance_from(sf::st_nearest_feature(entrance, net), mode = "all", weights = riv_length) <= thresh_to) %>%
+    dplyr::filter(member.label == to) %>%
+    dplyr::pull(node.label)
 
   # Identify local neighborhood around entrance
   local_exit = net %>%
-    dplyr::filter(tidygraph::node_distance_from(sf::st_nearest_feature(exit, net), mode = "all", weights = riv_length) <= len_rem)
+    dplyr::filter(tidygraph::node_distance_from(sf::st_nearest_feature(exit, net), mode = "all", weights = riv_length) <= thresh_from) %>%
+    dplyr::filter(member.label == from) %>%
+    dplyr::pull(node.label)
 
   # Gather thresholded segment total lengths
-
+  from_length <- sum(net_nodes[net_nodes$node.label %in% local_exit,]$riv_length)
+  to_length <- sum(net_nodes[net_nodes$node.label %in% local_entrance,]$riv_length)
 
 }
