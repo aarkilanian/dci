@@ -214,7 +214,7 @@ calculate_dci_pot_thresh <- function(all_members, net_nodes, weighted, threshold
   perms <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
 
   # Calculate DCI
-  DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perm, MoreArgs = list(nodes = net_nodes, threshold = threshold))
+  DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(nodes = net_nodes, threshold = threshold, totweight = totweight))
 
   # Measure length for each segment within each pair. Might be easier to calculate DCI pair by pair this way with an apply type implementation
   # However, maybe this would make things more confusing
@@ -292,7 +292,12 @@ gather_perm <- function(from, to, nodes){
 
 }
 
-gather_dci <- function(from, to, distance, perm, nodes, threshold){
+gather_dci <- function(from, to, distance, perm, nodes, threshold, totweight){
+
+  # Case when from and to segment are the same
+  if(from == to){
+
+  }
 
   # Extract sinks and barriers
   sinks_bars <- subset(nodes, nodes$type %in% c("Sink", "Barrier"))
@@ -335,7 +340,6 @@ gather_dci <- function(from, to, distance, perm, nodes, threshold){
     barriers$depth <- unlist(lapply(barriers$node.label, length))
     exit_label <- barriers[which.min(barriers$depth),]$node.label
     exit <- sf::st_geometry(nodes[nodes$node.label %in% exit_label,])
-
   }
 
   # Calculate max travelable distance in from & to segment
@@ -389,5 +393,9 @@ gather_dci <- function(from, to, distance, perm, nodes, threshold){
   # Gather thresholded segment total lengths
   from_length <- sum(net_nodes[net_nodes$node.label %in% local_exit,]$riv_length)
   to_length <- sum(net_nodes[net_nodes$node.label %in% local_entrance,]$riv_length)
+
+  # Calculate sub-segmental DCI for pair of segments
+  DCI <- from_length/totweight * to_length/totweight * perm * 100
+  return(DCI)
 
 }
