@@ -45,6 +45,7 @@ calculate_dci <- function(net, form = NULL, threshold = NULL, weighted = FALSE, 
   if(weighted){
     # Calculate total weighted length of segments
     seg_weights <- net_nodes %>%
+      as.data.frame() %>%
       dplyr::mutate(weighted_len = riv_length * riv_weight) %>%
       dplyr::group_by(member.label) %>%
       dplyr::summarise(segweight = sum(weighted_len, na.rm = TRUE)) %>%
@@ -53,6 +54,7 @@ calculate_dci <- function(net, form = NULL, threshold = NULL, weighted = FALSE, 
   } else {
     # Calculate segment total lengths
     seg_weights <- net_nodes %>%
+      as.data.frame() %>%
       dplyr::group_by(member.label) %>%
       dplyr::summarise(segweight = sum(riv_length, na.rm = TRUE)) %>%
       dplyr::filter(segweight != 0)
@@ -209,7 +211,7 @@ calculate_dci_pot_thresh <- function(all_members, net_nodes, weighted, threshold
   distances <- distances[-discard_pairs]
 
   # Calculate permeability between remaining pairs
-  perm <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
+  perms <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
 
   # Calculate DCI
   DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perm, MoreArgs = list(nodes = net_nodes, threshold = threshold))
@@ -292,9 +294,6 @@ gather_perm <- function(from, to, nodes){
 
 gather_dci <- function(from, to, distance, perm, nodes, threshold){
 
-  # Calculate remaining length to distribute to each segment
-  len_rem <- (threshold - distance) / 2
-
   # Extract sinks and barriers
   sinks_bars <- subset(nodes, nodes$type %in% c("Sink", "Barrier"))
 
@@ -339,21 +338,49 @@ gather_dci <- function(from, to, distance, perm, nodes, threshold){
 
   }
 
-  # Identify local neighbourhood around entrance and exit
-  iso = net %>%
-    dplyr::filter(tidygraph::node_distance_from(sf::st_nearest_feature(entrance, net), mode = "all", weights = weight) <= 50000)
+  # Calculate max travelable distance in from & to segment
+  max_travel_from <- net %>%
+    dplyr::mutate(trav = tidygraph::node_distance_from(sf::st_nearest_feature(exit, net), mode = "all", weights = riv_length)) %>%
+    dplyr::filter(member.label == from) %>%
+    dplyr::pull(trav) %>%
+    max()
 
-  b <- new_net %>%
-    activate(edges) %>%
-    dplyr::pull(riv_length)
+  max_travel_to <- net %>%
+    dplyr::mutate(trav = tidygraph::node_distance_from(sf::st_nearest_feature(entrance, net), mode = "all", weights = riv_length)) %>%
+    dplyr::filter(member.label == to) %>%
+    dplyr::pull(trav) %>%
+    max()
 
-  a <- net %>%
-    dplyr::mutate(distyy = node_distance_from(which(tidygraph::.N()$type == "Sink"), mode = "all", weights = riv_length))
+  # If there isn't enough length in one of the two segments adjust respective travel distances
+  rem_length <- threshold - distance
+  # If both segments don't have enough length
+  if(max_travel_from < rem_length/2 & max_travel_to < rem_length/2){
+    thresh_from <- max_travel_from
+    thresh_to <- max_travel_to
+  }
+  # If only from segment doesn't have enough length
+  else if(max_travel_from < rem_length/2){
+    thresh_from <- max_travel_from
+    thresh_to <- rem_length - max_travel_from
+  }
+  # If to segment doesn't have enough length
+  else if(max_travel_to < rem_length/2){
+    thresh_to <- max_travel_to
+    thresh_from <- rem_length - max_travel_to
+  }
+  # If both segments have enough length
+  else{
+    thresh_to <- rem_length/2
+    thresh_from <- rem_length/2
+  }
 
- a <-  net %>%
-    tidygraph::convert(sfnetworks::to_spatial_neighborhood(x = net, node = which(tidygraph::.N()$type == "Sink"), 5))
+  # Identify local neighborhood around entrance
+  local_entrance = net %>%
+    dplyr::filter(tidygraph::node_distance_from(sf::st_nearest_feature(entrance, net), mode = "all", weights = riv_length) <= len_rem)
 
-  a <- tidygraph::convert(net, sfnetworks::to_spatial_neighborhood, entrance, threshold = 500)
+  # Identify local neighborhood around entrance
+  local_exit = net %>%
+    dplyr::filter(tidygraph::node_distance_from(sf::st_nearest_feature(exit, net), mode = "all", weights = riv_length) <= len_rem)
 
   # Gather thresholded segment total lengths
 
