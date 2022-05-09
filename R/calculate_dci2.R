@@ -39,8 +39,8 @@ calculate_dci <- function(net, form = NULL, threshold = NULL, weighted = FALSE, 
   # Move edge weights to nodes
   # Weights from edges associated w/ upstream nodes
   net_nodes <- net_nodes %>%
-    dplyr::left_join(net_edges, by = c("nodeID" = "from"))
-
+    dplyr::left_join(net_edges, by = c("nodeID" = "from")) %>%
+    sf::st_as_sf(sf_column_name = "geometry.x")
 
   if(weighted){
     # Calculate total weighted length of segments
@@ -211,6 +211,9 @@ calculate_dci_pot_thresh <- function(all_members, net_nodes, weighted, threshold
   # Calculate permeability between remaining pairs
   perm <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
 
+  # Calculate DCI
+  DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perm, MoreArgs = list(nodes = net_nodes, threshold = threshold))
+
   # Measure length for each segment within each pair. Might be easier to calculate DCI pair by pair this way with an apply type implementation
   # However, maybe this would make things more confusing
 
@@ -235,10 +238,10 @@ gather_dist <- function(from, to, nodes){
   # Get sink-to-sink path between segments
   path <- path_between(from_sink, to_sink)
 
-  # Join node types and member labels for nodes on path
+  # Join member labels for nodes on path
   full_path <- nodes %>%
     dplyr::filter(node.label %in% path) %>%
-    dplyr::select(node.label, type, member.label)
+    dplyr::select(node.label, member.label)
 
   # Case when segments are neighbours
   if(length(unique(full_path$member.label)) == 2){
@@ -284,5 +287,75 @@ gather_perm <- function(from, to, nodes){
 
   # Return permeability between segments
   return(path_perm)
+
+}
+
+gather_dci <- function(from, to, distance, perm, nodes, threshold){
+
+  # Calculate remaining length to distribute to each segment
+  len_rem <- (threshold - distance) / 2
+
+  # Extract sinks and barriers
+  sinks_bars <- subset(nodes, nodes$type %in% c("Sink", "Barrier"))
+
+  # Get from segment local sink
+  from_sink <- sinks_bars[sinks_bars$member.label == from,]$node.label
+
+  # Get to segment local sink
+  to_sink <- sinks_bars[sinks_bars$member.label == to,]$node.label
+
+  # Get path between segments
+  path <- path_between(from_sink, to_sink)
+
+  # Join member labels for nodes on path
+  full_path <- nodes[nodes$node.label %in% path,]
+  full_path <- subset(full_path, select = c(node.label, member.label, type))
+
+  # If from segment is upstream of to segment
+  if(length(from_sink) > length(to_sink)){
+
+    # Set exit to one node upstream of from sink
+    exit_label <- list(append(unlist(from_sink), FALSE))
+    exit <- sf::st_geometry(nodes[nodes$node.label %in% exit_label,])
+
+    # Select most downstream barrier as entrance
+    barriers <- full_path[full_path$type == "Barrier",]
+    barriers$depth <- unlist(lapply(barriers$node.label, length))
+    entrance_label <- barriers[which.min(barriers$depth),]$node.label
+    entrance <- sf::st_geometry(nodes[nodes$node.label %in% entrance_label,])
+
+  # If from segment is downstream of to segment
+  } else {
+
+    # Set exit to one node upstream of to sink
+    entrance_label <- list(append(unlist(to_sink), FALSE))
+    entrance <- sf::st_geometry(nodes[nodes$node.label %in% entrance_label,])
+
+    # Select most downstream barrier as exit
+    barriers <- full_path[full_path$type == "Barrier",]
+    barriers$depth <- unlist(lapply(barriers$node.label, length))
+    exit_label <- barriers[which.min(barriers$depth),]$node.label
+    exit <- sf::st_geometry(nodes[nodes$node.label %in% exit_label,])
+
+  }
+
+  # Identify local neighbourhood around entrance and exit
+  iso = net %>%
+    dplyr::filter(tidygraph::node_distance_from(sf::st_nearest_feature(entrance, net), mode = "all", weights = weight) <= 50000)
+
+  b <- new_net %>%
+    activate(edges) %>%
+    dplyr::pull(riv_length)
+
+  a <- net %>%
+    dplyr::mutate(distyy = node_distance_from(which(tidygraph::.N()$type == "Sink"), mode = "all", weights = riv_length))
+
+ a <-  net %>%
+    tidygraph::convert(sfnetworks::to_spatial_neighborhood(x = net, node = which(tidygraph::.N()$type == "Sink"), 5))
+
+  a <- tidygraph::convert(net, sfnetworks::to_spatial_neighborhood, entrance, threshold = 500)
+
+  # Gather thresholded segment total lengths
+
 
 }
