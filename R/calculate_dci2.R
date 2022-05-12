@@ -90,7 +90,7 @@ calculate_dci <- function(net, form = NULL, threshold = NULL, weighted = FALSE, 
     if(form == "potamodromous") DCIs <- calculate_dci_pot_thresh(all_members, net_nodes, weighted, threshold, totweight, sites)
 
     # Diadromous case
-    if(form == "diadromous") DCIs <- calculate_dci_dia_thresh(all_members, weighted, threshold, totweight, net_nodes, sites)
+    if(form == "diadromous") DCIs <- calculate_dci_dia_thresh(all_members, net_nodes, weighted, threshold, totweight, sites)
 
     # Return calculated DCI values
     return(DCIs)
