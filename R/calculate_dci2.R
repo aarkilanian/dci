@@ -41,6 +41,8 @@ calculate_dci <- function(net, form = NULL, threshold = NULL, weighted = FALSE, 
   net_nodes <- net_nodes %>%
     dplyr::left_join(net_edges, by = c("nodeID" = "from")) %>%
     sf::st_as_sf(sf_column_name = "geometry.x")
+  # Set sink length to 0
+  net_nodes[net_nodes$type == "Sink",]$riv_length <- 0
 
   if(weighted){
     # Calculate total weighted length of segments
@@ -297,6 +299,28 @@ gather_dci <- function(from, to, distance, perm, nodes, threshold, totweight){
   # Case when from and to segment are the same
   if(from == to){
 
+    # Calculate average segment length
+    seg_nodes <- nodes[nodes$member.label == from,]
+    seg_nodes <- seg_nodes$node.label
+    # If there are over 50 nodes, select every 10th node
+    if(length(seg_nodes) >= 50){
+      seg_nodes <- seg_nodes[seq(0, length(seg_nodes), 10)]
+    }
+    loc_length <- vector("double", length(seg_nodes))
+    for(i in 1:length(seg_nodes)){
+      loc_length[i] <- gather_local_length(seg_nodes[i], from, threshold, nodes, net)
+    }
+    len_ave <- mean(loc_length)
+
+    # Convert to relative from segment length
+    from_rel <- len_ave / totweight
+
+    # Convert to relative to segment length
+    to_rel <- len_ave / totweight
+
+    # Calculate and return DCI value
+    return(from_rel * to_rel * 1 * 100)
+
   }
 
   # Extract sinks and barriers
@@ -316,7 +340,7 @@ gather_dci <- function(from, to, distance, perm, nodes, threshold, totweight){
   full_path <- subset(full_path, select = c(node.label, member.label, type))
 
   # If from segment is upstream of to segment
-  if(length(from_sink) > length(to_sink)){
+  if(length(unlist(from_sink)) > length(unlist(to_sink))){
 
     # Set exit to one node upstream of from sink
     exit_label <- list(append(unlist(from_sink), FALSE))
@@ -331,11 +355,11 @@ gather_dci <- function(from, to, distance, perm, nodes, threshold, totweight){
   # If from segment is downstream of to segment
   } else {
 
-    # Set exit to one node upstream of to sink
+    # Set entrance to one node upstream of to sink, extract geometry
     entrance_label <- list(append(unlist(to_sink), FALSE))
     entrance <- sf::st_geometry(nodes[nodes$node.label %in% entrance_label,])
 
-    # Select most downstream barrier as exit
+    # Select most downstream barrier as exit, extract geometry
     barriers <- full_path[full_path$type == "Barrier",]
     barriers$depth <- unlist(lapply(barriers$node.label, length))
     exit_label <- barriers[which.min(barriers$depth),]$node.label
@@ -378,24 +402,40 @@ gather_dci <- function(from, to, distance, perm, nodes, threshold, totweight){
     thresh_from <- rem_length/2
   }
 
-  # Identify local neighborhood around entrance
-  local_entrance = net %>%
-    dplyr::filter(tidygraph::node_distance_from(sf::st_nearest_feature(entrance, net), mode = "all", weights = riv_length) <= thresh_to) %>%
-    dplyr::filter(member.label == to) %>%
-    dplyr::pull(node.label)
+  # Calculate length of from neighbourhood
+  from_length <- gather_local_length(exit_label, from, threshold, nodes, net)
 
-  # Identify local neighborhood around entrance
-  local_exit = net %>%
-    dplyr::filter(tidygraph::node_distance_from(sf::st_nearest_feature(exit, net), mode = "all", weights = riv_length) <= thresh_from) %>%
-    dplyr::filter(member.label == from) %>%
-    dplyr::pull(node.label)
-
-  # Gather thresholded segment total lengths
-  from_length <- sum(net_nodes[net_nodes$node.label %in% local_exit,]$riv_length)
-  to_length <- sum(net_nodes[net_nodes$node.label %in% local_entrance,]$riv_length)
+  # Calculate length of to neighbourhood
+  to_length <- gather_local_length(entrance_label, to, threshold, nodes, net)
 
   # Calculate sub-segmental DCI for pair of segments
   DCI <- from_length/totweight * to_length/totweight * perm * 100
   return(DCI)
+
+}
+
+gather_local_length <- function(label, member, threshold, nodes, net){
+
+  # Subset network
+  net <- net %>%
+    tidygraph::activate(nodes) %>%
+    dplyr::filter(member.label == member)
+
+  # If subset network is empty return 0
+  if(nrow(net %>% activate(edges) %>% as.data.frame()) == 0){
+    return(0)
+  }
+
+  # Identify node associated with label
+  node <- sf::st_geometry(nodes[nodes$node.label %in% label,])
+
+  # Identify local neighbourhood around node
+  neighb <- net %>%
+    dplyr::filter(tidygraph::node_distance_from(sf::st_nearest_feature(node, net), mode = "all", weights = riv_length) <= threshold) %>%
+    tidygraph::activate(edges) %>%
+    dplyr::pull(riv_length)
+
+  # Calculate and return length
+  return(sum(neighb))
 
 }
