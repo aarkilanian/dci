@@ -41,11 +41,9 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
       dplyr::group_by(group) %>%
       dplyr::summarise(do_union = FALSE) %>%
       sf::st_cast("LINESTRING") %>%
-      dplyr::ungroup()
-    # Copy original river's attributes to river1
+      sf::st_geometry()
     river1 <- rivers[riv_ind,]
-    sf::st_geometry(river1) <- sf::st_geometry(river1_geom)
-    # Recalculate length
+    sf::st_geometry(river1) <- river1_geom
     river1$riv_length <- as.double(sf::st_length(river1))
     # Create second segment
     riv_end <- sf::st_geometry(rivers[riv_ind,])
@@ -55,15 +53,12 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
       dplyr::group_by(group) %>%
       dplyr::summarise(do_union = FALSE) %>%
       sf::st_cast("LINESTRING") %>%
-      dplyr::ungroup()
-    # Copy original river's attributes to river2
+      sf::st_geometry()
     river2 <- rivers[riv_ind,]
-    sf::st_geometry(river2) <- sf::st_geometry(river2_geom)
-    # Recalculate length
+    sf::st_geometry(river2) <- river2_geom
     river2$riv_length <- as.double(sf::st_length(river2))
     # Add new rivers
-    rivers <- rivers %>%
-      dplyr::bind_rows(river1, river2)
+    rivers <- rbind(rivers, river1, river2)
     # Remove old river
     rivers <- rivers[-riv_ind,]
   }
