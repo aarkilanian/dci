@@ -217,6 +217,15 @@ calculate_dci_pot_thresh <- function(all_members, net_nodes, weighted, threshold
 
   # Calculate DCI
   DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(nodes = net_nodes, threshold = threshold, totweight = totweight))
+  DCI_glob <- sum(DCIs)
+
+  # Return result
+  DCI_res <- data.frame(from_segment, to_segment, DCIs)
+  DCI_res <- DCI_res %>%
+    dplyr::group_by(segment = from_segment) %>%
+    dplyr::summarise(DCI = sum(DCIs)) %>%
+    dplyr::mutate(DCI_rel = DCI/DCI_glob*100)
+  return(DCI_res)
 
   # Measure length for each segment within each pair. Might be easier to calculate DCI pair by pair this way with an apply type implementation
   # However, maybe this would make things more confusing
