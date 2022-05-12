@@ -208,9 +208,11 @@ calculate_dci_pot_thresh <- function(all_members, net_nodes, weighted, threshold
 
   # Remove pairs with distances larger than the threshold
   discard_pairs <- which(distances > threshold)
-  from_segment <- from_segment[-discard_pairs]
-  to_segment <- to_segment[-discard_pairs]
-  distances <- distances[-discard_pairs]
+  if(length(discard_pairs) != 0){
+    from_segment <- from_segment[-discard_pairs]
+    to_segment <- to_segment[-discard_pairs]
+    distances <- distances[-discard_pairs]
+  }
 
   # Calculate permeability between remaining pairs
   perms <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
@@ -226,15 +228,45 @@ calculate_dci_pot_thresh <- function(all_members, net_nodes, weighted, threshold
     dplyr::summarise(DCI = sum(DCIs)) %>%
     dplyr::mutate(DCI_rel = DCI/DCI_glob*100)
   return(DCI_res)
-
-  # Measure length for each segment within each pair. Might be easier to calculate DCI pair by pair this way with an apply type implementation
-  # However, maybe this would make things more confusing
-
 }
 
 calculate_dci_dia_thresh <- function(all_members, net_nodes, weighted, threshold, totweight, sites = NULL){
 
+  # Identify sink segment
+  sink_seg <- net %>%
+    activate(nodes) %>%
+    dplyr::filter(type == "Sink") %>%
+    dplyr::pull(member.label)
 
+  # Determine segment pairs
+  from_segment <- rep(sink_seg, times = length(all_members))
+  to_segment <- all_members
+
+  # Remove pairs of segments further than threshold
+  distances <- mapply(gather_dist, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
+
+  # Remove pairs with distances larger than the threshold
+  discard_pairs <- which(distances > threshold)
+  if(length(discard_pairs) != 0){
+    from_segment <- from_segment[-discard_pairs]
+    to_segment <- to_segment[-discard_pairs]
+    distances <- distances[-discard_pairs]
+  }
+
+  # Calculate permeability between remaining pairs
+  perms <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
+
+  # Calculate DCI
+  DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(nodes = net_nodes, threshold = threshold, totweight = totweight))
+  DCI_glob <- sum(DCIs)
+
+  # Return result
+  DCI_res <- data.frame(from_segment, to_segment, DCIs)
+  DCI_res <- DCI_res %>%
+    dplyr::select(-from_segment) %>%
+    dplyr::rename(segment = to_segment, DCI = DCIs) %>%
+    dplyr::mutate(DCI_rel = DCI/DCI_glob*100)
+  return(DCI_res)
 }
 
 gather_dist <- function(from, to, nodes){
