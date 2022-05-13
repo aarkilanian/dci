@@ -128,11 +128,12 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights){
     dplyr::mutate(DCIs = from_len * to_len * perm * 100)
 
   # Group DCI results by from segment to obtain segmental DCI
-  DCI_glob <- sum(DCIs_sub)
   DCIs <- DCIs_sub %>%
     dplyr::group_by(from) %>%
     dplyr::summarise(DCI = sum(DCIs)) %>%
-    dplyr::rename(segment = from) %>%
+    dplyr::rename(segment = from)
+  DCI_glob <- sum(DCIs$DCI)
+  DCIs <- DCIs %>%
     dplyr::mutate(DCI_rel = DCI/DCI_glob*100) %>%
     as.data.frame()
 
