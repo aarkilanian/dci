@@ -75,10 +75,18 @@ calculate_dci <- function(net, form = NULL, threshold = NULL, weighted = FALSE, 
     seg_weights$segweight <- seg_weights$segweight / totweight
 
     # Potamodromous case
-    if(form == "potamodromous") DCIs <- calculate_dci_pot(all_members, net_nodes, seg_weights, sites)
+    if(form == "potamodromous") DCIs <- calculate_dci_pot(all_members, net_nodes, seg_weights)
 
     # Diadromous case
-    if(form == "diadromous") DCIs <- calculate_dci_dia(all_members, net_nodes, seg_weights, net_sink, sites)
+    if(form == "diadromous") DCIs <- calculate_dci_dia(all_members, net_nodes, seg_weights, net_sink)
+
+    # If sites are supplied, associate results to them
+    if(!is.null(sites)){
+      # Isolate site nodes
+      site_nodes <- net_nodes[net_nodes$type == sites,]
+      # Join results based on segment membership
+      DCIs <- dplyr::left_join(site_nodes, DCIs, by = c("member.label" = "segment"))
+    }
 
     # Return calculated DCI values
     return(DCIs)
@@ -87,10 +95,10 @@ calculate_dci <- function(net, form = NULL, threshold = NULL, weighted = FALSE, 
   } else {
 
     # Potamodromous case
-    if(form == "potamodromous") DCIs <- calculate_dci_pot_thresh(all_members, net_nodes, weighted, threshold, totweight, sites)
+    if(form == "potamodromous") DCIs <- calculate_dci_pot_thresh(all_members, net_nodes, weighted, threshold, totweight)
 
     # Diadromous case
-    if(form == "diadromous") DCIs <- calculate_dci_dia_thresh(all_members, net_nodes, weighted, threshold, totweight, sites)
+    if(form == "diadromous") DCIs <- calculate_dci_dia_thresh(all_members, net_nodes, weighted, threshold, totweight)
 
     # Return calculated DCI values
     return(DCIs)
@@ -98,7 +106,7 @@ calculate_dci <- function(net, form = NULL, threshold = NULL, weighted = FALSE, 
 
 }
 
-calculate_dci_pot <- function(all_members, net_nodes, seg_weights, sites = NULL){
+calculate_dci_pot <- function(all_members, net_nodes, seg_weights){
 
   # Determine segment pairs
   from_segment <- rep(all_members,
@@ -120,32 +128,20 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights, sites = NULL)
     dplyr::mutate(DCIs = from_len * to_len * perm * 100)
 
   # Group DCI results by from segment to obtain segmental DCI
+  DCI_glob <- sum(DCIs_sub)
   DCIs <- DCIs_sub %>%
     dplyr::group_by(from) %>%
-    dplyr::summarise(DCIs = sum(DCIs)) %>%
-    dplyr::rename(segment = from)
-
-  if(!is.null(sites)){
-
-    # Extract site nodes and join DCI values
-    DCIs <- net_nodes %>%
-      dplyr::filter(type == sites) %>%
-      dplyr::select(id, member.label, geometry.x) %>%
-      dplyr::rename("geometry" = "geometry.x") %>%
-      dplyr::left_join(DCIs, by = c("member.label" = "segment")) %>%
-      dplyr::select(-member.label)
-
-    # Convert DCI results to sf object
-    DCIs <- sf::st_as_sf(DCIs, sf_column_name = "geometry")
-
-  }
+    dplyr::summarise(DCI = sum(DCIs)) %>%
+    dplyr::rename(segment = from) %>%
+    dplyr::mutate(DCI_rel = DCI/DCI_glob*100) %>%
+    as.data.frame()
 
   # Return DCIs summary
   return(DCIs)
 
 }
 
-calculate_dci_dia <- function(all_members, net_nodes, seg_weights, net_sink, sites = NULL){
+calculate_dci_dia <- function(all_members, net_nodes, seg_weights, net_sink){
 
   # Identify sink segment
   sink_seg <- net %>%
@@ -171,10 +167,13 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, net_sink, sit
     dplyr::mutate(DCIs = from_len * to_len * perm * 100)
 
   # Group DCI results by from segment to obtain segmental DCI
+  DCI_glob <- sum(DCIs_sub)
   DCIs <- DCIs_sub %>%
     dplyr::group_by(to) %>%
-    dplyr::summarise(DCIs = sum(DCIs)) %>%
-    dplyr::rename(segment = to)
+    dplyr::summarise(DCI = sum(DCIs)) %>%
+    dplyr::rename(segment = to) %>%
+    dplyr::mutate(DCI_rel = DCI/DCI_glob*100) %>%
+    as.data.frame()
 
   if(!is.null(sites)){
 
@@ -195,7 +194,7 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, net_sink, sit
 
 }
 
-calculate_dci_pot_thresh <- function(all_members, net_nodes, weighted, threshold, totweight, sites = NULL){
+calculate_dci_pot_thresh <- function(all_members, net_nodes, weighted, threshold, totweight){
 
   # Determine segment pairs
   from_segment <- rep(all_members,
@@ -226,11 +225,12 @@ calculate_dci_pot_thresh <- function(all_members, net_nodes, weighted, threshold
   DCI_res <- DCI_res %>%
     dplyr::group_by(segment = from_segment) %>%
     dplyr::summarise(DCI = sum(DCIs)) %>%
-    dplyr::mutate(DCI_rel = DCI/DCI_glob*100)
+    dplyr::mutate(DCI_rel = DCI/DCI_glob*100) %>%
+    as.data.frame()
   return(DCI_res)
 }
 
-calculate_dci_dia_thresh <- function(all_members, net_nodes, weighted, threshold, totweight, sites = NULL){
+calculate_dci_dia_thresh <- function(all_members, net_nodes, weighted, threshold, totweight){
 
   # Identify sink segment
   sink_seg <- net %>%
