@@ -481,3 +481,27 @@ gather_local_length <- function(label, member, threshold, nodes, net){
   return(sum(neighb))
 
 }
+
+path_between <- function(s1, s2){
+  # Get path from segments to root
+  s1_path <- path_to_root(s1)
+  s2_path <- path_to_root(s2)
+
+  # Determine non-repeating nodes
+  path_sub <- s1_path[!(s1_path %in% s2_path)]
+  path <- append(path_sub, s2_path[!(s2_path %in% s1_path)])
+
+  # Return list of nodes across path
+  return(path)
+}
+
+path_to_root <- function(seg){
+  # Prepare input vectors
+  path <- rep(seg, each = length(unlist(seg)))
+  len <- length(unlist(seg)):1
+  # Sequentially remove final element from path until 1 left
+  path_out <- mapply(function(x, y) unlist(x)[1:y],
+                     path, len, SIMPLIFY = TRUE)
+  # Return list of nodes to the root
+  return(path_out)
+}
