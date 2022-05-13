@@ -168,27 +168,14 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, net_sink){
     dplyr::mutate(DCIs = from_len * to_len * perm * 100)
 
   # Group DCI results by from segment to obtain segmental DCI
-  DCI_glob <- sum(DCIs_sub)
   DCIs <- DCIs_sub %>%
     dplyr::group_by(to) %>%
     dplyr::summarise(DCI = sum(DCIs)) %>%
-    dplyr::rename(segment = to) %>%
+    dplyr::rename(segment = to)
+  DCI_glob <- sum(DCIs$DCI)
+  DCIs <- DCIs %>%
     dplyr::mutate(DCI_rel = DCI/DCI_glob*100) %>%
     as.data.frame()
-
-  if(!is.null(sites)){
-
-    # Extract site nodes and join DCI values
-    DCIs <- net_nodes %>%
-      dplyr::filter(type == sites) %>%
-      dplyr::select(id, member.label, geometry.x) %>%
-      dplyr::rename("geometry" = "geometry.x") %>%
-      dplyr::left_join(DCIs, by = c("member.label" = "segment")) %>%
-      dplyr::select(-member.label)
-
-    # Convert DCI results to sf object
-    DCIs <- sf::st_as_sf(DCIs, sf_column_name = "geometry")
-  }
 
   # Return DCIs summary
   return(DCIs)
