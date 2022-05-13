@@ -100,6 +100,14 @@ calculate_dci <- function(net, form = NULL, threshold = NULL, weighted = FALSE, 
     # Diadromous case
     if(form == "diadromous") DCIs <- calculate_dci_dia_thresh(all_members, net_nodes, weighted, threshold, totweight)
 
+    # If sites are supplied, associate results to them
+    if(!is.null(sites)){
+      # Isolate site nodes
+      site_nodes <- net_nodes[net_nodes$type == sites,]
+      # Join results based on segment membership
+      DCIs <- dplyr::left_join(site_nodes, DCIs, by = c("member.label" = "segment"))
+    }
+
     # Return calculated DCI values
     return(DCIs)
   }
@@ -205,7 +213,7 @@ calculate_dci_pot_thresh <- function(all_members, net_nodes, weighted, threshold
   perms <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
 
   # Calculate DCI
-  DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(nodes = net_nodes, threshold = threshold, totweight = totweight))
+  DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(nodes = net_nodes, threshold = threshold, totweight = totweight, weighted = weighted))
   DCI_glob <- sum(DCIs)
 
   # Return result
@@ -323,7 +331,7 @@ gather_perm <- function(from, to, nodes){
 
 }
 
-gather_dci <- function(from, to, distance, perm, nodes, threshold, totweight){
+gather_dci <- function(from, to, distance, perm, nodes, threshold, totweight, weighted){
 
   # Case when from and to segment are the same
   if(from == to){
@@ -337,7 +345,7 @@ gather_dci <- function(from, to, distance, perm, nodes, threshold, totweight){
     }
     loc_length <- vector("double", length(seg_nodes))
     for(i in 1:length(seg_nodes)){
-      loc_length[i] <- gather_local_length(seg_nodes[i], from, threshold, nodes, net)
+      loc_length[i] <- gather_local_length(seg_nodes[i], from, threshold, nodes, net, weighted)
     }
     len_ave <- mean(loc_length)
 
@@ -395,18 +403,33 @@ gather_dci <- function(from, to, distance, perm, nodes, threshold, totweight){
     exit <- sf::st_geometry(nodes[nodes$node.label %in% exit_label,])
   }
 
-  # Calculate max travelable distance in from & to segment
-  max_travel_from <- net %>%
-    dplyr::mutate(trav = tidygraph::node_distance_from(sf::st_nearest_feature(exit, net), mode = "all", weights = riv_length)) %>%
-    dplyr::filter(member.label == from) %>%
-    dplyr::pull(trav) %>%
-    max()
+  # Calculate max travelable distance in from & to segment (weighted)
+  if(weighted){
+    max_travel_from <- net %>%
+      dplyr::mutate(trav = tidygraph::node_distance_from(sf::st_nearest_feature(exit, net), mode = "all", weights = riv_weight)) %>%
+      dplyr::filter(member.label == from) %>%
+      dplyr::pull(trav) %>%
+      max()
 
-  max_travel_to <- net %>%
-    dplyr::mutate(trav = tidygraph::node_distance_from(sf::st_nearest_feature(entrance, net), mode = "all", weights = riv_length)) %>%
-    dplyr::filter(member.label == to) %>%
-    dplyr::pull(trav) %>%
-    max()
+    max_travel_to <- net %>%
+      dplyr::mutate(trav = tidygraph::node_distance_from(sf::st_nearest_feature(entrance, net), mode = "all", weights = riv_weight)) %>%
+      dplyr::filter(member.label == to) %>%
+      dplyr::pull(trav) %>%
+      max()
+  # Calculate max travelable distance in from & to segment (unweighted)
+  } else{
+    max_travel_from <- net %>%
+      dplyr::mutate(trav = tidygraph::node_distance_from(sf::st_nearest_feature(exit, net), mode = "all", weights = riv_length)) %>%
+      dplyr::filter(member.label == from) %>%
+      dplyr::pull(trav) %>%
+      max()
+
+    max_travel_to <- net %>%
+      dplyr::mutate(trav = tidygraph::node_distance_from(sf::st_nearest_feature(entrance, net), mode = "all", weights = riv_length)) %>%
+      dplyr::filter(member.label == to) %>%
+      dplyr::pull(trav) %>%
+      max()
+  }
 
   # If there isn't enough length in one of the two segments adjust respective travel distances
   rem_length <- threshold - distance
@@ -432,10 +455,10 @@ gather_dci <- function(from, to, distance, perm, nodes, threshold, totweight){
   }
 
   # Calculate length of from neighbourhood
-  from_length <- gather_local_length(exit_label, from, threshold, nodes, net)
+  from_length <- gather_local_length(exit_label, from, threshold, nodes, net, weighted)
 
   # Calculate length of to neighbourhood
-  to_length <- gather_local_length(entrance_label, to, threshold, nodes, net)
+  to_length <- gather_local_length(entrance_label, to, threshold, nodes, net, weighted)
 
   # Calculate sub-segmental DCI for pair of segments
   DCI <- from_length/totweight * to_length/totweight * perm * 100
@@ -443,7 +466,7 @@ gather_dci <- function(from, to, distance, perm, nodes, threshold, totweight){
 
 }
 
-gather_local_length <- function(label, member, threshold, nodes, net){
+gather_local_length <- function(label, member, threshold, nodes, net, weighted){
 
   # Subset network
   net <- net %>%
@@ -458,11 +481,19 @@ gather_local_length <- function(label, member, threshold, nodes, net){
   # Identify node associated with label
   node <- sf::st_geometry(nodes[nodes$node.label %in% label,])
 
-  # Identify local neighbourhood around node
-  neighb <- net %>%
-    dplyr::filter(tidygraph::node_distance_from(sf::st_nearest_feature(node, net), mode = "all", weights = riv_length) <= threshold) %>%
-    tidygraph::activate(edges) %>%
-    dplyr::pull(riv_length)
+  # Identify local neighbourhood around node (weighted)
+  if(weighted){
+    neighb <- net %>%
+      dplyr::filter(tidygraph::node_distance_from(sf::st_nearest_feature(node, net), mode = "all", weights = riv_weight) <= threshold) %>%
+      tidygraph::activate(edges) %>%
+      dplyr::pull(riv_riv_weight)
+  # Identify local neighbourhood around node (unweighted)
+  } else{
+    neighb <- net %>%
+      dplyr::filter(tidygraph::node_distance_from(sf::st_nearest_feature(node, net), mode = "all", weights = riv_length) <= threshold) %>%
+      tidygraph::activate(edges) %>%
+      dplyr::pull(riv_length)
+  }
 
   # Calculate and return length
   return(sum(neighb))
