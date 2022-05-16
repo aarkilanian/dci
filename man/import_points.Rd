@@ -4,7 +4,7 @@
 \alias{import_points}
 \title{Prepare point data for \code{\link{river_net}} connectivity analyses}
 \usage{
-import_points(path, type, perm = NULL)
+import_points(path, type, id = NULL, perm = NULL, quiet = FALSE)
 }
 \arguments{
 \item{path}{A character string or \code{\link{sf}} object, the path to a shapefile of points or \code{\link{sf}} object of points.}

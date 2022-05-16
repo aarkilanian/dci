@@ -4,7 +4,7 @@
 \alias{import_rivers}
 \title{Prepare rivers for \code{\link{river_net}} connectivity analyses}
 \usage{
-import_rivers(path, weight = NULL, min_comp = 10)
+import_rivers(path, weight = NULL, min_comp = 10, quiet = FALSE)
 }
 \arguments{
 \item{path}{A character string or \code{\link{sf}} object, the path to a shapefile of river lines or \code{\link{sf}} object of rivers.}

@@ -89,6 +89,7 @@ calculate_dci <- function(net, form = NULL, threshold = NULL, weighted = FALSE, 
     }
 
     # Return calculated DCI values
+    DCIs <- structure(DCIs, class = c("dci.results", class(DCIs)))
     return(DCIs)
 
   # If distance threshold is supplied
@@ -109,6 +110,7 @@ calculate_dci <- function(net, form = NULL, threshold = NULL, weighted = FALSE, 
     }
 
     # Return calculated DCI values
+    DCIs <- structure(DCIs, class = c("dci.results", class(DCIs)))
     return(DCIs)
   }
 
@@ -522,4 +524,10 @@ path_to_root <- function(seg){
                      path, len, SIMPLIFY = TRUE)
   # Return list of nodes to the root
   return(path_out)
+}
+
+#' @export
+print.dci.results <- function(x, ...){
+  cat("a")
+  invisible(x)
 }
