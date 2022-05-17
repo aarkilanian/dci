@@ -397,9 +397,9 @@ gather_dci <- function(from, to, distance, perm, nodes, seg_weights, threshold, 
 
   if(weighted){
     # Calculate length of from neighbourhood
-    from_length <- sum(nodes[nodes$member.label == from,]$riv_length * nodes[nodes$member.label == from,]$riv_weight)
+    from_length <- sum(nodes[nodes$member.label == from,]$riv_length * nodes[nodes$member.label == from,]$riv_weight, na.rm = TRUE)
     # Calculate length of to neighbourhood
-    to_length <- sum(nodes[nodes$member.label == to,]$riv_length * nodes[nodes$member.label == to,]$riv_weight)
+    to_length <- sum(nodes[nodes$member.label == to,]$riv_length * nodes[nodes$member.label == to,]$riv_weight, na.rm = TRUE)
 
   } else{
     # Calculate length of from neighbourhood
