@@ -1,6 +1,5 @@
-# Since nodes hold the edge length of their downstream node, barriers should be removed when calculating the DCI since that length belongs to another segment. Might need to reconsider which segment these should be labelled for. Or I just assume the amount of error is well spread out and not significant on DCI results.
-
-# Back to back barriers don't seem to hold any length, should be corrected
+# TODO Use mapply from with non-threshold DCI calculations similar to thresholded method
+# TODO Rewrite threshold method to consider neighbourhood size weighting instead of using in relative length
 
 calculate_dci <- function(net, form = NULL, threshold = NULL, weighted = FALSE, sites = NULL){
 
@@ -96,10 +95,10 @@ calculate_dci <- function(net, form = NULL, threshold = NULL, weighted = FALSE, 
   } else {
 
     # Potamodromous case
-    if(form == "potamodromous") DCIs <- calculate_dci_pot_thresh(all_members, net_nodes, weighted, threshold, totweight)
+    if(form == "potamodromous") DCIs <- calculate_dci_pot_thresh(all_members, net_nodes, seg_weights, weighted, threshold, totweight)
 
     # Diadromous case
-    if(form == "diadromous") DCIs <- calculate_dci_dia_thresh(all_members, net_nodes, weighted, threshold, totweight)
+    if(form == "diadromous") DCIs <- calculate_dci_dia_thresh(all_members, net_nodes, seg_weights, weighted, threshold, totweight)
 
     # If sites are supplied, associate results to them
     if(!is.null(sites)){
@@ -192,7 +191,7 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, net_sink){
 
 }
 
-calculate_dci_pot_thresh <- function(all_members, net_nodes, weighted, threshold, totweight){
+calculate_dci_pot_thresh <- function(all_members, net_nodes, seg_weights, weighted, threshold, totweight){
 
   # Determine segment pairs
   from_segment <- rep(all_members,
@@ -200,7 +199,7 @@ calculate_dci_pot_thresh <- function(all_members, net_nodes, weighted, threshold
   to_segment <- rep(all_members,
                     times = length(all_members))
 
-  # Remove pairs of segments further than threshold
+  # Calculate segment-segment distance between each pair
   distances <- mapply(gather_dist, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
 
   # Remove pairs with distances larger than the threshold
@@ -215,7 +214,7 @@ calculate_dci_pot_thresh <- function(all_members, net_nodes, weighted, threshold
   perms <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
 
   # Calculate DCI
-  DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(nodes = net_nodes, threshold, totweight, weighted))
+  DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(nodes = net_nodes, seg_weights, threshold, totweight, weighted))
   DCI_glob <- sum(DCIs)
 
   # Return result
@@ -228,7 +227,7 @@ calculate_dci_pot_thresh <- function(all_members, net_nodes, weighted, threshold
   return(DCI_res)
 }
 
-calculate_dci_dia_thresh <- function(all_members, net_nodes, weighted, threshold, totweight){
+calculate_dci_dia_thresh <- function(all_members, net_nodes, seg_weights, weighted, threshold, totweight){
 
   # Identify sink segment
   sink_seg <- net %>%
@@ -333,32 +332,14 @@ gather_perm <- function(from, to, nodes){
 
 }
 
-gather_dci <- function(from, to, distance, perm, nodes, threshold, totweight, weighted){
+gather_dci <- function(from, to, distance, perm, nodes, seg_weights, threshold, totweight, weighted){
 
   # Case when from and to segment are the same
   if(from == to){
 
-    # Calculate average segment length
-    seg_nodes <- nodes[nodes$member.label == from,]
-    seg_nodes <- seg_nodes$node.label
-    # If there are over 50 nodes, select every 10th node
-    if(length(seg_nodes) >= 50){
-      seg_nodes <- seg_nodes[seq(0, length(seg_nodes), 10)]
-    }
-    loc_length <- vector("double", length(seg_nodes))
-    for(i in 1:length(seg_nodes)){
-      loc_length[i] <- gather_local_length(seg_nodes[i], from, threshold, nodes, net, weighted)
-    }
-    len_ave <- mean(loc_length)
-
-    # Convert to relative from segment length
-    from_rel <- len_ave / totweight
-
-    # Convert to relative to segment length
-    to_rel <- len_ave / totweight
-
-    # Calculate and return DCI value
-    return(from_rel * to_rel * 1 * 100)
+    seg_length <- seg_weights[seg_weights$member.label == from,]$segweight
+    DCI <- seg_length/totweight * seg_length/totweight * 1 * 100
+    return(DCI)
 
   }
 
