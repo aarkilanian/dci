@@ -352,21 +352,21 @@ gather_dci <- function(from, to, distance, perm, nodes, seg_weights, threshold, 
   # Get to segment local sink
   to_sink <- sinks_bars[sinks_bars$member.label == to,]$node.label
 
-  # Get path between segments
+  # Get path between sinks
   path <- path_between(from_sink, to_sink)
 
-  # Join member labels for nodes on path
+  # Join node attributes to nodes on path
   full_path <- nodes[nodes$node.label %in% path,]
-  full_path <- subset(full_path, select = c(node.label, member.label, type))
 
+  # Determine final entrance and exit nodes for pair of segments
   # If from segment is upstream of to segment
   if(length(unlist(from_sink)) > length(unlist(to_sink))){
 
-    # Set exit to one node upstream of from sink
+    # Set exit to one node upstream of from sink, extract geometry
     exit_label <- list(append(unlist(from_sink), FALSE))
     exit <- sf::st_geometry(nodes[nodes$node.label %in% exit_label,])
 
-    # Select most downstream barrier as entrance
+    # Select most downstream barrier as entrance, extract geometry
     barriers <- full_path[full_path$type == "Barrier",]
     barriers$depth <- unlist(lapply(barriers$node.label, length))
     entrance_label <- barriers[which.min(barriers$depth),]$node.label
