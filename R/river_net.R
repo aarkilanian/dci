@@ -21,7 +21,6 @@ river_net <- function(rivers,
                    barriers,
                    sinks = NULL,
                    others = NULL,
-                   tolerance = 10,
                    check = TRUE){
 
   # Check rivers
@@ -47,6 +46,8 @@ river_net <- function(rivers,
       stop("Other points must first be imported with `import_points`")
     }
   }
+
+  # Check that there aren't repeating column names across inputs
 
   # Match river projection
   barriers <- sf::st_transform(barriers, sf::st_crs(rivers))

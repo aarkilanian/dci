@@ -7,6 +7,7 @@
 #' @param tolerance An integer value, the maximum distance in map units from rivers to given points. Set to NULL by default.
 #'
 #' @noRd
+# TODO relative riv sampling resolution
 split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
   # Remove sinks if present
   if("Sink" %in% pts$type){
@@ -17,6 +18,7 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
     # Update nearest river features
     riv_distances <- sf::st_distance(rivers, pts[i,])
     riv_ind <- which.min(riv_distances)
+    # TODO review this
     # Skip if distance is above threshold
     if(!is.null(tolerance)){
       min_dist <- riv_distances[riv_ind]
@@ -46,17 +48,30 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
     sf::st_geometry(river1) <- river1_geom
     river1$riv_length <- as.double(sf::st_length(river1))
     # Create second segment
-    riv_end <- sf::st_geometry(rivers[riv_ind,])
-    riv_end <- sf::st_sfc(sf::st_point(c(riv_end[[1]][riv_len/2], riv_end[[1]][riv_len])), crs = sf::st_crs(rivers))
-    sf::st_geometry(riv_pts[nrow(riv_pts),]) <- sf::st_geometry(riv_end)
-    river2_geom <- riv_pts[nrst_ind:nrow(riv_pts),] %>%
-      dplyr::group_by(group) %>%
-      dplyr::summarise(do_union = FALSE) %>%
-      sf::st_cast("LINESTRING") %>%
-      sf::st_geometry()
-    river2 <- rivers[riv_ind,]
-    sf::st_geometry(river2) <- river2_geom
-    river2$riv_length <- as.double(sf::st_length(river2))
+    # If point is close to end of river line
+    if(nrow(riv_pts) == nrst_ind){
+      line_start <- sf::st_geometry(riv_pts[nrst_ind,])
+      line_end <- sf::st_geometry(rivers[riv_ind,])
+      line_end <- sf::st_sfc(sf::st_point(c(line_end[[1]][riv_len/2], line_end[[1]][riv_len])), crs = sf::st_crs(rivers))
+      river2_geom <- sf::st_sfc(sf::st_linestring(matrix(c(line_start[[1]][1], line_end[[1]][1], line_start[[1]][2], line_end[[1]][2]), ncol = 2)))
+      river2 <- rivers[riv_ind,]
+      sf::st_crs(river2_geom) <- sf::st_crs(rivers)
+      sf::st_geometry(river2) <- river2_geom
+      river2$riv_length <- as.double(sf::st_length(river2))
+    # Otherwise
+    } else {
+      riv_end <- sf::st_geometry(rivers[riv_ind,])
+      riv_end <- sf::st_sfc(sf::st_point(c(riv_end[[1]][riv_len/2], riv_end[[1]][riv_len])), crs = sf::st_crs(rivers))
+      sf::st_geometry(riv_pts[nrow(riv_pts),]) <- sf::st_geometry(riv_end)
+      river2_geom <- riv_pts[nrst_ind:nrow(riv_pts),] %>%
+        dplyr::group_by(group) %>%
+        dplyr::summarise(do_union = FALSE) %>%
+        sf::st_cast("LINESTRING") %>%
+        sf::st_geometry()
+      river2 <- rivers[riv_ind,]
+      sf::st_geometry(river2) <- river2_geom
+      river2$riv_length <- as.double(sf::st_length(river2))
+    }
     # Add new rivers
     rivers <- rbind(rivers, river1, river2)
     # Remove old river
@@ -74,6 +89,7 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
 #' @inheritParams split_rivers_at_points
 #'
 #' @noRd
+# TODO remove tolerance
 join_attributes <- function(net, nodes, tolerance = NULL){
   # Find nearest river network node
   nrst <- nodes %>%

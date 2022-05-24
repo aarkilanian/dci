@@ -51,6 +51,7 @@ correct_divergences <- function(net){
     dplyr::group_by(component) %>%
     dplyr::filter(dplyr::n() > 10) %>%
     tidygraph::ungroup()
+  # TODO Message how much river lost
   # Get number of removed rivers
   num_div <- nrow(net %>%
                     activate(edges) %>%
