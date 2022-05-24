@@ -33,6 +33,9 @@ import_rivers <- function(path, weight = NULL, min_comp = 10, quiet = FALSE){
     stop("Provided data contains geometries other than LINESTRING and MULTILINESTRING")
   }
 
+  # Store original rivers for later plotting
+  rivers.old <- sf::st_zm(rivers)
+
   # Prepare rivers
   rivers <- rivers %>%
     # Remove Z/M dimensions
@@ -69,7 +72,8 @@ import_rivers <- function(path, weight = NULL, min_comp = 10, quiet = FALSE){
 
   # Plot rivers if quiet is set to FALSE
   if(quiet == FALSE){
-    plot(sf::st_geometry(rivers))
+    plot(sf::st_geometry(rivers.old), col = "red")
+    plot(sf::st_geometry(rivers), add = T, lwd = 2)
   }
 
   # Return rivers
