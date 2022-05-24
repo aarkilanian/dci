@@ -215,13 +215,13 @@ calculate_dci_pot_thresh <- function(all_members, net_nodes, seg_weights, weight
 
   # Calculate DCI
   DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(nodes = net_nodes, seg_weights, threshold, totweight, weighted))
-  DCI_glob <- sum(DCIs)
+  DCI_glob <- sum(DCIs, na.rm = TRUE)
 
   # Return result
   DCI_res <- data.frame(from_segment, to_segment, DCIs)
   DCI_res <- DCI_res %>%
     dplyr::group_by(segment = from_segment) %>%
-    dplyr::summarise(DCI = sum(DCIs)) %>%
+    dplyr::summarise(DCI = sum(DCIs, na.rm = TRUE)) %>%
     dplyr::mutate(DCI_rel = DCI/DCI_glob*100) %>%
     as.data.frame()
   return(DCI_res)
@@ -304,6 +304,8 @@ gather_dist <- function(from, to, nodes){
 }
 
 gather_perm <- function(from, to, nodes){
+
+  message(paste0("From ", from, " to ", to))
 
   # Condition when from and to are the same
   if(from == to){
@@ -443,7 +445,7 @@ path_to_root <- function(seg){
 }
 
 #' @export
-print.dci.results <- function(x, ...){
-  cat("a")
-  invisible(x)
-}
+# print.dci.results <- function(x, ...){
+#   cat("a")
+#   invisible(x)
+# }
