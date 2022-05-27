@@ -9,7 +9,7 @@ import_points(path, type, id = NULL, perm = NULL, quiet = FALSE)
 \arguments{
 \item{path}{A character string or \code{\link{sf}} object, the path to a shapefile of points or \code{\link{sf}} object of points.}
 
-\item{type}{A character string, either of “barrier”, “sink”, or “other” specifying the type of point.}
+\item{type}{A character string, either of “barrier”, “sink”, or “poi” specifying the type of point.}
 
 \item{perm}{An optional double vector, barrier permeabilities ranging from 0 to 1. These will be ignored for non-barrier points. Set to NULL by default.}
 }
