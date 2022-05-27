@@ -86,10 +86,10 @@ import_rivers <- function(path, weight = NULL, min_comp = 10, quiet = FALSE){
 #'Read and prepare geospatial point data for dci.
 #'
 #' @param path A character string or \code{\link{sf}} object, the path to a shapefile of points or \code{\link{sf}} object of points.
-#' @param type A character string, either of “barrier”, “sink”, or “other” specifying the type of point.
+#' @param type A character string, either of “barrier”, “sink”, or “poi” specifying the type of point.
 #' @param perm An optional double vector, barrier permeabilities ranging from 0 to 1. These will be ignored for non-barrier points. Set to NULL by default.
 #'
-#' @return Object of class barriers, sinks, or others prepared for input to \code{\link{river_net}}
+#' @return Object of class barriers, sinks, or poi prepared for input to \code{\link{river_net}}
 #'
 #' @export
 import_points <- function(path, type, id = NULL, perm = NULL, quiet = FALSE){
@@ -188,29 +188,29 @@ import_points <- function(path, type, id = NULL, perm = NULL, quiet = FALSE){
     sinks <- structure(sinks, class = c("sinks", class(sinks)))
     return(sinks)
   }
-  if(type == "others"){
+  if(type == "poi"){
     # Prepare other points
-    others <- points %>%
+    poi <- points %>%
       # Remove Z/M dimensions
       sf::st_zm() %>%
       # Assign other IDs
       dplyr::mutate(id = dplyr::row_number()) %>%
       # Assign other type
-      dplyr::mutate(type = "Other") %>%
+      dplyr::mutate(type = "poi") %>%
       # Assign permeability of 1
       dplyr::mutate(perm = 1) %>%
       # Select only newly created columns
       dplyr::select(id, perm, type)
     # Add user provided ID
     if(!is.null(id)){
-      others$user_id <- user_id
+      poi$user_id <- user_id
     }
     # Print prepared others
     if(quiet == FALSE){
-      plot(sf::st_geometry(others))
+      plot(sf::st_geometry(poi))
     }
     # Return others
-    others <- structure(others, class = c("others", class(others)))
-    return(others)
+    poi <- structure(poi, class = c("poi", class(poi)))
+    return(poi)
   }
 }
