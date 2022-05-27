@@ -2,9 +2,7 @@
 #'
 #'Read and prepare geospatial river lines data for dci.
 #'
-#' @param path A character string or \code{\link{sf}} object, the path to a shapefile of river lines or \code{\link{sf}} object of rivers.
-#'
-#' @param weight An optional double vector, river weights ranging from 0 to 1. Set to NULL by default.
+#' @param path A character string or \code{\link{sf}} object, the path to a shapefile of river lines or
 #'
 #' @param min_comp An integer value, the minimum number of river nodes in a network component. Isolated networks with less than this specified number of nodes will be discarded. Set to 10 by default.
 #'
@@ -14,7 +12,7 @@
 # TODO standardize weights
 # TODO multiple weighting columns - maybe in DCI calculation only, drop here
 # TODO barrier perm same
-import_rivers <- function(path, weight = NULL, min_comp = 10, quiet = FALSE){
+import_rivers <- function(path, min_comp = 10, quiet = FALSE){
   # Check for path type
   if(is.character(path)) sf <- FALSE
   else sf <- TRUE
@@ -47,12 +45,6 @@ import_rivers <- function(path, weight = NULL, min_comp = 10, quiet = FALSE){
   if(any(!(sf::st_is_valid(rivers))) | any(sf::st_is_empty(rivers))){
     stop("Invalid geometries detected in rivers")
   }
-  # Check that weight is valid
-  if(!(is.null(weight))){
-    if(!(is.numeric(rivers[[weight]]))) stop("Weight values must be numeric.")
-    # Check that weight is between 0 and 1
-    if(any(abs(rivers[[weight]]) > 1)) stop("Weight values must be between 0 and 1.")
-  }
 
   # Discard small component fragments
   net <- rivers %>%
@@ -64,11 +56,6 @@ import_rivers <- function(path, weight = NULL, min_comp = 10, quiet = FALSE){
   rivers <- net %>% activate(edges) %>% sf::st_as_sf()
   # Calculate river lengths
   rivers$riv_length <- as.double(sf::st_length(rivers))
-  # Add weighting to rivers
-  if(!(is.null(weight))){
-    rivers$riv_weight <- as.double(rivers[[weight]])
-    rivers <- rivers[!(names(rivers) %in% weight)]
-  }
 
   # Plot rivers if quiet is set to FALSE
   if(quiet == FALSE){
