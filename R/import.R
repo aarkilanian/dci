@@ -79,7 +79,7 @@ import_rivers <- function(path, min_comp = 10, quiet = FALSE){
 #' @return Object of class barriers, sinks, or poi prepared for input to \code{\link{river_net}}
 #'
 #' @export
-import_points <- function(path, type, id = NULL, perm = NULL, quiet = FALSE){
+import_points <- function(path, type, perm = NULL, quiet = FALSE){
   # Check for path type
   if(is.character(path)) sf <- FALSE
   else sf <- TRUE
@@ -135,13 +135,6 @@ import_points <- function(path, type, id = NULL, perm = NULL, quiet = FALSE){
       # Convert barrier permeabilities to double type
       barriers$perm <- as.double(barriers[[perm]])
     }
-    # Select only created columns
-    barriers <- barriers %>%
-      dplyr::select(id, perm, type)
-    # Add user provided ID
-    if(!is.null(id)){
-      barriers$user_id <- user_id
-    }
     # Print prepared barriers
     if(quiet == FALSE){
       plot(sf::st_geometry(barriers))
@@ -160,13 +153,7 @@ import_points <- function(path, type, id = NULL, perm = NULL, quiet = FALSE){
       # Assign sink type
       dplyr::mutate(type = "Sink") %>%
       # Assign permeability of 1
-      dplyr::mutate(perm = 1) %>%
-      # Select only newly created columns
-      dplyr::select(id, perm, type)
-    # Add user provided ID
-    if(!is.null(id)){
-      sinks$user_id <- user_id
-    }
+      dplyr::mutate(perm = 1)
     # Print prepared sinks
     if(quiet == FALSE){
       plot(sf::st_geometry(sinks))
@@ -185,13 +172,7 @@ import_points <- function(path, type, id = NULL, perm = NULL, quiet = FALSE){
       # Assign other type
       dplyr::mutate(type = "poi") %>%
       # Assign permeability of 1
-      dplyr::mutate(perm = 1) %>%
-      # Select only newly created columns
-      dplyr::select(id, perm, type)
-    # Add user provided ID
-    if(!is.null(id)){
-      poi$user_id <- user_id
-    }
+      dplyr::mutate(perm = 1)
     # Print prepared others
     if(quiet == FALSE){
       plot(sf::st_geometry(poi))
