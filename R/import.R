@@ -9,9 +9,6 @@
 #' @return Object of class rivers prepared for input to \code{\link{river_net}}
 #'
 #' @export
-# TODO standardize weights
-# TODO multiple weighting columns - maybe in DCI calculation only, drop here
-# TODO barrier perm same
 import_rivers <- function(path, min_comp = 10, quiet = FALSE){
   # Check for path type
   if(is.character(path)) sf <- FALSE
