@@ -14,7 +14,7 @@ import_points(path, type, id = NULL, perm = NULL, quiet = FALSE)
 \item{perm}{An optional double vector, barrier permeabilities ranging from 0 to 1. These will be ignored for non-barrier points. Set to NULL by default.}
 }
 \value{
-Object of class barriers, sinks, or others prepared for input to \code{\link{river_net}}
+Object of class barriers, sinks, or poi prepared for input to \code{\link{river_net}}
 }
 \description{
 Read and prepare geospatial point data for dci.

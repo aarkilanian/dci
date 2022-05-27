@@ -8,7 +8,7 @@
 #'
 #' @param sinks A \code{sinks} object returned by \code{\link{import_points}}. This data is optional.
 #'
-#' @param others A \code{others} object returned by \code{\link{import_points}}. This data is optional.
+#' @param poi A \code{poi} object returned by \code{\link{import_points}}. This data is optional.
 #'
 #' @param tolerance An integer value, the maximum snapping distance in map units of supplied points relative to river lines. Points outside this distance will be discarded. Defaults to 10 map units.
 #'
@@ -20,7 +20,7 @@
 river_net <- function(rivers,
                    barriers,
                    sinks = NULL,
-                   others = NULL,
+                   poi = NULL,
                    check = TRUE){
 
   # Check rivers
@@ -40,9 +40,9 @@ river_net <- function(rivers,
     }
   }
 
-  # Check other points
-  if(!(is.null(others))){
-    if(!("others" %in% class(others))){
+  # Check points of interest
+  if(!(is.null(poi))){
+    if(!("poi" %in% class(poi))){
       stop("Other points must first be imported with `import_points`")
     }
   }
@@ -52,10 +52,10 @@ river_net <- function(rivers,
   # Match river projection
   barriers <- sf::st_transform(barriers, sf::st_crs(rivers))
   sinks <- sf::st_transform(sinks, sf::st_crs(rivers))
-  if(!is.null(others)){
-    others <- sf::st_transform(others, sf::st_crs(rivers))
+  if(!is.null(poi)){
+    poi <- sf::st_transform(poi, sf::st_crs(rivers))
     # Combine nodes
-    user_nodes <- dplyr::bind_rows(barriers, sinks, others)
+    user_nodes <- dplyr::bind_rows(barriers, sinks, poi)
   } else{
     user_nodes <- dplyr::bind_rows(barriers, sinks)
   }
@@ -96,19 +96,19 @@ new_rivnet <- function(rivers,
                        barriers,
                        sinks = NULL,
                        riv_weight = NULL,
-                       others = NULL,
+                       poi = NULL,
                        snap_tolerance = 10,
                        correct_topology = TRUE){
 
   # Match river projection
   barriers <- sf::st_transform(barriers, sf::st_crs(rivers))
   sinks <- sf::st_transform(sinks, sf::st_crs(rivers))
-  if(!is.null(others)){
-    others <- sf::st_transform(others, sf::st_crs(rivers))
+  if(!is.null(poi)){
+    poi <- sf::st_transform(poi, sf::st_crs(rivers))
   }
 
   # Combine nodes together
-  user_nodes <- dplyr::bind_rows(barriers, sinks, others)
+  user_nodes <- dplyr::bind_rows(barriers, sinks, poi)
 
   # Clean up topology if requested
   if(correct_topology == TRUE){
