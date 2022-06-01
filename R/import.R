@@ -81,12 +81,12 @@ import_rivers <- function(path, min_comp = 10, quiet = FALSE){
 #'
 #' @param path A character string or \code{\link{sf}} object, the path to a shapefile of points or \code{\link{sf}} object of points.
 #' @param type A character string, either of “barrier”, “sink”, or “poi” specifying the type of point.
-#' @param perm An optional double vector, barrier permeabilities ranging from 0 to 1. These will be ignored for non-barrier points. Set to NULL by default.
+#' @param id An optional character vector specifying unique IDs for the points. Defaults to NULL
 #'
 #' @return Object of class barriers, sinks, or poi prepared for input to \code{\link{river_net}}
 #'
 #' @export
-import_points <- function(path, type, id = NULL, quiet = FALSE){
+import_points <- function(path, type, id = NULL){
   # Check for path type
   if(is.character(path)) sf <- FALSE
   else sf <- TRUE
@@ -113,84 +113,59 @@ import_points <- function(path, type, id = NULL, quiet = FALSE){
       }
     )
   }
+
+  # Barriers
   if(type == "barriers"){
     # Prepare barriers
     barriers <- points %>%
       # Remove Z/M dimension
       sf::st_zm() %>%
-      # Assign barrier IDs
-      dplyr::mutate(id = dplyr::row_number()) %>%
       # Assign barrier type
       dplyr::mutate(type = "Barrier")
-    # Assign 0% permeability to barriers by default if other permeability is not supplied
-    if(is.null(perm)){
-      barriers$perm <- 0
-      # If barrier permeabilities are supplied attempt to add them to the barriers
-    } else {
-      # Convert barrier permeabilities to double type
-      barriers$perm <- as.double(barriers[[perm]])
-    }
-    # Select only created columns
-    barriers <- barriers %>%
-      dplyr::select(id, perm, type)
+
     # Add user provided ID
     if(!is.null(id)){
       barriers$user_id <- user_id
     }
-    # Print prepared barriers
-    if(quiet == FALSE){
-      plot(sf::st_geometry(barriers))
-    }
+
     # Return barriers
     barriers <- structure(barriers, class = c("barriers", class(barriers)))
     return(barriers)
   }
+
+  # Sinks
   if(type == "sinks"){
     # Prepare sinks
     sinks <- points %>%
       # Remove Z/M dimensions
       sf::st_zm() %>%
-      # Assign sink IDs
-      dplyr::mutate(id = dplyr::row_number()) %>%
       # Assign sink type
-      dplyr::mutate(type = "Sink") %>%
-      # Assign permeability of 1
-      dplyr::mutate(perm = 1) %>%
-      # Select only newly created columns
-      dplyr::select(id, perm, type)
+      dplyr::mutate(type = "Sink")
+
     # Add user provided ID
     if(!is.null(id)){
       sinks$user_id <- user_id
     }
-    # Print prepared sinks
-    if(quiet == FALSE){
-      plot(sf::st_geometry(sinks))
-    }
+
     # Return sinks
     sinks <- structure(sinks, class = c("sinks", class(sinks)))
     return(sinks)
+
   }
+  # Points of interest
   if(type == "poi"){
     # Prepare other points
     poi <- points %>%
       # Remove Z/M dimensions
       sf::st_zm() %>%
-      # Assign other IDs
-      dplyr::mutate(id = dplyr::row_number()) %>%
       # Assign other type
-      dplyr::mutate(type = "poi") %>%
-      # Assign permeability of 1
-      dplyr::mutate(perm = 1) %>%
-      # Select only newly created columns
-      dplyr::select(id, perm, type)
+      dplyr::mutate(type = "poi")
+
     # Add user provided ID
     if(!is.null(id)){
       poi$user_id <- user_id
     }
-    # Print prepared others
-    if(quiet == FALSE){
-      plot(sf::st_geometry(poi))
-    }
+
     # Return others
     poi <- structure(poi, class = c("poi", class(poi)))
     return(poi)
