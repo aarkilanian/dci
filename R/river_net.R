@@ -5,7 +5,7 @@
 #' @param rivers A \code{rivers} object returned by \code{\link{import_rivers}}.
 #' @param barriers A \code{barriers} object returned by \code{\link{import_points}}.
 #' @param sinks A \code{sinks} object returned by \code{\link{import_points}}. This data is optional.
-#' @param poi A \code{others} object returned by \code{\link{import_points}}. This data is optional.
+#' @param poi A \code{poi} object returned by \code{\link{import_points}}. This data is optional.
 #' @param check A logical value, if \code{TRUE}, the default, dendritic topology of the river network is enforced with \code{\link{enforce_dendritic}}.
 #'
 #' @return An object of class \code{\link{river_net}} representing the river network formed by the geospatial lines and points provided.
@@ -34,9 +34,9 @@ river_net <- function(rivers,
     }
   }
 
-  # Check other points
-  if(!(is.null(others))){
-    if(!("others" %in% class(others))){
+  # Check points of interest
+  if(!(is.null(poi))){
+    if(!("poi" %in% class(poi))){
       stop("Other points must first be imported with `import_points`")
     }
   }
@@ -46,10 +46,10 @@ river_net <- function(rivers,
   # Match river projection
   barriers <- sf::st_transform(barriers, sf::st_crs(rivers))
   sinks <- sf::st_transform(sinks, sf::st_crs(rivers))
-  if(!is.null(others)){
-    others <- sf::st_transform(others, sf::st_crs(rivers))
+  if(!is.null(poi)){
+    poi <- sf::st_transform(poi, sf::st_crs(rivers))
     # Combine nodes
-    user_nodes <- dplyr::bind_rows(barriers, sinks, others)
+    user_nodes <- dplyr::bind_rows(barriers, sinks, poi)
   } else{
     user_nodes <- dplyr::bind_rows(barriers, sinks)
   }

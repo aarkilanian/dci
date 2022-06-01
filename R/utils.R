@@ -7,7 +7,6 @@
 #' @param tolerance An integer value, the maximum distance in map units from rivers to given points. Set to NULL by default.
 #'
 #' @noRd
-# TODO relative riv sampling resolution
 split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
   # Remove sinks if present
   if("Sink" %in% pts$type){
@@ -89,7 +88,6 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
 #' @inheritParams split_rivers_at_points
 #'
 #' @noRd
-# TODO remove tolerance
 join_attributes <- function(net, nodes, tolerance = NULL){
   # Find nearest river network node
   nrst <- nodes %>%

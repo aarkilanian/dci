@@ -8,6 +8,7 @@
 #' @return Object of class rivers prepared for input to \code{\link{river_net}}
 #'
 #' @export
+
 # TODO standardize weights
 # TODO multiple weighting columns - maybe in DCI calculation only, drop here
 # TODO barrier perm same
