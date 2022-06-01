@@ -3,10 +3,7 @@
 #'Read and prepare geospatial river lines data for dci.
 #'
 #' @param path A character string or \code{\link{sf}} object, the path to a shapefile of river lines or \code{\link{sf}} object of rivers.
-#'
-#' @param weight An optional double vector, river weights ranging from 0 to 1. Set to NULL by default.
-#'
-#' @param min_comp An integer value, the minimum number of river nodes in a network component. Isolated networks with less than this specified number of nodes will be discarded. Set to 10 by default.
+#' @param quiet A logical value, if \code{FALSE} edited rivers are plotted with the original. Defaults to \code{FALSE}.
 #'
 #' @return Object of class rivers prepared for input to \code{\link{river_net}}
 #'
@@ -14,7 +11,7 @@
 # TODO standardize weights
 # TODO multiple weighting columns - maybe in DCI calculation only, drop here
 # TODO barrier perm same
-import_rivers <- function(path, min_comp = 10, quiet = FALSE){
+import_rivers <- function(path, quiet = FALSE){
   # Check for path type
   if(is.character(path)) sf <- FALSE
   else sf <- TRUE
@@ -48,21 +45,20 @@ import_rivers <- function(path, min_comp = 10, quiet = FALSE){
     stop("Invalid geometries detected in rivers")
   }
 
-  # Discard small component fragments
+  # Identify components
   net <- rivers %>%
     sfnetworks::as_sfnetwork() %>%
-    # Retain only components with set minimum nodes
     dplyr::mutate(component = tidygraph::group_components()) %>%
-    dplyr::group_by(component) %>%
-    dplyr::filter(dplyr::n() > min_comp)
+    dplyr::group_by(component)
+
+  # Determine largest component and extract
+  big_comp <- sort(table(net %>% activate(nodes) %>% data.frame() %>% select(component)), decreasing = TRUE)[1]
+  net <- net %>%
+    dplyr::filter(component == big_comp)
   rivers <- net %>% activate(edges) %>% sf::st_as_sf()
+
   # Calculate river lengths
   rivers$riv_length <- as.double(sf::st_length(rivers))
-  # Add weighting to rivers
-  if(!(is.null(weight))){
-    rivers$riv_weight <- as.double(rivers[[weight]])
-    rivers <- rivers[!(names(rivers) %in% weight)]
-  }
 
   # Plot rivers if quiet is set to FALSE
   if(quiet == FALSE){
