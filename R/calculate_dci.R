@@ -21,6 +21,20 @@ calculate_dci <- function(net, perm, form = NULL, threshold = NULL, weight = NUL
     if(any(abs(rivers[[weight]]) > 1)) stop("Weight values must be between 0 and 1.")
   }
 
+  # Check that permeability is valid
+  if(!is.null(perm)){
+    user_perm <- tryCatch(
+      as.double(points[[perm]]),
+      error = function(e) {
+        stop("Supplied permeability field cannot be assigned because: ", e, call. = FALSE)
+      }
+    )
+    # Check that permeability is between 0 and 1
+    if(any(abs(user_perm) > 1)){
+      stop("Permeability values must be between 0 and 1.")
+    }
+  }
+
   # Extract edges
   net_edges <- net %>%
     activate(edges) %>%

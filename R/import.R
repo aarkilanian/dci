@@ -86,7 +86,7 @@ import_rivers <- function(path, min_comp = 10, quiet = FALSE){
 #' @return Object of class barriers, sinks, or poi prepared for input to \code{\link{river_net}}
 #'
 #' @export
-import_points <- function(path, type, id = NULL, perm = NULL, quiet = FALSE){
+import_points <- function(path, type, id = NULL, quiet = FALSE){
   # Check for path type
   if(is.character(path)) sf <- FALSE
   else sf <- TRUE
@@ -103,19 +103,7 @@ import_points <- function(path, type, id = NULL, perm = NULL, quiet = FALSE){
   if(any(!(sf::st_is_valid(points))) | any(sf::st_is_empty(points))){
     stop("Invalid geometries detected in points")
   }
-  # Check that permeability is valid
-  if(!is.null(perm)){
-    user_perm <- tryCatch(
-      as.double(points[[perm]]),
-      error = function(e) {
-        stop("Supplied permeability field cannot be assigned because: ", e, call. = FALSE)
-      }
-    )
-    # Check that permeability is between 0 and 1
-    if(any(abs(user_perm) > 1)){
-      stop("Permeability values must be between 0 and 1.")
-    }
-  }
+
   # Check that id is valid
   if(!is.null(id)){
     user_id <- tryCatch(
