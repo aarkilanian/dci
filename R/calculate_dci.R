@@ -1,7 +1,6 @@
 # TODO Use mapply from with non-threshold DCI calculations similar to thresholded method
-# TODO Rewrite threshold method to consider neighbourhood size weighting instead of using in relative length
 
-calculate_dci <- function(net, form = NULL, threshold = NULL, weighted = FALSE, sites = NULL){
+calculate_dci <- function(net, perm, form = NULL, threshold = NULL, weight = NULL, sites = NULL){
 
   # No valid network
   if(!("river_net" %in% class(net))){
@@ -13,6 +12,13 @@ calculate_dci <- function(net, form = NULL, threshold = NULL, weighted = FALSE, 
   }
   if(!(form %in% c("potamodromous", "diadromous"))){
     stop("A valid form of the DCI must be requested.")
+  }
+
+  # Check that weight is valid
+  if(!(is.null(weight))){
+    if(!(is.numeric(rivers[[weight]]))) stop("Weight values must be numeric.")
+    # Check that weight is between 0 and 1
+    if(any(abs(rivers[[weight]]) > 1)) stop("Weight values must be between 0 and 1.")
   }
 
   # Extract edges

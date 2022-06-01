@@ -14,7 +14,7 @@
 # TODO standardize weights
 # TODO multiple weighting columns - maybe in DCI calculation only, drop here
 # TODO barrier perm same
-import_rivers <- function(path, weight = NULL, min_comp = 10, quiet = FALSE){
+import_rivers <- function(path, min_comp = 10, quiet = FALSE){
   # Check for path type
   if(is.character(path)) sf <- FALSE
   else sf <- TRUE
@@ -46,12 +46,6 @@ import_rivers <- function(path, weight = NULL, min_comp = 10, quiet = FALSE){
   # Check for valid and empty geometries
   if(any(!(sf::st_is_valid(rivers))) | any(sf::st_is_empty(rivers))){
     stop("Invalid geometries detected in rivers")
-  }
-  # Check that weight is valid
-  if(!(is.null(weight))){
-    if(!(is.numeric(rivers[[weight]]))) stop("Weight values must be numeric.")
-    # Check that weight is between 0 and 1
-    if(any(abs(rivers[[weight]]) > 1)) stop("Weight values must be between 0 and 1.")
   }
 
   # Discard small component fragments
