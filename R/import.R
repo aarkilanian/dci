@@ -9,9 +9,6 @@
 #'
 #' @export
 
-# TODO standardize weights
-# TODO multiple weighting columns - maybe in DCI calculation only, drop here
-# TODO barrier perm same
 import_rivers <- function(path, quiet = FALSE){
   # Check for path type
   if(is.character(path)) sf <- FALSE
@@ -53,7 +50,8 @@ import_rivers <- function(path, quiet = FALSE){
     dplyr::group_by(component)
 
   # Determine largest component and extract
-  big_comp <- sort(table(net %>% activate(nodes) %>% data.frame() %>% select(component)), decreasing = TRUE)[1]
+  big_comp <- sort(table(net %>% activate(nodes) %>% data.frame() %>% dplyr::select(component)), decreasing = TRUE)[1]
+  big_comp <- as.integer(names(big_comp))
   net <- net %>%
     dplyr::filter(component == big_comp)
   rivers <- net %>% activate(edges) %>% sf::st_as_sf()
