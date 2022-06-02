@@ -16,8 +16,6 @@ river_net(rivers, barriers, sinks = NULL, poi = NULL, check = TRUE)
 \item{poi}{A \code{poi} object returned by \code{\link{import_points}}. This data is optional.}
 
 \item{check}{A logical value, if \code{TRUE}, the default, dendritic topology of the river network is enforced with \code{\link{enforce_dendritic}}.}
-
-\item{tolerance}{An integer value, the maximum snapping distance in map units of supplied points relative to river lines. Points outside this distance will be discarded. Defaults to 10 map units.}
 }
 \value{
 An object of class \code{\link{river_net}} representing the river network formed by the geospatial lines and points provided.

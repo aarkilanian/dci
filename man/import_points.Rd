@@ -4,14 +4,14 @@
 \alias{import_points}
 \title{Prepare point data for \code{\link{river_net}} connectivity analyses}
 \usage{
-import_points(path, type, id = NULL, perm = NULL, quiet = FALSE)
+import_points(path, type, id = NULL)
 }
 \arguments{
 \item{path}{A character string or \code{\link{sf}} object, the path to a shapefile of points or \code{\link{sf}} object of points.}
 
 \item{type}{A character string, either of “barrier”, “sink”, or “poi” specifying the type of point.}
 
-\item{perm}{An optional double vector, barrier permeabilities ranging from 0 to 1. These will be ignored for non-barrier points. Set to NULL by default.}
+\item{id}{An optional character vector specifying unique IDs for the points. Defaults to NULL}
 }
 \value{
 Object of class barriers, sinks, or poi prepared for input to \code{\link{river_net}}

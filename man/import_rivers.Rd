@@ -4,14 +4,12 @@
 \alias{import_rivers}
 \title{Prepare rivers for \code{\link{river_net}} connectivity analyses}
 \usage{
-import_rivers(path, weight = NULL, min_comp = 10, quiet = FALSE)
+import_rivers(path, quiet = FALSE)
 }
 \arguments{
 \item{path}{A character string or \code{\link{sf}} object, the path to a shapefile of river lines or \code{\link{sf}} object of rivers.}
 
-\item{weight}{An optional double vector, river weights ranging from 0 to 1. Set to NULL by default.}
-
-\item{min_comp}{An integer value, the minimum number of river nodes in a network component. Isolated networks with less than this specified number of nodes will be discarded. Set to 10 by default.}
+\item{quiet}{A logical value, if \code{FALSE} edited rivers are plotted with the original. Defaults to \code{FALSE}.}
 }
 \value{
 Object of class rivers prepared for input to \code{\link{river_net}}
