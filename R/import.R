@@ -82,6 +82,10 @@ import_rivers <- function(path, quiet = FALSE){
 #'
 #' @export
 import_points <- function(path, type, id = NULL){
+
+  # Check that type is valid
+  if(!(type %in% c("barriers", "sinks", "poi"))) stop("Points must be of 'barriers', 'sinks', or 'poi' type.")
+
   # Check for path type
   if(is.character(path)) sf <- FALSE
   else sf <- TRUE
