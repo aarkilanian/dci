@@ -37,11 +37,9 @@ river_net <- function(rivers,
   # Check points of interest
   if(!(is.null(poi))){
     if(!("poi" %in% class(poi))){
-      stop("Other points must first be imported with `import_points`")
+      stop("Points of interest must first be imported with `import_points`")
     }
   }
-
-  # Check that there aren't repeating column names across inputs
 
   # Match river projection
   barriers <- sf::st_transform(barriers, sf::st_crs(rivers))
