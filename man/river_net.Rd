@@ -4,7 +4,14 @@
 \alias{river_net}
 \title{Create a \code{river_net} object}
 \usage{
-river_net(rivers, barriers, sinks = NULL, poi = NULL, check = TRUE)
+river_net(
+  rivers,
+  barriers,
+  sinks = NULL,
+  poi = NULL,
+  check = TRUE,
+  tolerance = 10
+)
 }
 \arguments{
 \item{rivers}{A \code{rivers} object returned by \code{\link{import_rivers}}.}
