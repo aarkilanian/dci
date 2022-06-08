@@ -1,6 +1,19 @@
 # TODO Use mapply from with non-threshold DCI calculations similar to thresholded method
 
-calculate_dci <- function(net, perm, form = NULL, threshold = NULL, weight = NULL, sites = NULL){
+#' Calculate different forms of the DCI for a \code{\link{river_net}} object
+#'
+#' @param net A \code{\link{river_net}} object.
+#' @param form A string specifying the form of the DCI to calculate: either "potamodromous", "catadromous", or "all".
+#' @param perm The name of a column in the nodes table of net which holds the numeric permeability of nodes. If none is specified all barriers are automatically considered to have 0 permeability.
+#' @param threshold An optional numeric value specifying a dispersal limit in map units. If NULL, the default, no limit is considered.
+#' @param weight The name of column in the edges tables of net which holds numeric weights to be applied to river lengths. If none is specified, the DCI is calculated only with river lengths.
+#' @param sites The name of a type of nodes in the node table of net. If specified, DCI results will be calculated at these sites and returned. If not specified, the DCI results will be reported on the rivers. See details for more.
+#'
+#' @return A \code{\link{sf}} object of the rivers from the provided \code{\link{river_net}} object with new columns speciying the segmental DCI values at each river location. If sites is not \code{NULL}, a \code{\link{sf}} object of the site points with their associated DCI scores.
+#' @export
+#'
+#' @examples
+calculate_dci <- function(net, form, perm = NULL, threshold = NULL, weight = NULL, sites = NULL){
 
   # No valid network
   if(!("river_net" %in% class(net))){
