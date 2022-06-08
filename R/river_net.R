@@ -15,7 +15,8 @@ river_net <- function(rivers,
                    barriers,
                    sinks = NULL,
                    poi = NULL,
-                   check = TRUE){
+                   check = TRUE,
+                   tolerance = 10){
 
   # Check rivers
   if(!("rivers" %in% class(rivers))){
