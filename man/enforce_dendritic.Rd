@@ -4,7 +4,7 @@
 \alias{enforce_dendritic}
 \title{Enforce dendritic river topology}
 \usage{
-enforce_dendritic(rivers, divergence = TRUE, complex = TRUE)
+enforce_dendritic(rivers, divergence = TRUE, complex = TRUE, correct = FALSE)
 }
 \arguments{
 \item{rivers}{A \code{rivers} object returned by \code{\link{import_rivers}}.}
@@ -12,9 +12,11 @@ enforce_dendritic(rivers, divergence = TRUE, complex = TRUE)
 \item{divergence}{A logical value, when \code{TRUE}, the default, divergences are corrected.}
 
 \item{complex}{A logical value, when \code{TRUE}, the default, complex confluences are corrected.}
+
+\item{correct}{A logical value, when \code{FALSE}, the default, corrections are not automatically applied and a \code{\link{sf}} object of lines is returned with topological errors indicated. If \code{TRUE} errors are automatically corrected.}
 }
 \value{
-If \code{export} is \code{FALSE}, a \code{rivers} object with corrected dendritic topology. If \code{export} is \code{TRUE}, a \code{rivers} object with divergent river pairs given shared \code{divID} and rivers participating in complex confluences are given shared \code{complexID}.
+If \code{correct} is \code{FALSE}, a \code{sf} object with non-dendritic topology indicated in columns "divergent" and "complex". These error columns indicate for each river line if that river is part of a divergent pair or complex confluence. The columns are populated by integers which indicate with which river they share a topological error. If \code{correct} is \code{TRUE}, a \code{rivers} object with automatic topological corrections applied is returned.
 }
 \description{
 This function provides an interface to tools which can correct non-dendritic geometries in a river network. This tool can correct divergent rivers and complex confluences.
@@ -24,5 +26,5 @@ Divergent rivers are parts of a river network where a single tributary splits in
 
 Complex confluences occur when confluences have over 2 input tributaries. In a dendritic network two tributaries only must combine into one at confluences.
 
-If errors are being corrected manually, all divergent pairs must be reduced to only one river and complex confluences modified such that only 2 rivers join together.
+If errors are being corrected manually, all divergent pairs must be reduced to only one river and complex confluences modified such that only 2 rivers join together. When corrections are done automatically the shorted divergent stream is kept.
 }
