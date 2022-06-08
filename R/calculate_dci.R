@@ -1,5 +1,3 @@
-# TODO Use mapply from with non-threshold DCI calculations similar to thresholded method
-
 #' Calculate different forms of the DCI for a \code{\link{river_net}} object
 #'
 #' @param net A \code{\link{river_net}} object.

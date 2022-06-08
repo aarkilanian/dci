@@ -93,13 +93,16 @@ join_attributes <- function(net, nodes, tolerance = NULL){
   nrst <- nodes %>%
     sf::st_nearest_feature(net %>% activate(nodes) %>% sf::st_as_sf())
   nodes$key <- nrst
+  # If a tolerance is specified, avoid joining nodes outside that tolerance
   if(!is.null(tolerance)){
     # Get distance to nearest node
     net_nodes <- net %>% activate(nodes) %>% sf::st_as_sf()
     nrst_dist <- sf::st_distance(nodes, net_nodes[nrst,])
     nrst_dist <- diag(nrst_dist)
+    # Identify nodes outside tolerance
     within_tolerance <- as.double(nrst_dist) <= tolerance
     nodes <- nodes[within_tolerance,]
+  # If no tolerance use all nodes
   } else nodes <- nodes
   # Join special nodes' attributes to network nodes
   net <- net %>%
@@ -108,11 +111,7 @@ join_attributes <- function(net, nodes, tolerance = NULL){
     dplyr::left_join(as.data.frame(nodes) %>% dplyr::select(-geometry), by = c("rowID" = "key")) %>%
     dplyr::select(-rowID) %>%
     # Set node type of topological nodes
-    dplyr::mutate(type = dplyr::if_else(is.na(type), "Topo", type)) %>%
-    # Set topological node permeability
-    dplyr::mutate(perm = dplyr::if_else(is.na(perm), 1, perm)) %>%
-    # Add unique node IDs
-    dplyr::mutate(nodeID = dplyr::row_number())
+    dplyr::mutate(type = dplyr::if_else(is.na(type), "Topo", type))
   # Return joined network
   invisible(net)
 }
