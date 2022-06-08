@@ -81,6 +81,7 @@ calculate_dci <- function(net, form, perm = NULL, weight = NULL, threshold = NUL
   # Move edge attributes to nodes
   # Weights from edges associated w/ upstream nodes
   net_nodes <- net_nodes %>%
+    dplyr::mutate(nodeID = dplyr::row_number()) %>%
     dplyr::left_join(net_edges, by = c("nodeID" = "from")) %>%
     sf::st_as_sf(sf_column_name = "geometry.x")
   # Set sink length to 0
