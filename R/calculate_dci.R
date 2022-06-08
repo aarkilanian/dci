@@ -123,6 +123,14 @@ calculate_dci <- function(net, form, perm = NULL, weight = NULL, threshold = NUL
     # Diadromous case
     if(form == "diadromous") DCIs <- calculate_dci_dia(all_members, net_nodes, seg_weights, net_sink)
 
+    # Both DCI forms
+    if(form == "all"){
+      DCIs_pot <- calculate_dci_pot(all_members, net_nodes, seg_weights)
+      DCIs_dia <- calculate_dci_dia(all_members, net_nodes, seg_weights, net_sink)
+      DCIs <- DCIs_pot %>%
+        dplyr::left_join(DCIs_dia, by = "segment", suffix = c("_pot", "_dia"))
+    }
+
     # If sites are supplied, associate results to them
     if(!is.null(sites)){
       # Isolate site nodes
