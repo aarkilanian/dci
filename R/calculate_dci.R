@@ -3,70 +3,74 @@
 #' @param net A \code{\link{river_net}} object.
 #' @param form A string specifying the form of the DCI to calculate: either "potamodromous", "catadromous", or "all".
 #' @param perm The name of a column in the nodes table of net which holds the numeric permeability of nodes. If none is specified all barriers are automatically considered to have 0 permeability.
-#' @param threshold An optional numeric value specifying a dispersal limit in map units. If NULL, the default, no limit is considered.
 #' @param weight The name of column in the edges tables of net which holds numeric weights to be applied to river lengths. If none is specified, the DCI is calculated only with river lengths.
+#' @param threshold An optional numeric value specifying a dispersal limit in map units. If NULL, the default, no limit is considered.
 #' @param sites The name of a type of nodes in the node table of net. If specified, DCI results will be calculated at these sites and returned. If not specified, the DCI results will be reported on the rivers. See details for more.
 #'
 #' @return A \code{\link{sf}} object of the rivers from the provided \code{\link{river_net}} object with new columns speciying the segmental DCI values at each river location. If sites is not \code{NULL}, a \code{\link{sf}} object of the site points with their associated DCI scores.
 #' @export
 #'
 #' @examples
-calculate_dci <- function(net, form, perm = NULL, threshold = NULL, weight = NULL, sites = NULL){
+calculate_dci <- function(net, form, perm = NULL, weight = NULL, threshold = NULL, sites = NULL){
 
-  # No valid network
+  # Check that network is valid
   if(!("river_net" %in% class(net))){
     stop("A valid river_net object is required.")
   }
-  # No valld form
-  if(is.null(form)){
+  # Check that form is valid
+  if(!(form %in% c("potamodromous", "diadromous", "all"))){
     stop("A valid form of the DCI must be requested.")
-  }
-  if(!(form %in% c("potamodromous", "diadromous"))){
-    stop("A valid form of the DCI must be requested.")
-  }
-
-  # Check that weight is valid
-  if(!(is.null(weight))){
-    if(!(is.numeric(rivers[[weight]]))) stop("Weight values must be numeric.")
-    # Check that weight is between 0 and 1
-    if(any(abs(rivers[[weight]]) > 1)) stop("Weight values must be between 0 and 1.")
-  }
-
-  # Check that permeability is valid
-  if(!is.null(perm)){
-    user_perm <- tryCatch(
-      as.double(points[[perm]]),
-      error = function(e) {
-        stop("Supplied permeability field cannot be assigned because: ", e, call. = FALSE)
-      }
-    )
-    # Check that permeability is between 0 and 1
-    if(any(abs(user_perm) > 1)){
-      stop("Permeability values must be between 0 and 1.")
-    }
   }
 
   # Extract edges
   net_edges <- net %>%
     activate(edges) %>%
     as.data.frame()
-  # No valid weighting
-  if(weighted & !("riv_weight" %in% names(net_edges))){
-    stop("No valid weighting found in river network.")
-  }
 
   # Extract nodes
   net_nodes <- net %>%
     activate(nodes) %>%
     as.data.frame()
-  # Identify sink
-  if(form == "diadromous"){
-    net_sink <- net_nodes[net_nodes$type == "Sink",]$member.label
-    if(length(net_sink) == 0){
-      stop("No valid sink found in river network.")
+
+  # Check that permeability is valid
+  if(!is.null(perm)){
+    user_perm <- tryCatch(
+      as.double(net_nodes[[perm]]),
+      error = function(e) {
+        stop("Supplied permeability field cannot be assigned:", e, call. = FALSE)
+      }
+    )
+    # Check that permeability is between 0 and 1
+    if(any(abs(user_perm) > 1)){
+      warning("Permeability values are not between 0 and 1, normalizing values...")
+      user_perm <- (user_perm - min(user_perm)) / (max(user_perm) - min(user_perm))
     }
+    # Set active permeability column
+    net_nodes$perm <- user_perm
+  # Set binary permeability if perm is left NULL
+  } else {
+    net_nodes$perm <- 1
+    net_nodes[net_nodes$type == "Barrier",]$perm <- 0
   }
-  # Move edge weights to nodes
+
+  # Check that weight is valid
+  if(!(is.null(weight))){
+    user_weight <- tryCatch(
+      as.double(net_edges[[weight]]),
+      error = function(e) {
+        stop("Supplied weight field cannot be assigned:", e, call. = FALSE)
+      }
+    )
+    # Check that weight is between 0 and 1
+    if(any(abs(user_weight > 1))){
+      warning("Weight values must be between 0 and 1, normalizing data...")
+      user_weight <- (user_weight - min(user_weight)) / (max(user_weight) - min(user_weight))
+    }
+    # Set active weighting column
+    net_edges$riv_weight <- user_weight
+  }
+
+  # Move edge attributes to nodes
   # Weights from edges associated w/ upstream nodes
   net_nodes <- net_nodes %>%
     dplyr::left_join(net_edges, by = c("nodeID" = "from")) %>%
@@ -74,7 +78,7 @@ calculate_dci <- function(net, form, perm = NULL, threshold = NULL, weight = NUL
   # Set sink length to 0
   net_nodes[net_nodes$type == "Sink",]$riv_length <- 0
 
-  if(weighted){
+  if(!(is.null(weight))){
     # Calculate total weighted length of segments
     seg_weights <- net_nodes %>%
       as.data.frame() %>%
