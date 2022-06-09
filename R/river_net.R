@@ -4,7 +4,7 @@
 #'
 #' @param rivers A \code{rivers} object returned by \code{\link{import_rivers}}.
 #' @param barriers A \code{barriers} object returned by \code{\link{import_points}}.
-#' @param sinks A \code{sinks} object returned by \code{\link{import_points}}. This data is optional.
+#' @param sink A \code{sink} object returned by \code{\link{import_points}}. This data is optional.
 #' @param poi A \code{poi} object returned by \code{\link{import_points}}. This data is optional.
 #' @param check A logical value, if \code{TRUE}, the default, dendritic topology of the river network is enforced with \code{\link{enforce_dendritic}}.
 #'
@@ -13,7 +13,7 @@
 #' @export
 river_net <- function(rivers,
                    barriers,
-                   sinks = NULL,
+                   sink = NULL,
                    poi = NULL,
                    check = TRUE,
                    tolerance = 10){
