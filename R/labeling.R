@@ -1,30 +1,36 @@
 #' Label nodes with logical vector binary IDs
 #'
-#' @param rivnet rivnet object
+#' @inheritParams calculate_dci
 #'
-#' @noRd
-node_labeling <- function(rivnet){
+#' @return A \code{\link{river_net}} object with nodes assigned binary topological labels.
+#'
+#' @keywords internal
+#' @export
+node_labeling <- function(net){
   # Create new env
   labelenv <- new.env(parent = emptyenv())
   # Create variable to keep track of created labels outside loop
   assign('past_label', c(FALSE), labelenv)
   # Apply labeling function over network
-  rivnet <- rivnet %>%
+  net <- net %>%
     activate(nodes) %>%
     dplyr::mutate(node.label = tidygraph::map_bfs(root = which(tidygraph::.N()$type == "Sink"),
                                     .f = node_labeler, env = labelenv, mode = "all"))
   # Return labeled network
-  invisible(rivnet)
+  invisible(net)
 }
 
 #' Label nodes with integer segment member ID
 #'
-#' @param rivnet rivnet object
+#' @inheritParams calculate_dci
 #'
-#' @noRd
-membership_labeling <- function(rivnet){
+#' @return A \code{\link{river_net}} object with nodes assigned segment membership labels.
+#'
+#' @keywords internal
+#' @export
+membership_labeling <- function(net){
   # Retrieve number of barriers
-  num_bar <- rivnet %>%
+  num_bar <- net %>%
     activate(nodes) %>%
     as.data.frame() %>%
     dplyr::filter(type == "Barrier") %>%
@@ -34,7 +40,7 @@ membership_labeling <- function(rivnet){
   # Create variable in new environment to hold member IDs
   assign("labels", 1:(num_bar*2), envir = memberenv)
   # Apply labeling function over network
-  rivnet <- rivnet %>%
+  net <- net %>%
     activate(nodes) %>%
     dplyr::mutate(member.label = tidygraph::map_dfs_int(root = which(tidygraph::.N()$type == "Sink"),
                                                     .f = membership_labeler, env = memberenv, mode = "all"))
@@ -42,9 +48,16 @@ membership_labeling <- function(rivnet){
 
 #' Node labeling function passed to \code{\link[tidygraph]{map_bfs}}
 #'
-#' @param rivnet rivnet object
+#' @param node The index of the current node.
+#' @param parent The index of the parent node.
+#' @param path A list of previous results.
+#' @param env A parent environment holding past assigned labels.
+#' @param ... other parameters.
 #'
-#' @noRd
+#' @return The correct node label. Either TRUE or FALSE.
+#'
+#' @keywords internal
+#' @export
 node_labeler <- function(node, parent, path, env, ...){
   cur.type <- tidygraph::.N()$type[node]
   if(cur.type == "Sink"){
@@ -79,9 +92,12 @@ node_labeler <- function(node, parent, path, env, ...){
 
 #' Membership labeling function passed to \code{\link[tidygraph]{map_bfs}}
 #'
-#' @param rivnet rivnet object
+#' @inheritParams node_labeler
 #'
-#' @noRd
+#' @return An integer representing the current node's segment membership.
+#'
+#' @keywords internal
+#' @export
 membership_labeler <- function(node, parent, path, env, ...){
   cur.type <- tidygraph::.N()$type[node]
   if(cur.type == "Sink"){

@@ -1,3 +1,13 @@
+#' Export DCI results to spatial format
+#'
+#' @inheritParams calculate_dci
+#' @param A \code{\link{dci.results}} object of DCI results returned by \code{\link{calculate_dci}}.
+#' @param type The element of the river network for which results should be reported. Can be either "rivers" or any of the nodes included in the \code{\link{river_net}} object such as "barriers" or "poi".
+#'
+#' @return A \code{\link{sf}} object with the corresponding DCI results joined to each feature.
+#' @export
+#'
+#' @examples
 export_dci <- function(net, results, type = "rivers"){
 
  if(type == "rivers"){
@@ -44,13 +54,13 @@ export_dci <- function(net, results, type = "rivers"){
    # Return result
    invisible(barriers)
 
- } else if(type == "others"){
+ } else if(type == "poi"){
 
    # Join results to others
    others <- net %>%
      activate(nodes) %>%
      sf::st_as_sf() %>%
-     dplyr::filter(type == "Other") %>%
+     dplyr::filter(type == "poi") %>%
      dplyr::left_join(results, by = c("member.label" = "segment")) %>%
      dplyr::select(-c(node.label))
 

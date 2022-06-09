@@ -7,7 +7,7 @@
 #' @param sink A \code{sink} object returned by \code{\link{import_points}}. This data is optional.
 #' @param poi A \code{poi} object (points of interest) returned by \code{\link{import_points}}. This data is optional.
 #' @param check A logical value, if \code{TRUE}, the default, dendritic topology of the river network is enforced with \code{\link{enforce_dendritic}}.
-#' @param tolerance A numeric value specifying the distance in map units that points should be snapped to rivers. By default this is set to 1 map unit.
+#' @param tolerance A numeric value specifying the distance in map units that points should be snapped to rivers. Set to NULL by default.
 #'
 #' @return An object of class \code{\link{river_net}} representing the river network formed by the geospatial lines and points provided.
 #'
@@ -17,7 +17,7 @@ river_net <- function(rivers,
                    sink = NULL,
                    poi = NULL,
                    check = TRUE,
-                   tolerance = 1){
+                   tolerance = NULL){
 
   # Check rivers
   if(!("rivers" %in% class(rivers))){

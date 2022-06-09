@@ -11,7 +11,10 @@ split_rivers_at_points(rivers, pts, tolerance = NULL)
 
 \item{pts}{An \code{\link[sf]{sf}} object, points at which to split river lines.}
 
-\item{tolerance}{An integer value, the maximum distance in map units from rivers to given points. Set to NULL by default.}
+\item{tolerance}{A numeric value specifying the distance in map units that points should be snapped to rivers. Set to NULL by default.}
+}
+\value{
+A \code{\link{rivers}} object with non-split rivers replaced with two new features each at opposite sides of the node which splits it. All attributes assumed to be constant.
 }
 \description{
 Split river lines around point locations

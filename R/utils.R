@@ -4,9 +4,10 @@
 #'
 #' @param pts An \code{\link[sf]{sf}} object, points at which to split river lines.
 #'
-#' @param tolerance An integer value, the maximum distance in map units from rivers to given points. Set to NULL by default.
+#' @return A \code{\link{rivers}} object with non-split rivers replaced with two new features each at opposite sides of the node which splits it. All attributes assumed to be constant.
 #'
 #' @keywords internal
+#' @export
 split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
   # Remove sinks if present
   if("Sink" %in% pts$type){
@@ -81,13 +82,14 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
 
 #' Join variables from network nodes to \code{\link{river_net}} object.
 #'
-#' @param net A \code{\link{river_net}} object.
+#' @inheritParams river_net
 #'
-#' @param nodes An \code{\link[sf]{sf}} object of binded "barrier", "sink", or "other" points.
+#' @param nodes An \code{\link[sf]{sf}} object of "barrier", "sink", and "poi" points.
 #'
-#' @inheritParams split_rivers_at_points
+#' @return A \code{\link{river_net}} object with the supplied nodes' attributes joined to its nodes.
 #'
 #' @keywords internal
+#' @export
 join_attributes <- function(net, nodes, tolerance = NULL){
   # Find nearest river network node
   nrst <- nodes %>%

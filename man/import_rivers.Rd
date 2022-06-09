@@ -4,10 +4,10 @@
 \alias{import_rivers}
 \title{Prepare rivers for \code{\link{river_net}} connectivity analyses}
 \usage{
-import_rivers(path, quiet = FALSE)
+import_rivers(rivers, quiet = FALSE)
 }
 \arguments{
-\item{path}{A character string or \code{\link{sf}} object, the path to a shapefile of river lines or \code{\link{sf}} object of rivers.}
+\item{rivers}{A character string or \code{\link{sf}} object, the path to a shapefile of river lines or \code{\link{sf}} object of rivers.}
 
 \item{quiet}{A logical value, if \code{FALSE} edited rivers are plotted with the original. Defaults to \code{FALSE}.}
 }

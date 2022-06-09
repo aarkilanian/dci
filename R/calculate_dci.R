@@ -170,6 +170,16 @@ calculate_dci <- function(net, form, perm = NULL, weight = NULL, threshold = NUL
 
 }
 
+#' Calculate non-thresholded potamodromous DCI
+#'
+#' @param all_members An integer vector holding all assigned membership labels in the \code{\link{river_net}} object.
+#' @param net_nodes An \code{\link{sf}} object of the nodes of the \code{\link{river_net}} object with river attributes joined.
+#' @param seg_weights A data frame of each segments total length. Either weighted or unweighted depending on parameters.
+#'
+#' @return A data frame which holds raw and relative DCI scores for each segment.
+#'
+#' @keywords internal
+#' @export
 calculate_dci_pot <- function(all_members, net_nodes, seg_weights){
 
   # Determine segment pairs
@@ -206,7 +216,15 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights){
 
 }
 
-calculate_dci_dia <- function(all_members, net_nodes, seg_weights, net_sink){
+#' Calculate non-thresholded diadromous DCI
+#'
+#' @inheritParams calculate_dci_pot
+#'
+#' @return A data frame which holds raw and relative DCI scores for each segment.
+#'
+#' @keywords internal
+#' @export
+calculate_dci_dia <- function(all_members, net_nodes, seg_weights){
 
   # Identify sink segment
   sink_seg <- net %>%
@@ -246,6 +264,17 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, net_sink){
 
 }
 
+#' Calculate thresholded potamodromous DCI
+#'
+#' @inheritParams calculate_dci_pot
+#' @inheritParams calculate_dci
+#' @param weighted A logical value indicating whether river lengths in seg_weights are weighted.
+#' @param totweight The total length or weighted length of the whole network.
+#'
+#' @return A data frame which holds raw and relative DCI scores for each segment.
+#'
+#' @keywords internal
+#' @export
 calculate_dci_pot_thresh <- function(all_members, net_nodes, seg_weights, weighted, threshold, totweight){
 
   # Determine segment pairs
@@ -282,6 +311,12 @@ calculate_dci_pot_thresh <- function(all_members, net_nodes, seg_weights, weight
   return(DCI_res)
 }
 
+#' Calculate thresholded diadromous DCI
+#'
+#' @inheritParams calculate_dci_pot_thresh
+#'
+#' @keywords internal
+#' @export
 calculate_dci_dia_thresh <- function(all_members, net_nodes, seg_weights, weighted, threshold, totweight){
 
   # Identify sink segment
@@ -321,74 +356,20 @@ calculate_dci_dia_thresh <- function(all_members, net_nodes, seg_weights, weight
   return(DCI_res)
 }
 
-gather_dist <- function(from, to, nodes){
 
-  # Extract sinks and barriers
-  sinks_bars <- subset(nodes, nodes$type %in% c("Sink", "Barrier"))
-
-  # Get from segment local sink
-  from_sink <- sinks_bars[sinks_bars$member.label == from,]$node.label
-
-  # Get to segment local sink
-  to_sink <- sinks_bars[sinks_bars$member.label == to,]$node.label
-
-  # Get sink-to-sink path between segments
-  path <- path_between(from_sink, to_sink)
-
-  # Join member labels for nodes on path
-  full_path <- nodes %>%
-    dplyr::filter(node.label %in% path) %>%
-    dplyr::select(node.label, member.label)
-
-  # Case when segments are neighbours
-  if(length(unique(full_path$member.label)) == 2){
-    return(0)
-  }
-
-  # Trim path to only segment-segment distance
-  path_ss <- full_path[!(full_path$member.label %in% c(from, to)),]$node.label
-
-  # Get segment-segment path distance
-  dist_ss <- sum(nodes %>%
-                   dplyr::filter(node.label %in% path_ss) %>%
-                   dplyr::pull(riv_length), na.rm = TRUE)
-
-  # Return segment-segment distance
-  return(dist_ss)
-
-}
-
-gather_perm <- function(from, to, nodes){
-
-  message(paste0("From ", from, " to ", to))
-
-  # Condition when from and to are the same
-  if(from == to){
-    return(1)
-  }
-
-  # Extract sinks and barriers
-  sinks_bars <- subset(nodes, nodes$type %in% c("Sink", "Barrier"))
-
-  # Get from segment local sink
-  from_sink <- sinks_bars[sinks_bars$member.label == from,]$node.label
-
-  # Get to segment local sink
-  to_sink <- sinks_bars[sinks_bars$member.label == to,]$node.label
-
-  # Get path between segments
-  path <- path_between(from_sink, to_sink)
-
-  # Gather permeabilities across path
-  path_perm <- prod(nodes %>%
-                      dplyr::filter(node.label %in% path) %>%
-                      dplyr::pull(perm))
-
-  # Return permeability between segments
-  return(path_perm)
-
-}
-
+#' Calculate sub-segmental DCI component between a single pair of segments
+#'
+#' @inheritParams calculate_dci_pot_thresh
+#' @param from The origin segment's membership label.
+#' @param to The destination segment's membership label.
+#' @param distance The distance, in map units, between the two segments as calculated by \code{\link{gather_dist}}.
+#' @param perm The permeability between the two segments as calculated by \code{\link{gather_perm}}.
+#' @param nodes An \code{\link{sf}} object of the nodes of the \code{\link{river_net}} object with river attributes joined.
+#'
+#' @return The sub-segmental DCI component between given pair of segments.
+#'
+#' @keywords internal
+#' @export
 gather_dci <- function(from, to, distance, perm, nodes, seg_weights, threshold, totweight, weighted){
 
   # Case when from and to segment are the same
@@ -429,7 +410,7 @@ gather_dci <- function(from, to, distance, perm, nodes, seg_weights, threshold, 
     entrance_label <- barriers[which.min(barriers$depth),]$node.label
     entrance <- sf::st_geometry(nodes[nodes$node.label %in% entrance_label,])
 
-  # If from segment is downstream of to segment
+    # If from segment is downstream of to segment
   } else {
 
     # Set entrance to one node upstream of to sink, extract geometry
@@ -475,6 +456,103 @@ gather_dci <- function(from, to, distance, perm, nodes, seg_weights, threshold, 
 
 }
 
+#' Gather total distance between two nodes
+#'
+#' @param from The from node's label
+#' @param to The to node's label
+#' @param nodes An \code{\link{sf}} object of the nodes of the \code{\link{river_net}} object with river attributes joined.
+#'
+#' @return The distance, in map units, between the two given segments.
+#'
+#' @keywords internal
+#' @export
+gather_dist <- function(from, to, nodes){
+
+  # Extract sinks and barriers
+  sinks_bars <- subset(nodes, nodes$type %in% c("Sink", "Barrier"))
+
+  # Get from segment local sink
+  from_sink <- sinks_bars[sinks_bars$member.label == from,]$node.label
+
+  # Get to segment local sink
+  to_sink <- sinks_bars[sinks_bars$member.label == to,]$node.label
+
+  # Get sink-to-sink path between segments
+  path <- path_between(from_sink, to_sink)
+
+  # Join member labels for nodes on path
+  full_path <- nodes %>%
+    dplyr::filter(node.label %in% path) %>%
+    dplyr::select(node.label, member.label)
+
+  # Case when segments are neighbours
+  if(length(unique(full_path$member.label)) == 2){
+    return(0)
+  }
+
+  # Trim path to only segment-segment distance
+  path_ss <- full_path[!(full_path$member.label %in% c(from, to)),]$node.label
+  #'
+  #' @param from The from node's label
+  # Get segment-segment path distance
+  dist_ss <- sum(nodes %>%
+                   dplyr::filter(node.label %in% path_ss) %>%
+                   dplyr::pull(riv_length), na.rm = TRUE)
+
+  # Return segment-segment distance
+  return(dist_ss)
+
+}
+
+#' Gather permeability between two nodes
+#'
+#' @inheritParams gather_dist
+#'
+#' @return The permeability from 0 to 1 between the given nodes.
+#'
+#' @keywords internal
+#' @export
+gather_perm <- function(from, to, nodes){
+
+  message(paste0("From ", from, " to ", to))
+
+  # Condition when from and to are the same
+  if(from == to){
+    return(1)
+  }
+
+  # Extract sinks and barriers
+  sinks_bars <- subset(nodes, nodes$type %in% c("Sink", "Barrier"))
+
+  # Get from segment local sink
+  from_sink <- sinks_bars[sinks_bars$member.label == from,]$node.label
+
+  # Get to segment local sink
+  to_sink <- sinks_bars[sinks_bars$member.label == to,]$node.label
+
+  # Get path between segments
+  path <- path_between(from_sink, to_sink)
+
+  # Gather permeabilities across path
+  path_perm <- prod(nodes %>%
+                      dplyr::filter(node.label %in% path) %>%
+                      dplyr::pull(perm))
+
+  # Return permeability between segments
+  return(path_perm)
+
+}
+
+
+#' Find the path between two nodes
+#'
+#' @param s1 The label, a logical vector, of the origin node
+#' @param s2 The label, a logical vector, of the destination node
+#'
+#' @return A list of logical vectors in order to move from the origin to the destination node.
+#'
+#' @keywords internal
+#' @export
 path_between <- function(s1, s2){
   # Get path from segments to root
   s1_path <- path_to_root(s1)
@@ -488,6 +566,14 @@ path_between <- function(s1, s2){
   return(path)
 }
 
+#' Find the path to the root (sink) of the river network
+#'
+#' @param seg A node label represented by a logical vector.
+#'
+#' @return A list of logical vectors in order to move from the origin to the root (sink).
+#'
+#' @keywords internal
+#' @export
 path_to_root <- function(seg){
   # Prepare input vectors
   path <- rep(seg, each = length(unlist(seg)))

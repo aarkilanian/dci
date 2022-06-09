@@ -7,11 +7,12 @@
 join_attributes(net, nodes, tolerance = NULL)
 }
 \arguments{
-\item{net}{A \code{\link{river_net}} object.}
+\item{nodes}{An \code{\link[sf]{sf}} object of "barrier", "sink", and "poi" points.}
 
-\item{nodes}{An \code{\link[sf]{sf}} object of binded "barrier", "sink", or "other" points.}
-
-\item{tolerance}{An integer value, the maximum distance in map units from rivers to given points. Set to NULL by default.}
+\item{tolerance}{A numeric value specifying the distance in map units that points should be snapped to rivers. Set to NULL by default.}
+}
+\value{
+A \code{\link{river_net}} object with the supplied nodes' attributes joined to its nodes.
 }
 \description{
 Join variables from network nodes to \code{\link{river_net}} object.

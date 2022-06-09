@@ -7,10 +7,10 @@
 river_net(
   rivers,
   barriers,
-  sinks = NULL,
+  sink = NULL,
   poi = NULL,
   check = TRUE,
-  tolerance = 10
+  tolerance = NULL
 )
 }
 \arguments{
@@ -18,11 +18,13 @@ river_net(
 
 \item{barriers}{A \code{barriers} object returned by \code{\link{import_points}}.}
 
-\item{sinks}{A \code{sinks} object returned by \code{\link{import_points}}. This data is optional.}
+\item{sink}{A \code{sink} object returned by \code{\link{import_points}}. This data is optional.}
 
-\item{poi}{A \code{poi} object returned by \code{\link{import_points}}. This data is optional.}
+\item{poi}{A \code{poi} object (points of interest) returned by \code{\link{import_points}}. This data is optional.}
 
 \item{check}{A logical value, if \code{TRUE}, the default, dendritic topology of the river network is enforced with \code{\link{enforce_dendritic}}.}
+
+\item{tolerance}{A numeric value specifying the distance in map units that points should be snapped to rivers. Set to NULL by default.}
 }
 \value{
 An object of class \code{\link{river_net}} representing the river network formed by the geospatial lines and points provided.

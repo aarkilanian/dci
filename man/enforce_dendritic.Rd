@@ -4,14 +4,10 @@
 \alias{enforce_dendritic}
 \title{Enforce dendritic river topology}
 \usage{
-enforce_dendritic(rivers, divergence = TRUE, complex = TRUE, correct = FALSE)
+enforce_dendritic(rivers, correct = FALSE)
 }
 \arguments{
 \item{rivers}{A \code{rivers} object returned by \code{\link{import_rivers}}.}
-
-\item{divergence}{A logical value, when \code{TRUE}, the default, divergences are corrected.}
-
-\item{complex}{A logical value, when \code{TRUE}, the default, complex confluences are corrected.}
 
 \item{correct}{A logical value, when \code{FALSE}, the default, corrections are not automatically applied and a \code{\link{sf}} object of lines is returned with topological errors indicated. If \code{TRUE} errors are automatically corrected.}
 }
