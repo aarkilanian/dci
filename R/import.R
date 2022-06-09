@@ -32,11 +32,10 @@ import_rivers <- function(rivers, quiet = FALSE){
   rivers.old <- sf::st_zm(rivers)
 
   # Prepare rivers
-  rivers <- rivers %>%
-    # Remove Z/M dimensions
-    sf::st_zm() %>%
-    # Cast all features to linestring geometries
-    sf::st_cast("LINESTRING")
+  # Remove Z/M dimensions
+  rivers <- sf::st_zm(rivers)
+  # Cast all features to linestring geometries
+  rivers <- sf::st_cast(rivers, "LINESTRING")
 
   # Check for valid and empty geometries
   if(any(!(sf::st_is_valid(rivers))) | any(sf::st_is_empty(rivers))){
@@ -44,17 +43,18 @@ import_rivers <- function(rivers, quiet = FALSE){
   }
 
   # Identify components
-  net <- rivers %>%
-    sfnetworks::as_sfnetwork() %>%
+  net <- sfnetworks::as_sfnetwork(rivers) %>%
     dplyr::mutate(component = tidygraph::group_components()) %>%
-    dplyr::group_by(component)
+    dplyr::group_by(.data$component)
+ comps <- activate(net, nodes) %>%
+   as.data.frame(.data) %>%
+   dplyr::select(.data$component)
 
   # Determine largest component and extract
-  big_comp <- sort(table(net %>% activate(nodes) %>% data.frame() %>% dplyr::select(component)), decreasing = TRUE)[1]
+  big_comp <- sort(table(comps), decreasing = TRUE)[1]
   big_comp <- as.integer(names(big_comp))
-  net <- net %>%
-    dplyr::filter(component == big_comp)
-  rivers <- net %>% activate(edges) %>% sf::st_as_sf()
+  net <- net %>% dplyr::filter(.data$component == big_comp)
+  rivers <- activate(net, edges)
 
   # Calculate river lengths
   rivers$riv_length <- as.double(sf::st_length(rivers))
