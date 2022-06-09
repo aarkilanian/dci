@@ -12,8 +12,7 @@ node_labeling <- function(net){
   # Create variable to keep track of created labels outside loop
   assign('past_label', c(FALSE), labelenv)
   # Apply labeling function over network
-  net <- net %>%
-    activate(nodes) %>%
+  net <- activate(net, nodes) %>%
     dplyr::mutate(node.label = tidygraph::map_bfs(root = which(tidygraph::.N()$type == "Sink"),
                                     .f = node_labeler, env = labelenv, mode = "all"))
   # Return labeled network
@@ -30,18 +29,16 @@ node_labeling <- function(net){
 #' @export
 membership_labeling <- function(net){
   # Retrieve number of barriers
-  num_bar <- net %>%
-    activate(nodes) %>%
-    as.data.frame() %>%
-    dplyr::filter(type == "Barrier") %>%
-    nrow()
+  num_bar <- activate(net, nodes)
+    as.data.frame(.data) %>%
+    dplyr::filter(.data$type == "Barrier") %>%
+    nrow(.data)
   # Create new env
   memberenv <- new.env(parent = emptyenv())
   # Create variable in new environment to hold member IDs
   assign("labels", 1:(num_bar*2), envir = memberenv)
   # Apply labeling function over network
-  net <- net %>%
-    activate(nodes) %>%
+  net <- activate(net, nodes) %>%
     dplyr::mutate(member.label = tidygraph::map_dfs_int(root = which(tidygraph::.N()$type == "Sink"),
                                                     .f = membership_labeler, env = memberenv, mode = "all"))
 }
