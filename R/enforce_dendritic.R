@@ -200,7 +200,7 @@ correct_complex <- function(net, correct = TRUE){
       new_river2[[1]][num_coord/2 + 1] <- point_y
       new_river2 <- sf::st_sf(new_river2) %>%
         dplyr::mutate(rivID = nrow(rivers) + 1) %>%
-        dplyr::rename(.data$geometry = new_river2)
+        dplyr::rename(.data, geometry = new_river2)
       new_river2$rivID[1] <- nrow(rivers) + 1
       # Remove old river and add new ones
       rivers <- rivers[rivers$rivID == new_nodes$rivID[i]] %>%

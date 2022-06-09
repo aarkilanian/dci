@@ -30,9 +30,9 @@ river_net <- function(rivers,
   }
 
   # Check sinks
-  if(!is.null(sinks)){
-    if(!("sinks" %in% class(sinks))){
-      stop("Sinks must first be imported with `import_points`")
+  if(!is.null(sink)){
+    if(!("sink" %in% class(sink))){
+      stop("Sink must first be imported with `import_points`")
     }
   }
 

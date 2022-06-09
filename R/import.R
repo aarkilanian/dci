@@ -119,7 +119,7 @@ import_points <- function(pts, type){
   if(type == "sink"){
 
     # Check that there is only 1 point
-    if(nrow(pts) == 1) stop("Multiple points found. The sink must be a single point.")
+    if(nrow(pts) != 1) stop("Multiple points found. The sink must be a single point.")
 
     # Prepare sinks
     # Remove Z/M dimensions

@@ -31,7 +31,7 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
     riv_pts <- sf::st_line_sample(rivers[riv_ind,], density = 1/1) %>%
       sf::st_sf(.data) %>%
       sf::st_cast(.data, "POINT") %>%
-      dplyr::mutate(.data$group = 1)
+      dplyr::mutate(.data, group = 1)
 
     # Find nearest point (except start and end)
     nrst_ind <- which.min(sf::st_distance(pts[i,], riv_pts[-c(1, length(riv_pts)),])) + 2
@@ -123,7 +123,7 @@ join_attributes <- function(net, nodes, tolerance = NULL){
     dplyr::left_join(.data, as.data.frame(nodes) %>% dplyr::select(-.data$geometry), by = c("rowID" = "key")) %>%
     dplyr::select(-.data$rowID) %>%
     # Set node type of topological nodes
-    dplyr::mutate(.data$type = dplyr::if_else(is.na(.data$type), "Topo", .data$type))
+    dplyr::mutate(.data, type = dplyr::if_else(is.na(.data$type), "Topo", .data$type))
 
   # Return joined network
   invisible(net)

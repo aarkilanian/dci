@@ -190,16 +190,16 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights){
                          to = to_segment,
                          perm) %>%
     dplyr::left_join(.data, seg_weights, by = c("from" = "member.label")) %>%
-    dplyr::rename(.data$from_len = segweight) %>%
+    dplyr::rename(.data, from_len = segweight) %>%
     dplyr::left_join(.data, seg_weights, by = c("to" = "member.label")) %>%
-    dplyr::rename(.data$to_len = segweight) %>%
+    dplyr::rename(.data, to_len = segweight) %>%
     dplyr::mutate(DCIs = from_len * to_len * perm * 100)
 
   # Group DCI results by from segment to obtain segmental DCI
   DCIs <- DCIs_sub %>%
     dplyr::group_by(.data$from) %>%
     dplyr::summarise(DCI = sum(.data$DCIs)) %>%
-    dplyr::rename(.data$segment = from)
+    dplyr::rename(.data, segment = from)
   DCI_glob <- sum(DCIs$DCI)
   DCIs <- DCIs %>%
     dplyr::mutate(DCI_rel = DCI/DCI_glob*100) %>%
@@ -237,16 +237,16 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights){
                          to = to_segment,
                          perm) %>%
     dplyr::left_join(.data, seg_weights, by = c("from" = "member.label")) %>%
-    dplyr::rename(.data$from_len = segweight) %>%
+    dplyr::rename(.data, from_len = segweight) %>%
     dplyr::left_join(.data, seg_weights, by = c("to" = "member.label")) %>%
-    dplyr::rename(.data$to_len = segweight) %>%
+    dplyr::rename(.data, to_len = segweight) %>%
     dplyr::mutate(DCIs = from_len * to_len * perm * 100)
 
   # Group DCI results by from segment to obtain segmental DCI
   DCIs <- DCIs_sub %>%
     dplyr::group_by(.data$to) %>%
     dplyr::summarise(DCI = sum(.data$DCIs)) %>%
-    dplyr::rename(.data$segment = to)
+    dplyr::rename(.data, segment = to)
   DCI_glob <- sum(DCIs$DCI)
   DCIs <- DCIs %>%
     dplyr::mutate(DCI_rel = .data$DCI/DCI_glob*100) %>%
@@ -297,7 +297,7 @@ calculate_dci_pot_thresh <- function(all_members, net_nodes, seg_weights, weight
   # Return result
   DCI_res <- data.frame(from_segment, to_segment, DCIs)
   DCI_res <- DCI_res %>%
-    dplyr::group_by(.data$segment = from_segment) %>%
+    dplyr::group_by(.data, segment = from_segment) %>%
     dplyr::summarise(DCI = sum(.data$DCIs, na.rm = TRUE)) %>%
     dplyr::mutate(DCI_rel = .data$DCI/DCI_glob*100) %>%
     as.data.frame(.data)
@@ -343,7 +343,7 @@ calculate_dci_dia_thresh <- function(all_members, net_nodes, seg_weights, weight
   DCI_res <- data.frame(from_segment, to_segment, DCIs)
   DCI_res <- DCI_res %>%
     dplyr::select(-.data$from_segment) %>%
-    dplyr::rename(.data$segment = to_segment, .data$DCI = DCIs) %>%
+    dplyr::rename(.data, segment = to_segment, DCI = DCIs) %>%
     dplyr::mutate(DCI_rel = .data$DCI/DCI_glob*100)
   return(DCI_res)
 }
