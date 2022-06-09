@@ -146,6 +146,9 @@ calculate_dci <- function(net, form, perm = NULL, weight = NULL, threshold = NUL
   # If distance threshold is supplied
   } else {
 
+    # Check if weighting is requested
+    if(!is.null(weight)) weighted <- TRUE
+
     # Potamodromous case
     if(form == "potamodromous") DCIs <- calculate_dci_pot_thresh(all_members, net_nodes, seg_weights, weighted, threshold, totweight)
 
