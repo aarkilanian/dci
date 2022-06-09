@@ -2,25 +2,25 @@
 #'
 #'Read and prepare geospatial river lines data for dci.
 #'
-#' @param path A character string or \code{\link{sf}} object, the path to a shapefile of river lines or \code{\link{sf}} object of rivers.
+#' @param rivers A character string or \code{\link{sf}} object, the path to a shapefile of river lines or \code{\link{sf}} object of rivers.
 #' @param quiet A logical value, if \code{FALSE} edited rivers are plotted with the original. Defaults to \code{FALSE}.
 #'
 #' @return Object of class rivers prepared for input to \code{\link{river_net}}
 #'
 #' @export
 
-import_rivers <- function(path, quiet = FALSE){
+import_rivers <- function(rivers, quiet = FALSE){
   # Check for path type
-  if(is.character(path)) sf <- FALSE
+  if(is.character(rivers)) sf <- FALSE
   else sf <- TRUE
   # Read shapefile from path if not sf object
   if(!sf){
     # Read in river with sf
-    rivers <- tryCatch(sf::read_sf(path),
+    rivers <- tryCatch(sf::read_sf(rivers),
       error = function(e) rlang::abort("invalid spatial data provided")
     )
   } else{
-    rivers <- path
+    rivers <- rivers
   }
 
   # Check that spatial data is lines
@@ -74,39 +74,38 @@ import_rivers <- function(path, quiet = FALSE){
 #'
 #'Read and prepare geospatial point data for dci.
 #'
-#' @param path A character string or \code{\link{sf}} object, the path to a shapefile of points or \code{\link{sf}} object of points.
+#' @param pts A character string or \code{\link{sf}} object, the path to a shapefile of points or \code{\link{sf}} object of points.
 #' @param type A character string, either of “barrier”, “sink”, or “poi” specifying the type of point.
-#' @param id An optional character vector specifying unique IDs for the points. Defaults to NULL
 #'
 #' @return Object of class barriers, sinks, or poi prepared for input to \code{\link{river_net}}
 #'
 #' @export
-import_points <- function(path, type, id = NULL){
+import_points <- function(pts, type){
 
   # Check that type is valid
   if(!(type %in% c("barriers", "sinks", "poi"))) stop("Points must be of 'barriers', 'sinks', or 'poi' type.")
 
   # Check for path type
-  if(is.character(path)) sf <- FALSE
+  if(is.character(pts)) sf <- FALSE
   else sf <- TRUE
   # Read shapefile from path if not sf object
   if(!sf){
     # Read in river with sf
-    points <- tryCatch(sf::read_sf(path),
+    pts <- tryCatch(sf::read_sf(pts),
                        error = function(e) rlang::abort("invalid spatial data provided")
     )
   } else{
-    points <- path
+    pts <- pts
   }
   # Check for valid and empty geometries
-  if(any(!(sf::st_is_valid(points))) | any(sf::st_is_empty(points))){
+  if(any(!(sf::st_is_valid(pts))) | any(sf::st_is_empty(pts))){
     stop("Invalid geometries detected in points")
   }
 
   # Check that id is valid
   if(!is.null(id)){
     user_id <- tryCatch(
-      as.character(points[[id]]),
+      as.character(pts[[id]]),
       error = function(e) {
         stop("Cannot convert id values to character strings: ", e, call. = FALSE)
       }
@@ -116,7 +115,7 @@ import_points <- function(path, type, id = NULL){
   # Barriers
   if(type == "barriers"){
     # Prepare barriers
-    barriers <- points %>%
+    barriers <- pts %>%
       # Remove Z/M dimension
       sf::st_zm() %>%
       # Assign barrier type
@@ -135,7 +134,7 @@ import_points <- function(path, type, id = NULL){
   # Sinks
   if(type == "sinks"){
     # Prepare sinks
-    sinks <- points %>%
+    sinks <- pts %>%
       # Remove Z/M dimensions
       sf::st_zm() %>%
       # Assign sink type
@@ -154,7 +153,7 @@ import_points <- function(path, type, id = NULL){
   # Points of interest
   if(type == "poi"){
     # Prepare other points
-    poi <- points %>%
+    poi <- pts %>%
       # Remove Z/M dimensions
       sf::st_zm() %>%
       # Assign other type
