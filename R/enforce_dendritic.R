@@ -10,8 +10,6 @@
 #'
 #' @inheritParams river_net
 #'
-#' @param divergence A logical value, when \code{TRUE}, the default, divergences are corrected.
-#' @param complex A logical value, when \code{TRUE}, the default, complex confluences are corrected.
 #' @param correct A logical value, when \code{FALSE}, the default, corrections are not automatically applied and a \code{\link{sf}} object of lines is returned with topological errors indicated. If \code{TRUE} errors are automatically corrected.
 #'
 #' @return If \code{correct} is \code{FALSE}, a \code{sf} object with non-dendritic topology indicated in columns "divergent" and "complex". These error columns indicate for each river line if that river is part of a divergent pair or complex confluence. The columns are populated by integers which indicate with which river they share a topological error. If \code{correct} is \code{TRUE}, a \code{rivers} object with automatic topological corrections applied is returned.
@@ -31,18 +29,26 @@ enforce_dendritic <- function(rivers, correct = FALSE){
     # Recalculate river lengths
     net$riv_length <- as.double(sf::st_length(net))
     # Return corrected rivers
-    if("sfnetwork" %in% class(net)) invisible(net %>% activate(edges) %>% sf::st_as_sf())
-    else invisible(net)
+    invisible(net)
 
   # If errors are set to be manually edited, use full network
   } else {
     net_div <- correct_divergences(net, correct)
     net_comp <- correct_complex(net_div, correct)
+    invisible(net_comp)
   }
 
 }
 
-# Internal divergence correction function
+#' Correct river divergences
+#'
+#' @inheritParams calculate_dci
+#' @inheritParams enforce_dendritic
+#'
+#' @return If correct is \code{TRUE} a \code{\link{river_net}} object with the shorter of each divergent pair removed. If correct is \code{FALSE} a \code{\link{}} object with divergent pairs identified with a shared number in the new "divergent" column.
+#'
+#' @keywords internal
+#' @export
 correct_divergences <- function(net, correct = TRUE){
 
   # If no corrections desired, find and return divergences
@@ -92,7 +98,15 @@ correct_divergences <- function(net, correct = TRUE){
   }
 }
 
-# Internal complex confluence correction function
+#' Correct complex confluences
+#'
+#' @inheritParams calculate_dci
+#' @inheritParams enforce_dendritic
+#'
+#' @return If correct is \code{TRUE} a \code{\link{sf}} object of rivers with complex confluences separated into two closely located valid confluences. If correct is \code{FALSE} a \code{\link{sf}} object with rivers participating in complex confluences labeled with the same number ina  new "complex" column.
+#'
+#' @keywords internal
+#' @export
 correct_complex <- function(net, correct = TRUE){
   # Identify complex confluences
   complex_nodes <- net %>%
