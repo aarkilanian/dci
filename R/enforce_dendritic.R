@@ -18,8 +18,7 @@
 enforce_dendritic <- function(rivers, correct = FALSE){
 
   # Create river network
-  net <- rivers %>%
-    sfnetworks::as_sfnetwork(length_as_weight = TRUE)
+  net <- sfnetworks::as_sfnetwork(rivers, length_as_weight = TRUE)
 
   # Correct complex confluences
   # If automatically correcting topology, use network with divergences corrected
@@ -54,38 +53,35 @@ correct_divergences <- function(net, correct = TRUE){
   # If no corrections desired, find and return divergences
   if(!correct){
     # Find and identify divergent pairs
-    riv_divergences <- net %>%
-      activate(edges) %>%
-      sf::st_as_sf() %>%
-      dplyr::group_by(from) %>%
-      dplyr::mutate(grp_size = dplyr::n()) %>%
-      dplyr::mutate(divergent = dplyr::if_else(grp_size > 1, from, NA_integer_))
+    riv_divergences <- activate(net, edges) %>%
+      sf::st_as_sf(.data) %>%
+      dplyr::group_by(.data$from) %>%
+      dplyr::mutate(.data, grp_size = dplyr::n()) %>%
+      dplyr::mutate(.data, divergent = dplyr::if_else(grp_size > 1, from, NA_integer_))
     # Return non-corrected divergences
     invisible(riv_divergences)
   }
 
   # Find and correct divergences. Always keep longest stream
-  net_corrected <- net %>%
-    activate(edges) %>%
-    dplyr::group_by(from) %>%
-    dplyr::filter(weight == max(weight)) %>%
-    tidygraph::ungroup()
+  net_corrected <- activate(net, edges) %>%
+    dplyr::group_by(.data$from) %>%
+    dplyr::filter(.data$weight == max(.data$weight)) %>%
+    tidygraph::ungroup(.data)
 
   # Identify components
-  net_comp <- net_corrected %>%
-    sfnetworks::as_sfnetwork() %>%
-    dplyr::mutate(component = tidygraph::group_components()) %>%
-    dplyr::group_by(component)
+  net_comp <- sfnetworks::as_sfnetwork(net_corrected) %>%
+    dplyr::mutate(.data, component = tidygraph::group_components()) %>%
+    dplyr::group_by(.data$component)
 
   # Determine largest component and extract
   big_comp <- sort(table(net_comp %>% activate(nodes) %>% data.frame() %>% dplyr::select(component)), decreasing = TRUE)[1]
   big_comp <- as.integer(names(big_comp))
   net_corrected <- net_corrected %>%
-    dplyr::filter(component == big_comp)
+    dplyr::filter(.data$component == big_comp)
 
   # Get number of removed rivers
-  orig_num <- nrow(net %>% activate(edges) %>% as.data.frame())
-  cor_num <- nrow(riv_corrected %>% activate(edges) %>% as.data.frame())
+  orig_num <- nrow(as.data.frame(activate(net, edges)))
+  cor_num <- nrow(as.data.frame(activate(net, edges)))
   num_div <- orig_num - cor_num
 
   # Print number of corrected divergences
@@ -110,27 +106,27 @@ correct_divergences <- function(net, correct = TRUE){
 correct_complex <- function(net, correct = TRUE){
   # Identify complex confluences
   complex_nodes <- net %>%
-    tidygraph::convert(tidygraph::to_undirected) %>%
-    activate(nodes) %>%
+    tidygraph::convert(.data, tidygraph::to_undirected)
+
+  complex_nodes <- activate(complex_nodes, nodes) %>%
     dplyr::mutate(nodeID = dplyr::n()) %>%
     dplyr::mutate(degree = tidygraph::centrality_degree()) %>%
-    sf::st_as_sf() %>%
-    dplyr::filter(degree >= 4) %>%
-    dplyr::select(degree)
+    sf::st_as_sf(.data) %>%
+    dplyr::filter(.data$degree >= 4) %>%
+    dplyr::select(.data$degree)
 
   # If confluences have over 4 inputs recommend manual correction
   if(any(complex_nodes$degree > 4)) stop("Complex confluences with over 3 input tributaries have been detected. Use the standalone `enforce_dendritic()` and correct returned errors manually.")
   # If no errors return unchanged rivers
   if(length(complex_nodes$degree) == 0){
     message("No complex confluences found.")
-    invisible(net %>% activate(edges) %>% sf::st_as_sf())
+    invisible(sf::st_as_sf(activate(net, edges)))
 
   # Correct complex confluences detected
   } else {
     # Extract network rivers
-    rivers <- net %>%
-      activate(edges) %>%
-      sf::st_as_sf() %>%
+    rivers <- activate(net, edges) %>%
+      sf::st_as_sf(.data) %>%
       dplyr::mutate(rivID = 1:dplyr::n())
     sf::st_agr(rivers) <- "constant"
     # Add ID to complex nodes
@@ -138,7 +134,7 @@ correct_complex <- function(net, correct = TRUE){
       dplyr::mutate(complexID = 1:dplyr::n())
     # Create small buffer around confluence point
     buffer <- sf::st_buffer(complex_nodes, dist = 1) %>%
-      sf::st_cast("MULTILINESTRING", group_or_split = FALSE)
+      sf::st_cast(.data, "MULTILINESTRING", group_or_split = FALSE)
     sf::st_agr(buffer) <- "constant"
 
     # If manual editing desired, identify complex confluence rivers
@@ -148,21 +144,20 @@ correct_complex <- function(net, correct = TRUE){
     }
 
     # Create points at intersection of rivers and buffers
-    buff_intersect <- sf::st_intersection(rivers, buffer)%>%
-      dplyr::select(rivID, complexID, to)
+    buff_intersect <- sf::st_intersection(rivers, buffer)
+    buff_intersect <- buff_intersect[c("rivID", "complexID", "to")]
     # Select points out of buffer intersections for new confluence nodes on downstream edges
     new_nodes <- buff_intersect %>%
-      dplyr::group_by(complexID, to) %>%
-      dplyr::tally() %>%
-      dplyr::filter(n == 1) %>%
-      dplyr::left_join(as.data.frame(buff_intersect) %>% dplyr::select(to, rivID), by = c("to")) %>%
-      dplyr::select(complexID, rivID)
+      dplyr::group_by(.data[c("complexID","to")]) %>%
+      dplyr::tally(.data) %>%
+      dplyr::filter(.data$n == 1) %>%
+      dplyr::left_join(.data, as.data.frame(buff_intersect)[c("to", "rivID")], by = c("to")) %>%
+      dplyr::select(.data[c("complexID","rivID")])
     # Find closest rivers to new points
     modify_rivers <- integer(length = nrow(complex_nodes))
     for(confluence in new_nodes$complexID){
       # Gather participating rivers
-      candidates <- buff_intersect %>%
-        dplyr::filter(complexID == confluence)
+      candidates <- buff_intersect[buff_intersect$complexID == confluence]
       # Determine closest river to new confluence
       distances <- sf::st_distance(new_nodes[confluence,], candidates)
       ind <- which(distances == min(distances[distances > units::as_units(0, "m")]))
@@ -197,7 +192,7 @@ correct_complex <- function(net, correct = TRUE){
                                                point_x,
                                                start_y,
                                                point_y), 2)), crs = sf::st_crs(rivers)) %>%
-        sf::st_sf() %>%
+        sf::st_sf(.data) %>%
         dplyr::mutate(rivID = new_nodes$rivID[i])
       # Create second line segment from new confluence to the end of original
       new_river2 <- sf::st_geometry(old_river)
@@ -205,12 +200,11 @@ correct_complex <- function(net, correct = TRUE){
       new_river2[[1]][num_coord/2 + 1] <- point_y
       new_river2 <- sf::st_sf(new_river2) %>%
         dplyr::mutate(rivID = nrow(rivers) + 1) %>%
-        dplyr::rename(geometry = new_river2)
+        dplyr::rename(.data$geometry = new_river2)
       new_river2$rivID[1] <- nrow(rivers) + 1
       # Remove old river and add new ones
-      rivers <- rivers %>%
-        dplyr::filter(!(rivID == new_nodes$rivID[i])) %>%
-        dplyr::bind_rows(new_river1, new_river2)
+      rivers <- rivers[rivers$rivID == new_nodes$rivID[i]] %>%
+        dplyr::bind_rows(.data, new_river1, new_river2)
     }
     # Return modified rivers
     invisible(rivers)
