@@ -9,28 +9,33 @@
 #' @keywords internal
 #' @export
 split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
+
   # Remove sinks if present
   if("Sink" %in% pts$type){
-  pts <- pts %>%
-    dplyr::filter(type != "Sink")
-}
+  pts <- pts[pts$type != "Sink"]
+  }
+
   for(i in 1:nrow(pts)){
+
     # Update nearest river features
     riv_distances <- sf::st_distance(rivers, pts[i,])
     riv_ind <- which.min(riv_distances)
-    # TODO review this
+
     # Skip if distance is above threshold
     if(!is.null(tolerance)){
       min_dist <- riv_distances[riv_ind]
       if(as.double(min_dist) > tolerance) next()
     }
+
     # Place points on rivers
     riv_pts <- sf::st_line_sample(rivers[riv_ind,], density = 1/1) %>%
-      sf::st_sf() %>%
-      sf::st_cast("POINT") %>%
-      dplyr::mutate(group = 1)
+      sf::st_sf(.data) %>%
+      sf::st_cast(.data, "POINT") %>%
+      dplyr::mutate(.data$group = 1)
+
     # Find nearest point (except start and end)
     nrst_ind <- which.min(sf::st_distance(pts[i,], riv_pts[-c(1, length(riv_pts)),])) + 2
+
     # Create first segment
     riv_start <- sf::st_geometry(rivers[riv_ind,])
     riv_len <- length(riv_start[[1]])
@@ -40,13 +45,14 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
     sf::st_geometry(riv_pts[1,]) <- sf::st_geometry(riv_start)
     # Convert river points to line
     river1_geom <- riv_pts[1:nrst_ind,] %>%
-      dplyr::group_by(group) %>%
-      dplyr::summarise(do_union = FALSE) %>%
-      sf::st_cast("LINESTRING") %>%
-      sf::st_geometry()
+      dplyr::group_by(.data$group) %>%
+      dplyr::summarise(.data, do_union = FALSE) %>%
+      sf::st_cast(.data, "LINESTRING") %>%
+      sf::st_geometry(.data)
     river1 <- rivers[riv_ind,]
     sf::st_geometry(river1) <- river1_geom
     river1$riv_length <- as.double(sf::st_length(river1))
+
     # Create second segment
     # If point is close to end of river line
     if(nrow(riv_pts) == nrst_ind){
@@ -64,10 +70,10 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
       riv_end <- sf::st_sfc(sf::st_point(c(riv_end[[1]][riv_len/2], riv_end[[1]][riv_len])), crs = sf::st_crs(rivers))
       sf::st_geometry(riv_pts[nrow(riv_pts),]) <- sf::st_geometry(riv_end)
       river2_geom <- riv_pts[nrst_ind:nrow(riv_pts),] %>%
-        dplyr::group_by(group) %>%
-        dplyr::summarise(do_union = FALSE) %>%
-        sf::st_cast("LINESTRING") %>%
-        sf::st_geometry()
+        dplyr::group_by(.data$group) %>%
+        dplyr::summarise(.data, do_union = FALSE) %>%
+        sf::st_cast(.data, "LINESTRING") %>%
+        sf::st_geometry(.data)
       river2 <- rivers[riv_ind,]
       sf::st_geometry(river2) <- river2_geom
       river2$riv_length <- as.double(sf::st_length(river2))
@@ -91,14 +97,18 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
 #' @keywords internal
 #' @export
 join_attributes <- function(net, nodes, tolerance = NULL){
+
+  # Extract network nodes
+  net_nodes <- activate(net, nodes) %>%
+    sf::st_as_sf(.data)
+
   # Find nearest river network node
-  nrst <- nodes %>%
-    sf::st_nearest_feature(net %>% activate(nodes) %>% sf::st_as_sf())
+  nrst <-  sf::st_nearest_feature(nodes, net_nodes)
   nodes$key <- nrst
+
   # If a tolerance is specified, avoid joining nodes outside that tolerance
   if(!is.null(tolerance)){
     # Get distance to nearest node
-    net_nodes <- net %>% activate(nodes) %>% sf::st_as_sf()
     nrst_dist <- sf::st_distance(nodes, net_nodes[nrst,])
     nrst_dist <- diag(nrst_dist)
     # Identify nodes outside tolerance
@@ -106,14 +116,15 @@ join_attributes <- function(net, nodes, tolerance = NULL){
     nodes <- nodes[within_tolerance,]
   # If no tolerance use all nodes
   } else nodes <- nodes
+
   # Join special nodes' attributes to network nodes
-  net <- net %>%
-    activate(nodes) %>%
+  net <- activate(net, nodes) %>%
     dplyr::mutate(rowID = dplyr::row_number()) %>%
-    dplyr::left_join(as.data.frame(nodes) %>% dplyr::select(-geometry), by = c("rowID" = "key")) %>%
-    dplyr::select(-rowID) %>%
+    dplyr::left_join(.data, as.data.frame(nodes) %>% dplyr::select(-.data$geometry), by = c("rowID" = "key")) %>%
+    dplyr::select(-.data$rowID) %>%
     # Set node type of topological nodes
-    dplyr::mutate(type = dplyr::if_else(is.na(type), "Topo", type))
+    dplyr::mutate(.data$type = dplyr::if_else(is.na(.data$type), "Topo", .data$type))
+
   # Return joined network
   invisible(net)
 }
