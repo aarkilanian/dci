@@ -23,14 +23,10 @@ calculate_dci <- function(net, form, perm = NULL, weight = NULL, threshold = NUL
   }
 
   # Extract edges
-  net_edges <- net %>%
-    activate(edges) %>%
-    as.data.frame()
+  net_edges <- as.data.frame(activate(net, edges))
 
   # Extract nodes
-  net_nodes <- net %>%
-    activate(nodes) %>%
-    as.data.frame()
+  net_nodes <- as.data.frame(activate(net, nodes))
 
   # Check that permeability is valid
   if(!is.null(perm)){
@@ -82,27 +78,25 @@ calculate_dci <- function(net, form, perm = NULL, weight = NULL, threshold = NUL
   # Weights from edges associated w/ upstream nodes
   net_nodes <- net_nodes %>%
     dplyr::mutate(nodeID = dplyr::row_number()) %>%
-    dplyr::left_join(net_edges, by = c("nodeID" = "from")) %>%
-    sf::st_as_sf(sf_column_name = "geometry.x")
+    dplyr::left_join(.data, net_edges, by = c("nodeID" = "from")) %>%
+    sf::st_as_sf(.data, sf_column_name = "geometry.x")
   # Set sink length to 0
   net_nodes[net_nodes$type == "Sink",]$riv_length <- 0
 
   if(!(is.null(weight))){
     # Calculate total weighted length of segments
-    seg_weights <- net_nodes %>%
-      as.data.frame() %>%
+    seg_weights <- as.data.frame(net_nodes)
       dplyr::mutate(weighted_len = riv_length * riv_weight) %>%
-      dplyr::group_by(member.label) %>%
-      dplyr::summarise(segweight = sum(weighted_len, na.rm = TRUE)) %>%
+      dplyr::group_by(.data$member.label) %>%
+      dplyr::summarise(segweight = sum(.data$weighted_len, na.rm = TRUE)) %>%
       # Remove members with 0 length
-      dplyr::filter(segweight != 0)
+      dplyr::filter(.data$segweight != 0)
   } else {
     # Calculate segment total lengths
-    seg_weights <- net_nodes %>%
-      as.data.frame() %>%
-      dplyr::group_by(member.label) %>%
-      dplyr::summarise(segweight = sum(riv_length, na.rm = TRUE)) %>%
-      dplyr::filter(segweight != 0)
+    seg_weights <- as.data.frame(net_nodes) %>%
+      dplyr::group_by(.data$member.label) %>%
+      dplyr::summarise(segweight = sum(.data$riv_length, na.rm = TRUE)) %>%
+      dplyr::filter(.data$segweight != 0)
   }
 
   # Gather member IDs
@@ -128,7 +122,7 @@ calculate_dci <- function(net, form, perm = NULL, weight = NULL, threshold = NUL
       DCIs_pot <- calculate_dci_pot(all_members, net_nodes, seg_weights)
       DCIs_dia <- calculate_dci_dia(all_members, net_nodes, seg_weights, net_sink)
       DCIs <- DCIs_pot %>%
-        dplyr::left_join(DCIs_dia, by = "segment", suffix = c("_pot", "_dia"))
+        dplyr::left_join(.data, DCIs_dia, by = "segment", suffix = c("_pot", "_dia"))
     }
 
     # If sites are supplied, associate results to them
@@ -195,21 +189,21 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights){
   DCIs_sub <- data.frame(from = from_segment,
                          to = to_segment,
                          perm) %>%
-    dplyr::left_join(seg_weights, by = c("from" = "member.label")) %>%
-    dplyr::rename(from_len = segweight) %>%
-    dplyr::left_join(seg_weights, by = c("to" = "member.label")) %>%
-    dplyr::rename(to_len = segweight) %>%
+    dplyr::left_join(.data, seg_weights, by = c("from" = "member.label")) %>%
+    dplyr::rename(.data$from_len = segweight) %>%
+    dplyr::left_join(.data, seg_weights, by = c("to" = "member.label")) %>%
+    dplyr::rename(.data$to_len = segweight) %>%
     dplyr::mutate(DCIs = from_len * to_len * perm * 100)
 
   # Group DCI results by from segment to obtain segmental DCI
   DCIs <- DCIs_sub %>%
-    dplyr::group_by(from) %>%
-    dplyr::summarise(DCI = sum(DCIs)) %>%
-    dplyr::rename(segment = from)
+    dplyr::group_by(.data$from) %>%
+    dplyr::summarise(DCI = sum(.data$DCIs)) %>%
+    dplyr::rename(.data$segment = from)
   DCI_glob <- sum(DCIs$DCI)
   DCIs <- DCIs %>%
     dplyr::mutate(DCI_rel = DCI/DCI_glob*100) %>%
-    as.data.frame()
+    as.data.frame(.data)
 
   # Return DCIs summary
   return(DCIs)
@@ -227,10 +221,9 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights){
 calculate_dci_dia <- function(all_members, net_nodes, seg_weights){
 
   # Identify sink segment
-  sink_seg <- net %>%
-    activate(nodes) %>%
-    dplyr::filter(type == "Sink") %>%
-    dplyr::pull(member.label)
+  sink_seg <- activate(net, nodes) %>%
+    dplyr::filter(.data$type == "Sink") %>%
+    dplyr::pull(.data$member.label)
 
   # Determine segment pairs
   from_segment <- rep(sink_seg, times = length(all_members))
@@ -243,21 +236,21 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights){
   DCIs_sub <- data.frame(from = from_segment,
                          to = to_segment,
                          perm) %>%
-    dplyr::left_join(seg_weights, by = c("from" = "member.label")) %>%
-    dplyr::rename(from_len = segweight) %>%
-    dplyr::left_join(seg_weights, by = c("to" = "member.label")) %>%
-    dplyr::rename(to_len = segweight) %>%
+    dplyr::left_join(.data, seg_weights, by = c("from" = "member.label")) %>%
+    dplyr::rename(.data$from_len = segweight) %>%
+    dplyr::left_join(.data, seg_weights, by = c("to" = "member.label")) %>%
+    dplyr::rename(.data$to_len = segweight) %>%
     dplyr::mutate(DCIs = from_len * to_len * perm * 100)
 
   # Group DCI results by from segment to obtain segmental DCI
   DCIs <- DCIs_sub %>%
-    dplyr::group_by(to) %>%
-    dplyr::summarise(DCI = sum(DCIs)) %>%
-    dplyr::rename(segment = to)
+    dplyr::group_by(.data$to) %>%
+    dplyr::summarise(DCI = sum(.data$DCIs)) %>%
+    dplyr::rename(.data$segment = to)
   DCI_glob <- sum(DCIs$DCI)
   DCIs <- DCIs %>%
-    dplyr::mutate(DCI_rel = DCI/DCI_glob*100) %>%
-    as.data.frame()
+    dplyr::mutate(DCI_rel = .data$DCI/DCI_glob*100) %>%
+    as.data.frame(.data)
 
   # Return DCIs summary
   return(DCIs)
@@ -304,10 +297,10 @@ calculate_dci_pot_thresh <- function(all_members, net_nodes, seg_weights, weight
   # Return result
   DCI_res <- data.frame(from_segment, to_segment, DCIs)
   DCI_res <- DCI_res %>%
-    dplyr::group_by(segment = from_segment) %>%
-    dplyr::summarise(DCI = sum(DCIs, na.rm = TRUE)) %>%
-    dplyr::mutate(DCI_rel = DCI/DCI_glob*100) %>%
-    as.data.frame()
+    dplyr::group_by(.data$segment = from_segment) %>%
+    dplyr::summarise(DCI = sum(.data$DCIs, na.rm = TRUE)) %>%
+    dplyr::mutate(DCI_rel = .data$DCI/DCI_glob*100) %>%
+    as.data.frame(.data)
   return(DCI_res)
 }
 
@@ -320,10 +313,9 @@ calculate_dci_pot_thresh <- function(all_members, net_nodes, seg_weights, weight
 calculate_dci_dia_thresh <- function(all_members, net_nodes, seg_weights, weighted, threshold, totweight){
 
   # Identify sink segment
-  sink_seg <- net %>%
-    activate(nodes) %>%
-    dplyr::filter(type == "Sink") %>%
-    dplyr::pull(member.label)
+  sink_seg <- activate(net, nodes) %>%
+    dplyr::filter(.data$type == "Sink") %>%
+    dplyr::pull(.data$member.label)
 
   # Determine segment pairs
   from_segment <- rep(sink_seg, times = length(all_members))
@@ -350,9 +342,9 @@ calculate_dci_dia_thresh <- function(all_members, net_nodes, seg_weights, weight
   # Return result
   DCI_res <- data.frame(from_segment, to_segment, DCIs)
   DCI_res <- DCI_res %>%
-    dplyr::select(-from_segment) %>%
-    dplyr::rename(segment = to_segment, DCI = DCIs) %>%
-    dplyr::mutate(DCI_rel = DCI/DCI_glob*100)
+    dplyr::select(-.data$from_segment) %>%
+    dplyr::rename(.data$segment = to_segment, .data$DCI = DCIs) %>%
+    dplyr::mutate(DCI_rel = .data$DCI/DCI_glob*100)
   return(DCI_res)
 }
 
@@ -429,8 +421,8 @@ gather_dci <- function(from, to, distance, perm, nodes, seg_weights, threshold, 
 
   # Gather neighbourhood around exit (from segment)
   neighb <- net %>%
-    dplyr::filter(tidygraph::node_distance_from(sf::st_nearest_feature(exit, net), mode = "all", weights = riv_length) <= threshold) %>%
-    dplyr::filter(member.label == from)
+    dplyr::filter(.data, tidygraph::node_distance_from(sf::st_nearest_feature(exit, net), mode = "all", weights = riv_length) <= threshold) %>%
+    dplyr::filter(.data$member.label == from)
   neighb_length <- sum(neighb$riv_length)
 
   if(weighted){
@@ -482,8 +474,8 @@ gather_dist <- function(from, to, nodes){
 
   # Join member labels for nodes on path
   full_path <- nodes %>%
-    dplyr::filter(node.label %in% path) %>%
-    dplyr::select(node.label, member.label)
+    dplyr::filter(.data$node.label %in% path) %>%
+    dplyr::select(.data[c("node.label", "member.label")])
 
   # Case when segments are neighbours
   if(length(unique(full_path$member.label)) == 2){
@@ -496,8 +488,8 @@ gather_dist <- function(from, to, nodes){
   #' @param from The from node's label
   # Get segment-segment path distance
   dist_ss <- sum(nodes %>%
-                   dplyr::filter(node.label %in% path_ss) %>%
-                   dplyr::pull(riv_length), na.rm = TRUE)
+                   dplyr::filter(.data$node.label %in% path_ss) %>%
+                   dplyr::pull(.data$riv_length), na.rm = TRUE)
 
   # Return segment-segment distance
   return(dist_ss)
@@ -535,8 +527,8 @@ gather_perm <- function(from, to, nodes){
 
   # Gather permeabilities across path
   path_perm <- prod(nodes %>%
-                      dplyr::filter(node.label %in% path) %>%
-                      dplyr::pull(perm))
+                      dplyr::filter(.data$node.label %in% path) %>%
+                      dplyr::pull(.data$perm))
 
   # Return permeability between segments
   return(path_perm)
