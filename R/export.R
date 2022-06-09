@@ -13,15 +13,14 @@ export_dci <- function(net, results, type = "rivers"){
  if(type == "rivers"){
 
    # Extract nodes
-   nodes <- net %>% activate(nodes) %>% sf::st_as_sf()
+   nodes <- sf::st_as_sf(activate(net, nodes))
 
    # Join results to rivers
-   rivers <- net %>%
-     activate(edges) %>%
-     sf::st_as_sf() %>%
-     dplyr::left_join(as.data.frame(nodes), by = c("from" = "nodeID")) %>%
-     dplyr::left_join(results, by = c("member.label" = "segment")) %>%
-     dplyr::select(-c(node.label))
+   rivers <- activate(net, edges) %>%
+     sf::st_as_sf(.data) %>%
+     dplyr::left_join(.data, as.data.frame(nodes), by = c("from" = "nodeID")) %>%
+     dplyr::left_join(.data, results, by = c("member.label" = "segment")) %>%
+     dplyr::select(-.data$node.label)
 
    # Plot result
    print(
@@ -36,17 +35,16 @@ export_dci <- function(net, results, type = "rivers"){
  } else if(type == "barriers"){
 
    # Join results to barriers
-   barriers <- net %>%
-     activate(nodes) %>%
-     sf::st_as_sf() %>%
-     dplyr::filter(type %in% c("Barrier", "Sink")) %>%
-     dplyr::left_join(results, by = c("member.label" = "segment")) %>%
-     dplyr::select(-c(node.label))
+   barriers <- activate(net, nodes) %>%
+     sf::st_as_sf(.data) %>%
+     dplyr::filter(.data$type %in% c("Barrier", "Sink")) %>%
+     dplyr::left_join(.data, results, by = c("member.label" = "segment")) %>%
+     dplyr::select(-.data$node.label)
 
    # Plot results
    print(
    ggplot() +
-     geom_sf(data = net %>% activate(edges) %>% sf::st_as_sf(), col = "gray50") +
+     geom_sf(data = sf::st_as_sf(activate(net, edges)), col = "gray50") +
      geom_sf(data = barriers, aes(col = DCI)) +
      scale_colour_viridis_b()
    )
@@ -57,17 +55,16 @@ export_dci <- function(net, results, type = "rivers"){
  } else if(type == "poi"){
 
    # Join results to others
-   others <- net %>%
-     activate(nodes) %>%
-     sf::st_as_sf() %>%
-     dplyr::filter(type == "poi") %>%
-     dplyr::left_join(results, by = c("member.label" = "segment")) %>%
-     dplyr::select(-c(node.label))
+   others <- activate(net, nodes) %>%
+     sf::st_as_sf(.data) %>%
+     dplyr::filter(.data, type == "poi") %>%
+     dplyr::left_join(.data, results, by = c("member.label" = "segment")) %>%
+     dplyr::select(-.data$node.label)
 
    # Plot results
    print(
    ggplot() +
-     geom_sf(data = net %>% activate(edges) %>% sf::st_as_sf(), col = "gray50") +
+     geom_sf(data = sf::st_as_sf(activate(net, edges)), col = "gray50") +
      geom_sf(data = others, aes(col = DCI)) +
      scale_colour_viridis_b()
    )
