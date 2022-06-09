@@ -102,29 +102,13 @@ import_points <- function(pts, type){
     stop("Invalid geometries detected in points")
   }
 
-  # Check that id is valid
-  if(!is.null(id)){
-    user_id <- tryCatch(
-      as.character(pts[[id]]),
-      error = function(e) {
-        stop("Cannot convert id values to character strings: ", e, call. = FALSE)
-      }
-    )
-  }
-
   # Barriers
   if(type == "barriers"){
     # Prepare barriers
-    barriers <- pts %>%
-      # Remove Z/M dimension
-      sf::st_zm() %>%
-      # Assign barrier type
-      dplyr::mutate(type = "Barrier")
-
-    # Add user provided ID
-    if(!is.null(id)){
-      barriers$user_id <- user_id
-    }
+    # Remove Z/M dimension
+    barriers <- sf::st_zm(pts)
+    # Assign barrier type
+    barriers$type <- "Barrier"
 
     # Return barriers
     barriers <- structure(barriers, class = c("barriers", class(barriers)))
@@ -138,16 +122,10 @@ import_points <- function(pts, type){
     if(nrow(pts) == 1) stop("Multiple points found. The sink must be a single point.")
 
     # Prepare sinks
-    sink <- pts %>%
-      # Remove Z/M dimensions
-      sf::st_zm() %>%
-      # Assign sink type
-      dplyr::mutate(type = "Sink")
-
-    # Add user provided ID
-    if(!is.null(id)){
-      sinks$user_id <- user_id
-    }
+    # Remove Z/M dimensions
+    sink <- sf::st_zm(pts)
+    # Assign sink type
+    sink$type <- "Sink"
 
     # Return sinks
     sink <- structure(sinks, class = c("sink", class(sinks)))
@@ -156,17 +134,11 @@ import_points <- function(pts, type){
   }
   # Points of interest
   if(type == "poi"){
-    # Prepare other points
-    poi <- pts %>%
-      # Remove Z/M dimensions
-      sf::st_zm() %>%
-      # Assign other type
-      dplyr::mutate(type = "poi")
-
-    # Add user provided ID
-    if(!is.null(id)){
-      poi$user_id <- user_id
-    }
+    # Prepare poi points
+    # Remove Z/M dimensions
+    poi <- sf::st_zm(pts)
+    # Assign poi type
+    poi$type <- "poi"
 
     # Return others
     poi <- structure(poi, class = c("poi", class(poi)))
