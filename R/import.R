@@ -77,13 +77,13 @@ import_rivers <- function(rivers, quiet = FALSE){
 #' @param pts A character string or \code{\link{sf}} object, the path to a shapefile of points or \code{\link{sf}} object of points.
 #' @param type A character string, either of “barrier”, “sink”, or “poi” specifying the type of point.
 #'
-#' @return Object of class barriers, sinks, or poi prepared for input to \code{\link{river_net}}
+#' @return Object of class barriers, sink, or poi prepared for input to \code{\link{river_net}}
 #'
 #' @export
 import_points <- function(pts, type){
 
   # Check that type is valid
-  if(!(type %in% c("barriers", "sinks", "poi"))) stop("Points must be of 'barriers', 'sinks', or 'poi' type.")
+  if(!(type %in% c("barriers", "sink", "poi"))) stop("Points must be of 'barriers', 'sink', or 'poi' type.")
 
   # Check for path type
   if(is.character(pts)) sf <- FALSE
@@ -131,10 +131,14 @@ import_points <- function(pts, type){
     return(barriers)
   }
 
-  # Sinks
-  if(type == "sinks"){
+  # Sink
+  if(type == "sink"){
+
+    # Check that there is only 1 point
+    if(nrow(pts) == 1) stop("Multiple points found. The sink must be a single point.")
+
     # Prepare sinks
-    sinks <- pts %>%
+    sink <- pts %>%
       # Remove Z/M dimensions
       sf::st_zm() %>%
       # Assign sink type
@@ -146,8 +150,8 @@ import_points <- function(pts, type){
     }
 
     # Return sinks
-    sinks <- structure(sinks, class = c("sinks", class(sinks)))
-    return(sinks)
+    sink <- structure(sinks, class = c("sink", class(sinks)))
+    return(sink)
 
   }
   # Points of interest
