@@ -56,8 +56,8 @@ correct_divergences <- function(net, correct = TRUE){
     riv_divergences <- activate(net, edges) %>%
       sf::st_as_sf(.data) %>%
       dplyr::group_by(.data$from) %>%
-      dplyr::mutate(.data, grp_size = dplyr::n()) %>%
-      dplyr::mutate(.data, divergent = dplyr::if_else(grp_size > 1, from, NA_integer_))
+      dplyr::mutate(grp_size = dplyr::n()) %>%
+      dplyr::mutate(divergent = dplyr::if_else(grp_size > 1, from, NA_integer_))
     # Return non-corrected divergences
     invisible(riv_divergences)
   }
@@ -69,19 +69,19 @@ correct_divergences <- function(net, correct = TRUE){
     tidygraph::ungroup(.data)
 
   # Identify components
-  net_comp <- sfnetworks::as_sfnetwork(net_corrected) %>%
-    dplyr::mutate(.data, component = tidygraph::group_components()) %>%
+  net_comp <- activate(net_corrected, nodes) %>%
+    dplyr::mutate(component = tidygraph::group_components()) %>%
     dplyr::group_by(.data$component)
 
   # Determine largest component and extract
   big_comp <- sort(table(net_comp %>% activate(nodes) %>% data.frame() %>% dplyr::select(component)), decreasing = TRUE)[1]
   big_comp <- as.integer(names(big_comp))
-  net_corrected <- net_corrected %>%
+  net_corrected <- net_comp %>%
     dplyr::filter(.data$component == big_comp)
 
   # Get number of removed rivers
   orig_num <- nrow(as.data.frame(activate(net, edges)))
-  cor_num <- nrow(as.data.frame(activate(net, edges)))
+  cor_num <- nrow(as.data.frame(activate(net_corrected, edges)))
   num_div <- orig_num - cor_num
 
   # Print number of corrected divergences
@@ -104,14 +104,13 @@ correct_divergences <- function(net, correct = TRUE){
 #' @keywords internal
 #' @export
 correct_complex <- function(net, correct = TRUE){
-  # Identify complex confluences
-  complex_nodes <- net %>%
-    tidygraph::convert(.data, tidygraph::to_undirected)
 
-  complex_nodes <- activate(complex_nodes, nodes) %>%
+  # Identify complex confluences
+  net_undirected <- activate(tidygraph::convert(net, tidygraph::to_undirected), nodes)
+  net_degree <- net_undirected %>%
     dplyr::mutate(nodeID = dplyr::n()) %>%
-    dplyr::mutate(degree = tidygraph::centrality_degree()) %>%
-    sf::st_as_sf(.data) %>%
+    dplyr::mutate(degree = tidygraph::centrality_degree())
+  complex_nodes <- sf::st_as_sf(complex_nodes) %>%
     dplyr::filter(.data$degree >= 4) %>%
     dplyr::select(.data$degree)
 
@@ -124,17 +123,21 @@ correct_complex <- function(net, correct = TRUE){
 
   # Correct complex confluences detected
   } else {
+
+    # Print number of complex confluences found
+    num_complex <- nrow(complex_nodes)
+    message(num_complex, " confluences found.")
+
     # Extract network rivers
-    rivers <- activate(net, edges) %>%
-      sf::st_as_sf(.data) %>%
+    rivers <- sf::st_as_sf(activate(net, edges)) %>%
       dplyr::mutate(rivID = 1:dplyr::n())
     sf::st_agr(rivers) <- "constant"
     # Add ID to complex nodes
     complex_nodes <- complex_nodes %>%
       dplyr::mutate(complexID = 1:dplyr::n())
     # Create small buffer around confluence point
-    buffer <- sf::st_buffer(complex_nodes, dist = 1) %>%
-      sf::st_cast(.data, "MULTILINESTRING", group_or_split = FALSE)
+    buffer <- sf::st_buffer(complex_nodes, dist = 1)
+    buffer <- sf::st_cast(buffer, "MULTILINESTRING", group_or_split = FALSE)
     sf::st_agr(buffer) <- "constant"
 
     # If manual editing desired, identify complex confluence rivers
