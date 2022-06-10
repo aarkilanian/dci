@@ -80,8 +80,8 @@ calculate_dci <- function(net, form, perm = NULL, weight = NULL, threshold = NUL
     dplyr::mutate(nodeID = dplyr::row_number()) %>%
     dplyr::left_join(.data, net_edges, by = c("nodeID" = "from")) %>%
     sf::st_as_sf(.data, sf_column_name = "geometry.x")
-  # Set sink length to 0
-  net_nodes[net_nodes$type == "Sink",]$riv_length <- 0
+  # Set outlet length to 0
+  net_nodes[net_nodes$type == "outlet",]$riv_length <- 0
 
   if(!(is.null(weight))){
     # Calculate total weighted length of segments
@@ -220,9 +220,9 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights){
 #' @export
 calculate_dci_dia <- function(all_members, net_nodes, seg_weights){
 
-  # Identify sink segment
+  # Identify outlet segment
   sink_seg <- activate(net, nodes) %>%
-    dplyr::filter(.data$type == "Sink") %>%
+    dplyr::filter(.data$type == "outlet") %>%
     dplyr::pull(.data$member.label)
 
   # Determine segment pairs
@@ -312,9 +312,9 @@ calculate_dci_pot_thresh <- function(all_members, net_nodes, seg_weights, weight
 #' @export
 calculate_dci_dia_thresh <- function(all_members, net_nodes, seg_weights, weighted, threshold, totweight){
 
-  # Identify sink segment
+  # Identify outlet segment
   sink_seg <- activate(net, nodes) %>%
-    dplyr::filter(.data$type == "Sink") %>%
+    dplyr::filter(.data$type == "outlet") %>%
     dplyr::pull(.data$member.label)
 
   # Determine segment pairs
@@ -374,12 +374,12 @@ gather_dci <- function(from, to, distance, perm, nodes, seg_weights, threshold, 
   }
 
   # Extract sinks and barriers
-  sinks_bars <- subset(nodes, nodes$type %in% c("Sink", "Barrier"))
+  sinks_bars <- subset(nodes, nodes$type %in% c("outlet", "Barrier"))
 
-  # Get from segment local sink
+  # Get from segment local outlet
   from_sink <- sinks_bars[sinks_bars$member.label == from,]$node.label
 
-  # Get to segment local sink
+  # Get to segment local outlet
   to_sink <- sinks_bars[sinks_bars$member.label == to,]$node.label
 
   # Get path between sinks
@@ -392,7 +392,7 @@ gather_dci <- function(from, to, distance, perm, nodes, seg_weights, threshold, 
   # If from segment is upstream of to segment
   if(length(unlist(from_sink)) > length(unlist(to_sink))){
 
-    # Set exit to one node upstream of from sink, extract geometry
+    # Set exit to one node upstream of from outlet, extract geometry
     exit_label <- list(append(unlist(from_sink), FALSE))
     exit <- sf::st_geometry(nodes[nodes$node.label %in% exit_label,])
 
@@ -405,7 +405,7 @@ gather_dci <- function(from, to, distance, perm, nodes, seg_weights, threshold, 
     # If from segment is downstream of to segment
   } else {
 
-    # Set entrance to one node upstream of to sink, extract geometry
+    # Set entrance to one node upstream of to outlet, extract geometry
     entrance_label <- list(append(unlist(to_sink), FALSE))
     entrance <- sf::st_geometry(nodes[nodes$node.label %in% entrance_label,])
 
@@ -461,15 +461,15 @@ gather_dci <- function(from, to, distance, perm, nodes, seg_weights, threshold, 
 gather_dist <- function(from, to, nodes){
 
   # Extract sinks and barriers
-  sinks_bars <- subset(nodes, nodes$type %in% c("Sink", "Barrier"))
+  sinks_bars <- subset(nodes, nodes$type %in% c("outlet", "Barrier"))
 
-  # Get from segment local sink
+  # Get from segment local outlet
   from_sink <- sinks_bars[sinks_bars$member.label == from,]$node.label
 
-  # Get to segment local sink
+  # Get to segment local outlet
   to_sink <- sinks_bars[sinks_bars$member.label == to,]$node.label
 
-  # Get sink-to-sink path between segments
+  # Get outlet-to-outlet path between segments
   path <- path_between(from_sink, to_sink)
 
   # Join member labels for nodes on path
@@ -514,12 +514,12 @@ gather_perm <- function(from, to, nodes){
   }
 
   # Extract sinks and barriers
-  sinks_bars <- subset(nodes, nodes$type %in% c("Sink", "Barrier"))
+  sinks_bars <- subset(nodes, nodes$type %in% c("outlet", "Barrier"))
 
-  # Get from segment local sink
+  # Get from segment local outlet
   from_sink <- sinks_bars[sinks_bars$member.label == from,]$node.label
 
-  # Get to segment local sink
+  # Get to segment local outlet
   to_sink <- sinks_bars[sinks_bars$member.label == to,]$node.label
 
   # Get path between segments
@@ -558,11 +558,11 @@ path_between <- function(s1, s2){
   return(path)
 }
 
-#' Find the path to the root (sink) of the river network
+#' Find the path to the root (outlet) of the river network
 #'
 #' @param seg A node label represented by a logical vector.
 #'
-#' @return A list of logical vectors in order to move from the origin to the root (sink).
+#' @return A list of logical vectors in order to move from the origin to the root (outlet).
 #'
 #' @keywords internal
 #' @export

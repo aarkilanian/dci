@@ -11,9 +11,14 @@ node_labeling <- function(net){
   labelenv <- new.env(parent = emptyenv())
   # Create variable to keep track of created labels outside loop
   assign('past_label', c(FALSE), labelenv)
+  # Determine row index of outlet
+  out_index <- activate(net, nodes) %>%
+    as.data.frame(.data) %>%
+    dplyr::pull(.data$type)
+  out_index <- which(sink_index == "outlet")
   # Apply labeling function over network
   net <- activate(net, nodes) %>%
-    dplyr::mutate(node.label = tidygraph::map_bfs(root = which(tidygraph::.N()$type == "Sink"),
+    dplyr::mutate(node.label = tidygraph::map_bfs(root = out_index,
                                     .f = node_labeler, env = labelenv, mode = "all"))
   # Return labeled network
   invisible(net)
@@ -39,7 +44,7 @@ membership_labeling <- function(net){
   assign("labels", 1:(num_bar*2), envir = memberenv)
   # Apply labeling function over network
   net <- activate(net, nodes) %>%
-    dplyr::mutate(member.label = tidygraph::map_dfs_int(root = which(tidygraph::.N()$type == "Sink"),
+    dplyr::mutate(member.label = tidygraph::map_dfs_int(root = which(tidygraph::.N()$type == "outlet"),
                                                     .f = membership_labeler, env = memberenv, mode = "all"))
 }
 
@@ -57,8 +62,8 @@ membership_labeling <- function(net){
 #' @export
 node_labeler <- function(node, parent, path, env, ...){
   cur.type <- tidygraph::.N()$type[node]
-  if(cur.type == "Sink"){
-    # Create sink label
+  if(cur.type == "outlet"){
+    # Create outlet label
     node_label <- c(FALSE)
     # Write to external variable
     assign("past_label", node_label, envir = env)
@@ -97,8 +102,8 @@ node_labeler <- function(node, parent, path, env, ...){
 #' @export
 membership_labeler <- function(node, parent, path, env, ...){
   cur.type <- tidygraph::.N()$type[node]
-  if(cur.type == "Sink"){
-    # Create sink label
+  if(cur.type == "outlet"){
+    # Create outlet label
     member_label <- 0
     # Return label
     return(member_label)

@@ -37,7 +37,7 @@ export_dci <- function(net, results, type = "rivers"){
    # Join results to barriers
    barriers <- activate(net, nodes) %>%
      sf::st_as_sf(.data) %>%
-     dplyr::filter(.data$type %in% c("Barrier", "Sink")) %>%
+     dplyr::filter(.data$type %in% c("Barrier", "outlet")) %>%
      dplyr::left_join(.data, results, by = c("member.label" = "segment")) %>%
      dplyr::select(-.data$node.label)
 

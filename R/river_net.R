@@ -4,7 +4,7 @@
 #'
 #' @param rivers A \code{rivers} object returned by \code{\link{import_rivers}}.
 #' @param barriers A \code{barriers} object returned by \code{\link{import_points}}.
-#' @param sink A \code{sink} object returned by \code{\link{import_points}}. This data is optional.
+#' @param outlet A \code{outlet} object returned by \code{\link{import_points}}. This data is optional.
 #' @param poi A \code{poi} object (points of interest) returned by \code{\link{import_points}}. This data is optional.
 #' @param check A logical value, if \code{TRUE}, the default, dendritic topology of the river network is enforced with \code{\link{enforce_dendritic}}.
 #' @param tolerance A numeric value specifying the distance in map units that points should be snapped to rivers. Set to NULL by default.
@@ -14,7 +14,7 @@
 #' @export
 river_net <- function(rivers,
                    barriers,
-                   sink = NULL,
+                   outlet = NULL,
                    poi = NULL,
                    check = TRUE,
                    tolerance = NULL){
@@ -30,9 +30,9 @@ river_net <- function(rivers,
   }
 
   # Check sinks
-  if(!is.null(sink)){
-    if(!("sink" %in% class(sink))){
-      stop("Sink must first be imported with `import_points`")
+  if(!is.null(outlet)){
+    if(!("outlet" %in% class(outlet))){
+      stop("outlet must first be imported with `import_points`")
     }
   }
 
@@ -45,13 +45,13 @@ river_net <- function(rivers,
 
   # Match river projection
   barriers <- sf::st_transform(barriers, sf::st_crs(rivers))
-  sink <- sf::st_transform(sink, sf::st_crs(rivers))
+  outlet <- sf::st_transform(outlet, sf::st_crs(rivers))
   if(!is.null(poi)){
     poi <- sf::st_transform(poi, sf::st_crs(rivers))
     # Combine nodes
-    user_nodes <- dplyr::bind_rows(barriers, sink, poi)
+    user_nodes <- dplyr::bind_rows(barriers, outlet, poi)
   } else{
-    user_nodes <- dplyr::bind_rows(barriers, sink)
+    user_nodes <- dplyr::bind_rows(barriers, outlet)
   }
 
   # Clean up topology if requested

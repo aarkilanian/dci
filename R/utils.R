@@ -90,7 +90,7 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
 #'
 #' @inheritParams river_net
 #'
-#' @param nodes An \code{\link[sf]{sf}} object of "barrier", "sink", and "poi" points.
+#' @param nodes An \code{\link[sf]{sf}} object of "barrier", "outlet", and "poi" points.
 #'
 #' @return A \code{\link{river_net}} object with the supplied nodes' attributes joined to its nodes.
 #'

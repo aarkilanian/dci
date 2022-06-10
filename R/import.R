@@ -75,15 +75,15 @@ import_rivers <- function(rivers, quiet = FALSE){
 #'Read and prepare geospatial point data for dci.
 #'
 #' @param pts A character string or \code{\link{sf}} object, the path to a shapefile of points or \code{\link{sf}} object of points.
-#' @param type A character string, either of “barrier”, “sink”, or “poi” specifying the type of point.
+#' @param type A character string, either of “barrier”, “outlet”, or “poi” specifying the type of point.
 #'
-#' @return Object of class barriers, sink, or poi prepared for input to \code{\link{river_net}}
+#' @return Object of class barriers, outlet, or poi prepared for input to \code{\link{river_net}}
 #'
 #' @export
 import_points <- function(pts, type){
 
   # Check that type is valid
-  if(!(type %in% c("barriers", "sink", "poi"))) stop("Points must be of 'barriers', 'sink', or 'poi' type.")
+  if(!(type %in% c("barriers", "outlet", "poi"))) stop("Points must be of 'barriers', 'outlet', or 'poi' type.")
 
   # Check for path type
   if(is.character(pts)) sf <- FALSE
@@ -115,21 +115,21 @@ import_points <- function(pts, type){
     return(barriers)
   }
 
-  # Sink
-  if(type == "sink"){
+  # outlet
+  if(type == "outlet"){
 
     # Check that there is only 1 point
-    if(nrow(pts) != 1) stop("Multiple points found. The sink must be a single point.")
+    if(nrow(pts) != 1) stop("Multiple points found. The outlet must be a single point.")
 
     # Prepare sinks
     # Remove Z/M dimensions
-    sink <- sf::st_zm(pts)
-    # Assign sink type
-    sink$type <- "Sink"
+    outlet <- sf::st_zm(pts)
+    # Assign outlet type
+    outlet$type <- "outlet"
 
     # Return sinks
-    sink <- structure(sinks, class = c("sink", class(sinks)))
-    return(sink)
+    outlet <- structure(sinks, class = c("outlet", class(sinks)))
+    return(outlet)
 
   }
   # Points of interest
