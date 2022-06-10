@@ -45,13 +45,13 @@ river_net <- function(rivers,
 
   # Match river projection
   barriers <- sf::st_transform(barriers, sf::st_crs(rivers))
-  sinks <- sf::st_transform(sinks, sf::st_crs(rivers))
+  sink <- sf::st_transform(sink, sf::st_crs(rivers))
   if(!is.null(poi)){
     poi <- sf::st_transform(poi, sf::st_crs(rivers))
     # Combine nodes
-    user_nodes <- dplyr::bind_rows(barriers, sinks, poi)
+    user_nodes <- dplyr::bind_rows(barriers, sink, poi)
   } else{
-    user_nodes <- dplyr::bind_rows(barriers, sinks)
+    user_nodes <- dplyr::bind_rows(barriers, sink)
   }
 
   # Clean up topology if requested
