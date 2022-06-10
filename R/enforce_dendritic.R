@@ -126,7 +126,7 @@ correct_complex <- function(net, correct = TRUE){
 
     # Print number of complex confluences found
     num_complex <- nrow(complex_nodes)
-    message(num_complex, " confluences found.")
+    message(num_complex, " complex confluences found.")
 
     # Extract network rivers
     rivers <- sf::st_as_sf(activate(net, edges)) %>%
