@@ -99,8 +99,7 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
 join_attributes <- function(net, nodes, tolerance = NULL){
 
   # Extract network nodes
-  net_nodes <- activate(net, nodes) %>%
-    sf::st_as_sf(.data)
+  net_nodes <- sf::st_as_sf(activate(net, nodes))
 
   # Find nearest river network node
   nrst <-  sf::st_nearest_feature(nodes, net_nodes)
@@ -120,10 +119,10 @@ join_attributes <- function(net, nodes, tolerance = NULL){
   # Join special nodes' attributes to network nodes
   net <- activate(net, nodes) %>%
     dplyr::mutate(rowID = dplyr::row_number()) %>%
-    dplyr::left_join(.data, as.data.frame(nodes) %>% dplyr::select(-.data$geometry), by = c("rowID" = "key")) %>%
+    dplyr::left_join(as.data.frame(nodes) %>% dplyr::select(-.data$geometry), by = c("rowID" = "key")) %>%
     dplyr::select(-.data$rowID) %>%
     # Set node type of topological nodes
-    dplyr::mutate(.data, type = dplyr::if_else(is.na(.data$type), "Topo", .data$type))
+    dplyr::mutate(type = dplyr::if_else(is.na(.data$type), "Topo", .data$type))
 
   # Return joined network
   invisible(net)
