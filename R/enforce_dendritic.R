@@ -110,7 +110,7 @@ correct_complex <- function(net, correct = TRUE){
   net_degree <- net_undirected %>%
     dplyr::mutate(nodeID = dplyr::n()) %>%
     dplyr::mutate(degree = tidygraph::centrality_degree())
-  complex_nodes <- sf::st_as_sf(complex_nodes) %>%
+  complex_nodes <- sf::st_as_sf(net_degree) %>%
     dplyr::filter(.data$degree >= 4) %>%
     dplyr::select(.data$degree)
 
@@ -151,16 +151,17 @@ correct_complex <- function(net, correct = TRUE){
     buff_intersect <- buff_intersect[c("rivID", "complexID", "to")]
     # Select points out of buffer intersections for new confluence nodes on downstream edges
     new_nodes <- buff_intersect %>%
-      dplyr::group_by(.data[c("complexID","to")]) %>%
-      dplyr::tally(.data) %>%
-      dplyr::filter(.data$n == 1) %>%
-      dplyr::left_join(.data, as.data.frame(buff_intersect)[c("to", "rivID")], by = c("to")) %>%
-      dplyr::select(.data[c("complexID","rivID")])
+      dplyr::group_by(.data$complexID, .data$to) %>%
+      dplyr::tally() %>%
+      dplyr::filter(.data$n == 1)
+    # Identify associated rivers
+    new_nodes <- dplyr::left_join(new_nodes, as.data.frame(buff_intersect[c("to", "rivID")]))
+    new_nodes <- new_nodes[c("complexID", "rivID")]
     # Find closest rivers to new points
     modify_rivers <- integer(length = nrow(complex_nodes))
     for(confluence in new_nodes$complexID){
       # Gather participating rivers
-      candidates <- buff_intersect[buff_intersect$complexID == confluence]
+      candidates <- buff_intersect[buff_intersect$complexID == confluence,]
       # Determine closest river to new confluence
       distances <- sf::st_distance(new_nodes[confluence,], candidates)
       ind <- which(distances == min(distances[distances > units::as_units(0, "m")]))
@@ -191,23 +192,26 @@ correct_complex <- function(net, correct = TRUE){
       start_x <- old_river[[1]][1]
       start_y <- old_river[[1]][num_coord/2 + 1]
       # Create first line segment from old confluence to new confluence
-      new_river1 <- sf::st_sfc(sf::st_linestring(matrix(c(start_x,
+      new_river1 <- sf::st_sf(sf::st_sfc(sf::st_linestring(matrix(c(start_x,
                                                point_x,
                                                start_y,
-                                               point_y), 2)), crs = sf::st_crs(rivers)) %>%
-        sf::st_sf(.data) %>%
+                                               point_y), 2)), crs = sf::st_crs(rivers))) %>%
         dplyr::mutate(rivID = new_nodes$rivID[i])
+      names(new_river1) <- c("geometry", "rivID")
+      sf::st_geometry(new_river1) <- "geometry"
       # Create second line segment from new confluence to the end of original
       new_river2 <- sf::st_geometry(old_river)
       new_river2[[1]][1] <- point_x
       new_river2[[1]][num_coord/2 + 1] <- point_y
       new_river2 <- sf::st_sf(new_river2) %>%
-        dplyr::mutate(rivID = nrow(rivers) + 1) %>%
-        dplyr::rename(.data, geometry = new_river2)
+        dplyr::mutate(rivID = nrow(rivers) + 1)
+      names(new_river2)[names(new_river2) == "new_river2"] <- "geometry"
+      sf::st_geometry(new_river2) <- "geometry"
       new_river2$rivID[1] <- nrow(rivers) + 1
-      # Remove old river and add new ones
-      rivers <- rivers[rivers$rivID == new_nodes$rivID[i]] %>%
-        dplyr::bind_rows(.data, new_river1, new_river2)
+      # Remove old river
+      rivers <- rivers[!(rivers$rivID == new_nodes$rivID[i]),]
+      # Add new rivers
+      rivers <- dplyr::bind_rows(rivers, new_river1, new_river2)
     }
     # Return modified rivers
     invisible(rivers)
