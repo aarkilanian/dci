@@ -54,7 +54,7 @@ import_rivers <- function(rivers, quiet = FALSE){
   big_comp <- sort(table(comps), decreasing = TRUE)[1]
   big_comp <- as.integer(names(big_comp))
   net <- net %>% dplyr::filter(.data$component == big_comp)
-  rivers <- activate(net, edges)
+  rivers <- sf::st_as_sf(activate(net, edges))
 
   # Calculate river lengths
   rivers$riv_length <- as.double(sf::st_length(rivers))
