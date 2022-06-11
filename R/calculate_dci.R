@@ -78,8 +78,8 @@ calculate_dci <- function(net, form, perm = NULL, weight = NULL, threshold = NUL
   # Weights from edges associated w/ upstream nodes
   net_nodes <- net_nodes %>%
     dplyr::mutate(nodeID = dplyr::row_number()) %>%
-    dplyr::left_join(.data, net_edges, by = c("nodeID" = "from")) %>%
-    sf::st_as_sf(.data, sf_column_name = "geometry.x")
+    dplyr::left_join(net_edges, by = c("nodeID" = "from"))
+  net_nodes <- sf::st_as_sf(net_nodes, sf_column_name = "geometry.x")
   # Set outlet length to 0
   net_nodes[net_nodes$type == "outlet",]$riv_length <- 0
 
@@ -189,21 +189,20 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights){
   DCIs_sub <- data.frame(from = from_segment,
                          to = to_segment,
                          perm) %>%
-    dplyr::left_join(.data, seg_weights, by = c("from" = "member.label")) %>%
-    dplyr::rename(.data, from_len = segweight) %>%
-    dplyr::left_join(.data, seg_weights, by = c("to" = "member.label")) %>%
-    dplyr::rename(.data, to_len = segweight) %>%
-    dplyr::mutate(DCIs = from_len * to_len * perm * 100)
+    dplyr::left_join(seg_weights, by = c("from" = "member.label"))
+  names(DCIs_sub)[names(DCIs_sub) == "segweight"] <- "from_len"
+  DCIs_sub <- dplyr::left_join(DCIs_sub, seg_weights, by = c("to" = "member.label"))
+  names(DCIs_sub)[names(DCIs_sub) == "segweight"] <- "to_len"
+  DCIs_sub$DCIs <- DCIs_sub$from_len * DCIs_sub$to_len * DCIs_sub$perm * 100
 
   # Group DCI results by from segment to obtain segmental DCI
   DCIs <- DCIs_sub %>%
     dplyr::group_by(.data$from) %>%
-    dplyr::summarise(DCI = sum(.data$DCIs)) %>%
-    dplyr::rename(.data, segment = from)
+    dplyr::summarise(DCI = sum(.data$DCIs))
+  names(DCIs)[names(DCIs) == "from"] <- "segment"
   DCI_glob <- sum(DCIs$DCI)
-  DCIs <- DCIs %>%
-    dplyr::mutate(DCI_rel = DCI/DCI_glob*100) %>%
-    as.data.frame(.data)
+  DCIs$DCI_rel <- DCIs$DCI / DCI_glob * 100
+  DCIs <- as.data.frame(DCIs)
 
   # Return DCIs summary
   return(DCIs)
