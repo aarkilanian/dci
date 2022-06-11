@@ -85,8 +85,8 @@ calculate_dci <- function(net, form, perm = NULL, weight = NULL, threshold = NUL
 
   if(!(is.null(weight))){
     # Calculate total weighted length of segments
-    seg_weights <- as.data.frame(net_nodes)
-      dplyr::mutate(weighted_len = riv_length * riv_weight) %>%
+    seg_weights <- as.data.frame(net_nodes) %>%
+      dplyr::mutate(weighted_len = .data$riv_length * .data$riv_weight) %>%
       dplyr::group_by(.data$member.label) %>%
       dplyr::summarise(segweight = sum(.data$weighted_len, na.rm = TRUE)) %>%
       # Remove members with 0 length
