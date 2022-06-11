@@ -12,9 +12,7 @@ node_labeling <- function(net){
   # Create variable to keep track of created labels outside loop
   assign('past_label', c(FALSE), labelenv)
   # Determine row index of outlet
-  out_index <- activate(net, nodes) %>%
-    as.data.frame(.data) %>%
-    dplyr::pull(.data$type)
+  out_index <- as.data.frame(activate(net, nodes))$type
   out_index <- which(out_index == "outlet")
   # Apply labeling function over network
   net <- activate(net, nodes) %>%
@@ -34,10 +32,9 @@ node_labeling <- function(net){
 #' @export
 membership_labeling <- function(net){
   # Retrieve number of barriers
-  num_bar <- activate(net, nodes)
-    as.data.frame(.data) %>%
+  num_bar <- as.data.frame(activate(net, nodes)) %>%
     dplyr::filter(.data$type == "Barrier") %>%
-    nrow(.data)
+    nrow()
   # Create new env
   memberenv <- new.env(parent = emptyenv())
   # Create variable in new environment to hold member IDs
