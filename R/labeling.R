@@ -15,7 +15,7 @@ node_labeling <- function(net){
   out_index <- activate(net, nodes) %>%
     as.data.frame(.data) %>%
     dplyr::pull(.data$type)
-  out_index <- which(sink_index == "outlet")
+  out_index <- which(out_index == "outlet")
   # Apply labeling function over network
   net <- activate(net, nodes) %>%
     dplyr::mutate(node.label = tidygraph::map_bfs(root = out_index,
