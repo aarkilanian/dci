@@ -128,7 +128,7 @@ import_points <- function(pts, type){
     outlet$type <- "outlet"
 
     # Return sinks
-    outlet <- structure(sinks, class = c("outlet", class(sinks)))
+    outlet <- structure(outlet, class = c("outlet", class(outlet)))
     return(outlet)
 
   }
