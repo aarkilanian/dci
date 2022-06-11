@@ -295,10 +295,11 @@ calculate_dci_pot_thresh <- function(all_members, net_nodes, seg_weights, weight
   # Return result
   DCI_res <- data.frame(from_segment, to_segment, DCIs)
   DCI_res <- DCI_res %>%
-    dplyr::group_by(.data, segment = from_segment) %>%
-    dplyr::summarise(DCI = sum(.data$DCIs, na.rm = TRUE)) %>%
-    dplyr::mutate(DCI_rel = .data$DCI/DCI_glob*100) %>%
-    as.data.frame(.data)
+    dplyr::group_by(.data$from_segment) %>%
+    dplyr::summarise(DCI = sum(.data$DCIs, na.rm = TRUE))
+  DCI_res$DCI_rel <- DCI_res$DCI * DCI_glob * 100
+  names(DCI_res)[names(DCI_res) == "from_segment"] <- "segment"
+  DCI_res <- as.data.frame(DCI_res)
   return(DCI_res)
 }
 
@@ -419,7 +420,7 @@ gather_dci <- function(from, to, distance, perm, nodes, seg_weights, threshold, 
 
   # Gather neighbourhood around exit (from segment)
   neighb <- net %>%
-    dplyr::filter(.data, tidygraph::node_distance_from(sf::st_nearest_feature(exit, net), mode = "all", weights = riv_length) <= threshold) %>%
+    dplyr::filter(tidygraph::node_distance_from(sf::st_nearest_feature(exit, net), mode = "all", weights = riv_length) <= threshold) %>%
     dplyr::filter(.data$member.label == from)
   neighb_length <- sum(neighb$riv_length)
 
@@ -472,8 +473,8 @@ gather_dist <- function(from, to, nodes){
 
   # Join member labels for nodes on path
   full_path <- nodes %>%
-    dplyr::filter(.data$node.label %in% path) %>%
-    dplyr::select(.data[c("node.label", "member.label")])
+    dplyr::filter(.data$node.label %in% path)
+  full_path <- full_path[c("node.label", "member.label")]
 
   # Case when segments are neighbours
   if(length(unique(full_path$member.label)) == 2){
