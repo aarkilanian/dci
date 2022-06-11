@@ -142,6 +142,7 @@ calculate_dci <- function(net, form, perm = NULL, weight = NULL, threshold = NUL
 
     # Check if weighting is requested
     if(!is.null(weight)) weighted <- TRUE
+    else weighted <- FALSE
 
     # Potamodromous case
     if(form == "potamodromous") DCIs <- calculate_dci_pot_thresh(all_members, net_nodes, seg_weights, weighted, threshold, totweight)
@@ -335,15 +336,15 @@ calculate_dci_dia_thresh <- function(all_members, net_nodes, seg_weights, weight
   perms <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
 
   # Calculate DCI
-  DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(nodes = net_nodes, threshold, totweight, weighted))
+  DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(nodes = net_nodes, seg_weights, threshold, totweight, weighted))
   DCI_glob <- sum(DCIs)
 
   # Return result
   DCI_res <- data.frame(from_segment, to_segment, DCIs)
-  DCI_res <- DCI_res %>%
-    dplyr::select(-.data$from_segment) %>%
-    dplyr::rename(.data, segment = to_segment, DCI = DCIs) %>%
-    dplyr::mutate(DCI_rel = .data$DCI/DCI_glob*100)
+  DCI_res <- DCI_res[c("to_segment","DCIs")]
+  names(DCI_res)[names(DCI_res) == "to_segment"] <- "segment"
+  names(DCI_res)[names(DCI_res) == "DCIs"] <- "DCI"
+  DCI_res$DCI_rel <- DCI_res$DCI / DCI_glob * 100
   return(DCI_res)
 }
 
