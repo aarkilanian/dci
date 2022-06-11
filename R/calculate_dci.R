@@ -115,12 +115,12 @@ calculate_dci <- function(net, form, perm = NULL, weight = NULL, threshold = NUL
     if(form == "potamodromous") DCIs <- calculate_dci_pot(all_members, net_nodes, seg_weights)
 
     # Diadromous case
-    if(form == "diadromous") DCIs <- calculate_dci_dia(all_members, net_nodes, seg_weights, net_sink)
+    if(form == "diadromous") DCIs <- calculate_dci_dia(all_members, net_nodes, seg_weights)
 
     # Both DCI forms
     if(form == "all"){
       DCIs_pot <- calculate_dci_pot(all_members, net_nodes, seg_weights)
-      DCIs_dia <- calculate_dci_dia(all_members, net_nodes, seg_weights, net_sink)
+      DCIs_dia <- calculate_dci_dia(all_members, net_nodes, seg_weights)
       DCIs <- DCIs_pot %>%
         dplyr::left_join(.data, DCIs_dia, by = "segment", suffix = c("_pot", "_dia"))
     }
@@ -188,8 +188,8 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights){
   # Gather DCI inputs and calculate sub-segmental DCI
   DCIs_sub <- data.frame(from = from_segment,
                          to = to_segment,
-                         perm) %>%
-    dplyr::left_join(seg_weights, by = c("from" = "member.label"))
+                         perm)
+  DCIs_sub <- dplyr::left_join(DCIs_sub, seg_weights, by = c("from" = "member.label"))
   names(DCIs_sub)[names(DCIs_sub) == "segweight"] <- "from_len"
   DCIs_sub <- dplyr::left_join(DCIs_sub, seg_weights, by = c("to" = "member.label"))
   names(DCIs_sub)[names(DCIs_sub) == "segweight"] <- "to_len"
@@ -234,22 +234,21 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights){
   # Gather DCI inputs and calculate sub-segmental DCI
   DCIs_sub <- data.frame(from = from_segment,
                          to = to_segment,
-                         perm) %>%
-    dplyr::left_join(.data, seg_weights, by = c("from" = "member.label")) %>%
-    dplyr::rename(.data, from_len = segweight) %>%
-    dplyr::left_join(.data, seg_weights, by = c("to" = "member.label")) %>%
-    dplyr::rename(.data, to_len = segweight) %>%
-    dplyr::mutate(DCIs = from_len * to_len * perm * 100)
+                         perm)
+  DCIs_sub <- dplyr::left_join(DCIs_sub, seg_weights, by = c("from" = "member.label"))
+  names(DCIs_sub)[names(DCIs_sub) == "segweight"] <- "from_len"
+  DCIs_sub <- dplyr::left_join(DCIs_sub, seg_weights, by = c("to" = "member.label"))
+  names(DCIs_sub)[names(DCIs_sub) == "segweight"] <- "to_len"
+  DCIs_sub$DCIs <- DCIs_sub$from_len * DCIs_sub$to_len * DCIs_sub$perm * 100
 
   # Group DCI results by from segment to obtain segmental DCI
   DCIs <- DCIs_sub %>%
     dplyr::group_by(.data$to) %>%
-    dplyr::summarise(DCI = sum(.data$DCIs)) %>%
-    dplyr::rename(.data, segment = to)
+    dplyr::summarise(DCI = sum(.data$DCIs))
+  names(DCIs)[names(DCIs) == "to"] <- "segment"
   DCI_glob <- sum(DCIs$DCI)
-  DCIs <- DCIs %>%
-    dplyr::mutate(DCI_rel = .data$DCI/DCI_glob*100) %>%
-    as.data.frame(.data)
+  DCIs$DCI_rel <- DCIs$DCI / DCI_glob * 100
+  DCIs <- as.data.frame(DCIs)
 
   # Return DCIs summary
   return(DCIs)
