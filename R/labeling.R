@@ -33,15 +33,18 @@ node_labeling <- function(net){
 membership_labeling <- function(net){
   # Retrieve number of barriers
   num_bar <- as.data.frame(activate(net, nodes)) %>%
-    dplyr::filter(.data$type == "Barrier") %>%
+    dplyr::filter(.data$type == "barrier") %>%
     nrow()
   # Create new env
   memberenv <- new.env(parent = emptyenv())
   # Create variable in new environment to hold member IDs
   assign("labels", 1:(num_bar*2), envir = memberenv)
+  # Determine row index of outlet
+  out_index <- as.data.frame(activate(net, nodes))$type
+  out_index <- which(out_index == "outlet")
   # Apply labeling function over network
   net <- activate(net, nodes) %>%
-    dplyr::mutate(member.label = tidygraph::map_dfs_int(root = which(tidygraph::.N()$type == "outlet"),
+    dplyr::mutate(member.label = tidygraph::map_dfs_int(root = out_index,
                                                     .f = membership_labeler, env = memberenv, mode = "all"))
 }
 
@@ -107,11 +110,12 @@ membership_labeler <- function(node, parent, path, env, ...){
   }
   parent_label <- as.integer(as.vector(path$result[length(path$result)]))
   # If current node is a barrier use new member ID
-  if(tidygraph::.N()$type[node] == "Barrier"){
+  if(tidygraph::.N()$type[node] == "barrier"){
     # Retrieve label list
     old_labels <- get("labels", envir = env)
     # Choose new label
     member_label <- old_labels[1]
+    print(member_label)
     # Remove label from list
     assign("labels", old_labels[-1], envir = env)
     return(member_label)
