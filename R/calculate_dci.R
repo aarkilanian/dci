@@ -115,7 +115,16 @@ calculate_dci <- function(net, form, perm = NULL, weight = NULL, threshold = NUL
     if(form == "potamodromous") DCIs <- calculate_dci_pot(all_members, net_nodes, seg_weights)
 
     # Diadromous case
-    if(form == "diadromous") DCIs <- calculate_dci_dia(all_members, net_nodes, seg_weights)
+    if(form == "diadromous"){
+
+      # Identify outlet segment
+      outlet_seg <- activate(net, nodes) %>%
+        dplyr::filter(.data$type == "outlet") %>%
+        dplyr::pull(.data$member.label)
+
+      # Calculate DCI
+      DCIs <- calculate_dci_dia(all_members, net_nodes, seg_weights, outlet_seg)
+    }
 
     # Both DCI forms
     if(form == "all"){
@@ -148,7 +157,16 @@ calculate_dci <- function(net, form, perm = NULL, weight = NULL, threshold = NUL
     if(form == "potamodromous") DCIs <- calculate_dci_pot_thresh(all_members, net_nodes, seg_weights, weighted, threshold, totweight)
 
     # Diadromous case
-    if(form == "diadromous") DCIs <- calculate_dci_dia_thresh(all_members, net_nodes, seg_weights, weighted, threshold, totweight)
+    if(form == "diadromous"){
+
+      # Identify outlet segment
+      outlet_seg <- activate(net, nodes) %>%
+        dplyr::filter(.data$type == "outlet") %>%
+        dplyr::pull(.data$member.label)
+
+      # Calculate DCI
+      DCIs <- calculate_dci_dia_thresh(all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg)
+    }
 
     # If sites are supplied, associate results to them
     if(!is.null(sites)){
@@ -213,20 +231,16 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights){
 #' Calculate non-thresholded diadromous DCI
 #'
 #' @inheritParams calculate_dci_pot
+#' @param outlet_seg An integer indicating the membership label of the outlet segment
 #'
 #' @return A data frame which holds raw and relative DCI scores for each segment.
 #'
 #' @keywords internal
 #' @export
-calculate_dci_dia <- function(all_members, net_nodes, seg_weights){
-
-  # Identify outlet segment
-  sink_seg <- activate(net, nodes) %>%
-    dplyr::filter(.data$type == "outlet") %>%
-    dplyr::pull(.data$member.label)
+calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg){
 
   # Determine segment pairs
-  from_segment <- rep(sink_seg, times = length(all_members))
+  from_segment <- rep(outlet_seg, times = length(all_members))
   to_segment <- all_members
 
   # Calculate permeability between each pair of segments
@@ -307,18 +321,14 @@ calculate_dci_pot_thresh <- function(all_members, net_nodes, seg_weights, weight
 #' Calculate thresholded diadromous DCI
 #'
 #' @inheritParams calculate_dci_pot_thresh
+#' @param outlet_seg An integer indicating the membership label of the outlet segment
 #'
 #' @keywords internal
 #' @export
-calculate_dci_dia_thresh <- function(all_members, net_nodes, seg_weights, weighted, threshold, totweight){
-
-  # Identify outlet segment
-  sink_seg <- activate(net, nodes) %>%
-    dplyr::filter(.data$type == "outlet") %>%
-    dplyr::pull(.data$member.label)
+calculate_dci_dia_thresh <- function(all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg){
 
   # Determine segment pairs
-  from_segment <- rep(sink_seg, times = length(all_members))
+  from_segment <- rep(outlet_seg, times = length(all_members))
   to_segment <- all_members
 
   # Remove pairs of segments further than threshold
