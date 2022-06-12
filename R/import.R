@@ -108,7 +108,7 @@ import_points <- function(pts, type){
     # Remove Z/M dimension
     barriers <- sf::st_zm(pts)
     # Assign barrier type
-    barriers$type <- "Barrier"
+    barriers$type <- "barrier"
 
     # Return barriers
     barriers <- structure(barriers, class = c("barriers", class(barriers)))

@@ -37,7 +37,7 @@ calculate_dci <- function(net, form, perm = NULL, weight = NULL, threshold = NUL
       }
     )
     # Set non-barrier node permeabilities to 1
-    non_bar <- which(!net_nodes$type == "Barrier")
+    non_bar <- which(!net_nodes$type == "barrier")
     user_perm[non_bar] <- 1
     # Check that permeability is between 0 and 1
     if(any(user_perm > 1)){
@@ -49,7 +49,7 @@ calculate_dci <- function(net, form, perm = NULL, weight = NULL, threshold = NUL
   # Set binary permeability if perm is left NULL
   } else {
     net_nodes$perm <- 1
-    net_nodes[net_nodes$type == "Barrier",]$perm <- 0
+    net_nodes[net_nodes$type == "barrier",]$perm <- 0
   }
 
   # Check that weight is valid
@@ -374,7 +374,7 @@ gather_dci <- function(from, to, distance, perm, nodes, seg_weights, threshold, 
   }
 
   # Extract sinks and barriers
-  sinks_bars <- subset(nodes, nodes$type %in% c("outlet", "Barrier"))
+  sinks_bars <- subset(nodes, nodes$type %in% c("outlet", "barrier"))
 
   # Get from segment local outlet
   from_sink <- sinks_bars[sinks_bars$member.label == from,]$node.label
@@ -397,7 +397,7 @@ gather_dci <- function(from, to, distance, perm, nodes, seg_weights, threshold, 
     exit <- sf::st_geometry(nodes[nodes$node.label %in% exit_label,])
 
     # Select most downstream barrier as entrance, extract geometry
-    barriers <- full_path[full_path$type == "Barrier",]
+    barriers <- full_path[full_path$type == "barrier",]
     barriers$depth <- unlist(lapply(barriers$node.label, length))
     entrance_label <- barriers[which.min(barriers$depth),]$node.label
     entrance <- sf::st_geometry(nodes[nodes$node.label %in% entrance_label,])
@@ -410,7 +410,7 @@ gather_dci <- function(from, to, distance, perm, nodes, seg_weights, threshold, 
     entrance <- sf::st_geometry(nodes[nodes$node.label %in% entrance_label,])
 
     # Select most downstream barrier as exit, extract geometry
-    barriers <- full_path[full_path$type == "Barrier",]
+    barriers <- full_path[full_path$type == "barrier",]
     barriers$depth <- unlist(lapply(barriers$node.label, length))
     exit_label <- barriers[which.min(barriers$depth),]$node.label
     exit <- sf::st_geometry(nodes[nodes$node.label %in% exit_label,])
@@ -461,7 +461,7 @@ gather_dci <- function(from, to, distance, perm, nodes, seg_weights, threshold, 
 gather_dist <- function(from, to, nodes){
 
   # Extract sinks and barriers
-  sinks_bars <- subset(nodes, nodes$type %in% c("outlet", "Barrier"))
+  sinks_bars <- subset(nodes, nodes$type %in% c("outlet", "barrier"))
 
   # Get from segment local outlet
   from_sink <- sinks_bars[sinks_bars$member.label == from,]$node.label
@@ -514,7 +514,7 @@ gather_perm <- function(from, to, nodes){
   }
 
   # Extract sinks and barriers
-  sinks_bars <- subset(nodes, nodes$type %in% c("outlet", "Barrier"))
+  sinks_bars <- subset(nodes, nodes$type %in% c("outlet", "barrier"))
 
   # Get from segment local outlet
   from_sink <- sinks_bars[sinks_bars$member.label == from,]$node.label
