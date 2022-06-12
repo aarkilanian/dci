@@ -13,14 +13,14 @@ export_dci <- function(net, results, type = "rivers"){
  if(type == "rivers"){
 
    # Extract nodes
-   nodes <- sf::st_as_sf(activate(net, nodes))
+   nodes <- sf::st_as_sf(activate(net, nodes)) %>%
+     dplyr::mutate(nodeID = dplyr::row_number())
 
    # Join results to rivers
-   rivers <- activate(net, edges) %>%
-     sf::st_as_sf(.data) %>%
-     dplyr::left_join(.data, as.data.frame(nodes), by = c("from" = "nodeID")) %>%
-     dplyr::left_join(.data, results, by = c("member.label" = "segment")) %>%
-     dplyr::select(-.data$node.label)
+   rivers <- sf::st_as_sf(activate(net, edges)) %>%
+     dplyr::left_join(as.data.frame(nodes), by = c("from" = "nodeID")) %>%
+     dplyr::left_join(results, by = c("member.label" = "segment"))
+   rivers <- rivers[,!(names(rivers) == "node.label")]
 
    # Plot result
    print(
@@ -35,11 +35,10 @@ export_dci <- function(net, results, type = "rivers"){
  } else if(type == "barriers"){
 
    # Join results to barriers
-   barriers <- activate(net, nodes) %>%
-     sf::st_as_sf(.data) %>%
+   barriers <- sf::st_as_sf(activate(net, nodes)) %>%
      dplyr::filter(.data$type %in% c("Barrier", "outlet")) %>%
-     dplyr::left_join(.data, results, by = c("member.label" = "segment")) %>%
-     dplyr::select(-.data$node.label)
+     dplyr::left_join(results, by = c("member.label" = "segment"))
+   barriers <- barriers[,!(names(barriers) == "node.label")]
 
    # Plot results
    print(
@@ -55,11 +54,10 @@ export_dci <- function(net, results, type = "rivers"){
  } else if(type == "poi"){
 
    # Join results to others
-   others <- activate(net, nodes) %>%
-     sf::st_as_sf(.data) %>%
+   others <- sf::st_as_sf(activate(net, nodes)) %>%
      dplyr::filter(.data, type == "poi") %>%
-     dplyr::left_join(.data, results, by = c("member.label" = "segment")) %>%
-     dplyr::select(-.data$node.label)
+     dplyr::left_join(results, by = c("member.label" = "segment"))
+   others <- others[,!(names(others) == "node.label")]
 
    # Plot results
    print(
