@@ -9,10 +9,10 @@ import_points(pts, type)
 \arguments{
 \item{pts}{A character string or \code{\link{sf}} object, the path to a shapefile of points or \code{\link{sf}} object of points.}
 
-\item{type}{A character string, either of “barrier”, “sink”, or “poi” specifying the type of point.}
+\item{type}{A character string, either of “barrier”, “outlet”, or “poi” specifying the type of point.}
 }
 \value{
-Object of class barriers, sink, or poi prepared for input to \code{\link{river_net}}
+Object of class barriers, outlet, or poi prepared for input to \code{\link{river_net}}
 }
 \description{
 Read and prepare geospatial point data for dci.

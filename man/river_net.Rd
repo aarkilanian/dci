@@ -7,7 +7,7 @@
 river_net(
   rivers,
   barriers,
-  sink = NULL,
+  outlet = NULL,
   poi = NULL,
   check = TRUE,
   tolerance = NULL
@@ -18,7 +18,7 @@ river_net(
 
 \item{barriers}{A \code{barriers} object returned by \code{\link{import_points}}.}
 
-\item{sink}{A \code{sink} object returned by \code{\link{import_points}}. This data is optional.}
+\item{outlet}{A \code{outlet} object returned by \code{\link{import_points}}. This data is optional.}
 
 \item{poi}{A \code{poi} object (points of interest) returned by \code{\link{import_points}}. This data is optional.}
 

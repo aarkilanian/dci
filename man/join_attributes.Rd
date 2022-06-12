@@ -7,7 +7,7 @@
 join_attributes(net, nodes, tolerance = NULL)
 }
 \arguments{
-\item{nodes}{An \code{\link[sf]{sf}} object of "barrier", "sink", and "poi" points.}
+\item{nodes}{An \code{\link[sf]{sf}} object of "barrier", "outlet", and "poi" points.}
 
 \item{tolerance}{A numeric value specifying the distance in map units that points should be snapped to rivers. Set to NULL by default.}
 }

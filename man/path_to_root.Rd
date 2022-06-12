@@ -2,7 +2,7 @@
 % Please edit documentation in R/calculate_dci.R
 \name{path_to_root}
 \alias{path_to_root}
-\title{Find the path to the root (sink) of the river network}
+\title{Find the path to the root (outlet) of the river network}
 \usage{
 path_to_root(seg)
 }
@@ -10,9 +10,9 @@ path_to_root(seg)
 \item{seg}{A node label represented by a logical vector.}
 }
 \value{
-A list of logical vectors in order to move from the origin to the root (sink).
+A list of logical vectors in order to move from the origin to the root (outlet).
 }
 \description{
-Find the path to the root (sink) of the river network
+Find the path to the root (outlet) of the river network
 }
 \keyword{internal}

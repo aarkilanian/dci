@@ -4,7 +4,7 @@
 \alias{calculate_dci_dia}
 \title{Calculate non-thresholded diadromous DCI}
 \usage{
-calculate_dci_dia(all_members, net_nodes, seg_weights)
+calculate_dci_dia(all_members, net_nodes, seg_weights, outlet_seg)
 }
 \arguments{
 \item{all_members}{An integer vector holding all assigned membership labels in the \code{\link{river_net}} object.}
@@ -12,6 +12,8 @@ calculate_dci_dia(all_members, net_nodes, seg_weights)
 \item{net_nodes}{An \code{\link{sf}} object of the nodes of the \code{\link{river_net}} object with river attributes joined.}
 
 \item{seg_weights}{A data frame of each segments total length. Either weighted or unweighted depending on parameters.}
+
+\item{outlet_seg}{An integer indicating the membership label of the outlet segment}
 }
 \value{
 A data frame which holds raw and relative DCI scores for each segment.

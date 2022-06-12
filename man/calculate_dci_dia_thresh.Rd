@@ -10,7 +10,8 @@ calculate_dci_dia_thresh(
   seg_weights,
   weighted,
   threshold,
-  totweight
+  totweight,
+  outlet_seg
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ calculate_dci_dia_thresh(
 \item{threshold}{An optional numeric value specifying a dispersal limit in map units. If NULL, the default, no limit is considered.}
 
 \item{totweight}{The total length or weighted length of the whole network.}
+
+\item{outlet_seg}{An integer indicating the membership label of the outlet segment}
 }
 \description{
 Calculate thresholded diadromous DCI
