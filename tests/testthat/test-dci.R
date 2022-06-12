@@ -8,38 +8,7 @@ test_that("Invalid DCI form request returns error", {
 
   ex <- 1
   class(ex) <- "river_net"
-  expect_error(calculate_dci(ex), "A valid form of the DCI must be requested.")
-  expect_error(calculate_dci(ex, form = "invalid"), "A valid form of the DCI must be requested.")
-
-})
-
-test_that("Invalid sink returns error", {
-
-  # Load rivnet
-  net <- readRDS(test_path("testdata", "testnet.rds"))
-
-  # Remove sink
-  net <- net %>%
-    sfnetworks::activate(nodes) %>%
-    dplyr::filter(type != "Sink")
-
-  # Run test
-  expect_error(calculate_dci(net, form = "diadromous"), "No valid sink found in river network.")
-
-})
-
-test_that("Error when no weighting is not present", {
-
-  # Load rivnet
-  net <- readRDS(test_path("testdata", "testnet.rds"))
-
-  # Remove weighting
-  net <- net %>%
-    sfnetworks::activate(edges) %>%
-    dplyr::select(-riv_weight)
-
-  # Run test
-  expect_error(calculate_dci(net, form = "diadromous", weighted = TRUE), "No valid weighting found in river network.")
+  expect_error(calculate_dci(ex, form = "x"), "A valid form of the DCI must be requested.")
 
 })
 

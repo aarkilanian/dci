@@ -5,6 +5,7 @@ test_that("Split rivers returns correct number of sections", {
     dplyr::rename("geometry" = "x") %>%
     sf::st_as_sf(wkt = "geometry")
   riv <- sf::st_as_sf(riv, wkt = "x")
+  riv$riv_length <- 10
   pnt <- sf::st_as_sf(sf::st_sfc(sf::st_point(c(5,1)), sf::st_point(c(10,10)))) %>%
     dplyr::rename("geometry" = "x") %>%
     sf::st_as_sf(wkt = "geometry")
@@ -22,6 +23,7 @@ test_that("Split rivers returns correct number of sections", {
                                  sf::st_linestring(matrix(c(1,5,5,1), 2)))) %>%
     dplyr::rename("geometry" = "x") %>%
     sf::st_as_sf(wkt = "geometry")
+  riv$riv_length <- c(5,10)
 
   # Single point, multiple rivers
   split_riv <- split_rivers_at_points(riv, pnt[1,])
@@ -40,6 +42,7 @@ test_that("Rivers are split at correct points", {
     dplyr::rename("geometry" = "x") %>%
     sf::st_as_sf(wkt = "geometry")
   riv <- sf::st_as_sf(riv, wkt = "x")
+  riv$riv_length <- 10
   pnt <- sf::st_as_sf(sf::st_sfc(sf::st_point(c(5,1)), sf::st_point(c(9,10)))) %>%
     dplyr::rename("geometry" = "x") %>%
     sf::st_as_sf(wkt = "geometry")
@@ -61,6 +64,7 @@ test_that("Start and end point are preserved", {
     dplyr::rename("geometry" = "x") %>%
     sf::st_as_sf(wkt = "geometry")
   riv <- sf::st_as_sf(riv, wkt = "x")
+  riv$riv_length <- 10
   pnt <- sf::st_as_sf(sf::st_sfc(sf::st_point(c(5,1)), sf::st_point(c(10,10)))) %>%
     dplyr::rename("geometry" = "x") %>%
     sf::st_as_sf(wkt = "geometry")
@@ -73,7 +77,7 @@ test_that("Start and end point are preserved", {
   split_riv <- split_rivers_at_points(riv, pnt[1,])
   new_start <- sf::st_cast(split_riv[1,], "POINT", warn = F)[1,]
   new_end <- sf::st_cast(split_riv[2,], "POINT", warn = F)[12,]
-  expect_true(identical(new_end$geometry, riv_end$geometry))
+  expect_true(identical(unname(unlist(new_end$geometry)), unlist(riv_end$geometry)))
 
 })
 
@@ -84,6 +88,7 @@ test_that("Points outside tolerance do not participate in splitting", {
     dplyr::rename("geometry" = "x") %>%
     sf::st_as_sf(wkt = "geometry")
   riv <- sf::st_as_sf(riv, wkt = "x")
+  riv$riv_length <- 10
   pnt <- sf::st_as_sf(sf::st_sfc(sf::st_point(c(5,1)), sf::st_point(c(10,10)))) %>%
     dplyr::rename("geometry" = "x") %>%
     sf::st_as_sf(wkt = "geometry")

@@ -1,28 +1,7 @@
 test_that("non-valid import path returns error", {
 
   expect_error(import_rivers("invalid_path"), "invalid spatial data provided")
-  expect_error(import_points("invalid_path", type = "Barrier"), "invalid spatial data provided")
-
-})
-
-test_that("Invalid river weighting throws error", {
-
-  # Create test rivers
-  rivers <- sf::st_as_sf(sf::st_sfc(sf::st_linestring(matrix(c(1,2,2,2), 2)),
-                                    sf::st_linestring(matrix(c(2,2,4,2), 2)),
-                                    sf::st_linestring(matrix(c(2,2,1,2), 2)),
-                                    sf::st_linestring(matrix(c(2,10,2,2), 2)),
-                                    sf::st_linestring(matrix(c(10,10,2,1), 2)),
-                                    sf::st_linestring(matrix(c(10,10,2,5), 2))
-  ))
-  # Create test weighting field with characters
-  rivers$weight_chr <- c("d", "l", "j", "g", "d", "a")
-  # Create test weighting field  outisde range
-  rivers$weight_rng <- c(1,4,3,5,43,5)
-
-  # Run test
-  expect_error(import_rivers(rivers, "weight_chr"), "Weight values must be numeric.")
-  expect_error(import_rivers(rivers, "weight_rng"), "Weight values must be between 0 and 1.")
+  expect_error(import_points("invalid_path", type = "barriers"), "invalid spatial data provided")
 
 })
 
@@ -45,64 +24,19 @@ test_that("Cannot import rivers from file with geometries other than LINESTRING 
 
 })
 
-test_that("Specifying point IDs works as expected", {
-
-  # Create points
-  bars <- sf::st_as_sf(sf::st_sfc(sf::st_point(c(1,1)),
-                                  sf::st_point(c(2,2)),
-                                  sf::st_point(c(3,3))))
-  # Generate IDs (character)
-  bars$charid <- c("a", "b", "c")
-  # Generate IDs (integers)
-  bars$intid <- c(1, 2, 3)
-
-  # Run test
-  import_char <- import_points(bars, type = "barriers", id = "charid")
-  import_int <- import_points(bars, type = "barriers", id = "intid")
-  import_sink <- import_points(bars, type = "sinks", id = "intid")
-  import_other <- import_points(bars, type = "others", id = "intid")
-  expect_equal(import_char$user_id, as.character(bars$charid))
-  expect_equal(import_int$user_id, as.character(bars$intid))
-  expect_equal(import_sink$user_id, as.character(bars$intid))
-  expect_equal(import_other$user_id, as.character(bars$intid))
-})
-
-test_that("Invalid permeability throws error", {
-
-  # Create points
-  bars <- sf::st_as_sf(sf::st_sfc(sf::st_point(c(1,1)),
-                                  sf::st_point(c(2,2)),
-                                  sf::st_point(c(3,3))))
-  # Create permeability with characters
-  test_perm_chr <- c("20 %", "20 %", "40 %")
-  # Create permeability outside range
-  test_perm_rng <- c(0.2, 1.5, 3)
-
-  # Run character vector test
-  expect_error(import_points(path = bars, type = "Barrier", perm = test_perm_chr),
-               "Supplied permeability field cannot be assigned because: ")
-  # Run outside range test
-  expect_error(import_points(path = bars, type = "Barrier", perm = test_perm_rng),
-               "^Supplied permeability field cannot be assigned because:")
-
-})
 
 test_that("Points are imported correctly", {
 
-  # Create points
+  # Test barrier
   bars <- sf::st_as_sf(sf::st_sfc(sf::st_point(c(1,1)),
                                   sf::st_point(c(2,2)),
                                   sf::st_point(c(3,3))))
   expect_equal(nrow(import_points(bars, type = "barriers")), 3)
 
-  # Create permeability values
-  bars$permeability <- c(0,0.5,1)
-  bars_imported <- import_points(bars, perm = "permeability", type = "barriers")
-  expect_equal(bars_imported$perm, bars$permeability)
 
   # Test sink
-  expect_equal(nrow(import_points(bars, type = "sinks")), 3)
+  expect_equal(nrow(import_points(bars[1,], type = "outlet")), 1)
 
   # Test other
-  expect_equal(nrow(import_points(bars, type = "others")), 3)
+  expect_equal(nrow(import_points(bars, type = "poi")), 3)
 })
