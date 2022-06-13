@@ -2,7 +2,7 @@
 #'
 #' @param net A \code{\link{river_net}} object.
 #' @param form A string specifying the form of the DCI to calculate: either "potamodromous", "catadromous", or "all".
-#' @param perm The name of a column in the nodes table of net which holds the numeric permeability of nodes. If none is specified all barriers are automatically considered to have 0 permeability.
+#' @param pass The name of a column in the nodes table of net which holds the numeric passability of nodes. If none is specified all barriers are automatically considered to have 0 passability.
 #' @param weight The name of column in the edges tables of net which holds numeric weights to be applied to river lengths. If none is specified, the DCI is calculated only with river lengths.
 #' @param threshold An optional numeric value specifying a dispersal limit in map units. If NULL, the default, no limit is considered.
 #' @param sites The name of a type of nodes in the node table of net. If specified, DCI results will be calculated at these sites and returned. If not specified, the DCI results will be reported on the rivers. See details for more.
@@ -11,7 +11,7 @@
 #' @export
 #'
 #' @examples
-calculate_dci <- function(net, form, perm = NULL, weight = NULL, threshold = NULL, sites = NULL){
+calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NULL, sites = NULL){
 
   # Check that network is valid
   if(!("river_net" %in% class(net))){
@@ -28,28 +28,28 @@ calculate_dci <- function(net, form, perm = NULL, weight = NULL, threshold = NUL
   # Extract nodes
   net_nodes <- as.data.frame(activate(net, nodes))
 
-  # Check that permeability is valid
-  if(!is.null(perm)){
+  # Check that passability is valid
+  if(!is.null(pass)){
     user_perm <- tryCatch(
-      as.double(net_nodes[[perm]]),
+      as.double(net_nodes[[pass]]),
       error = function(e) {
-        stop("Supplied permeability field cannot be assigned:", e, call. = FALSE)
+        stop("Supplied passability field cannot be assigned:", e, call. = FALSE)
       }
     )
     # Set non-barrier node permeabilities to 1
     non_bar <- which(net_nodes$type != "barrier")
     user_perm[non_bar] <- 1
-    # Check that permeability is between 0 and 1
+    # Check that passability is between 0 and 1
     if(any(user_perm > 1)){
-      warning("Permeability values are not between 0 and 1, normalizing values...")
+      warning("passability values are not between 0 and 1, normalizing values...")
       user_perm <- (user_perm - min(user_perm)) / (max(user_perm) - min(user_perm))
     }
-    # Set active permeability column
-    net_nodes$perm <- user_perm
-  # Set binary permeability if perm is left NULL
+    # Set active passability column
+    net_nodes$pass <- user_perm
+  # Set binary passability if pass is left NULL
   } else {
-    net_nodes$perm <- 1
-    net_nodes[net_nodes$type == "barrier",]$perm <- 0
+    net_nodes$pass <- 1
+    net_nodes[net_nodes$type == "barrier",]$pass <- 0
   }
 
   # Check that weight is valid
@@ -201,18 +201,18 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights){
   to_segment <- rep(all_members,
                     times = length(all_members))
 
-  # Calculate permeability between each pair of segments
-  perm <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
+  # Calculate passability between each pair of segments
+  pass <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
 
   # Gather DCI inputs and calculate sub-segmental DCI
   DCIs_sub <- data.frame(from = from_segment,
                          to = to_segment,
-                         perm)
+                         pass)
   DCIs_sub <- dplyr::left_join(DCIs_sub, seg_weights, by = c("from" = "member.label"))
   names(DCIs_sub)[names(DCIs_sub) == "segweight"] <- "from_len"
   DCIs_sub <- dplyr::left_join(DCIs_sub, seg_weights, by = c("to" = "member.label"))
   names(DCIs_sub)[names(DCIs_sub) == "segweight"] <- "to_len"
-  DCIs_sub$DCIs <- DCIs_sub$from_len * DCIs_sub$to_len * DCIs_sub$perm * 100
+  DCIs_sub$DCIs <- DCIs_sub$from_len * DCIs_sub$to_len * DCIs_sub$pass * 100
 
   # Group DCI results by from segment to obtain segmental DCI
   DCIs <- DCIs_sub %>%
@@ -243,18 +243,18 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg){
   from_segment <- rep(outlet_seg, times = length(all_members))
   to_segment <- all_members
 
-  # Calculate permeability between each pair of segments
-  perm <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
+  # Calculate passability between each pair of segments
+  pass <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
 
   # Gather DCI inputs and calculate sub-segmental DCI
   DCIs_sub <- data.frame(from = from_segment,
                          to = to_segment,
-                         perm)
+                         pass)
   DCIs_sub <- dplyr::left_join(DCIs_sub, seg_weights, by = c("from" = "member.label"))
   names(DCIs_sub)[names(DCIs_sub) == "segweight"] <- "from_len"
   DCIs_sub <- dplyr::left_join(DCIs_sub, seg_weights, by = c("to" = "member.label"))
   names(DCIs_sub)[names(DCIs_sub) == "segweight"] <- "to_len"
-  DCIs_sub$DCIs <- DCIs_sub$from_len * DCIs_sub$to_len * DCIs_sub$perm * 100
+  DCIs_sub$DCIs <- DCIs_sub$from_len * DCIs_sub$to_len * DCIs_sub$pass * 100
 
   # Group DCI results by from segment to obtain segmental DCI
   DCIs <- DCIs_sub %>%
@@ -300,7 +300,7 @@ calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights, w
     distances <- distances[-discard_pairs]
   }
 
-  # Calculate permeability between remaining pairs
+  # Calculate passability between remaining pairs
   perms <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
 
   # Calculate DCI
@@ -342,7 +342,7 @@ calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, w
     distances <- distances[-discard_pairs]
   }
 
-  # Calculate permeability between remaining pairs
+  # Calculate passability between remaining pairs
   perms <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
 
   # Calculate DCI
@@ -365,14 +365,14 @@ calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, w
 #' @param from The origin segment's membership label.
 #' @param to The destination segment's membership label.
 #' @param distance The distance, in map units, between the two segments as calculated by \code{\link{gather_dist}}.
-#' @param perm The permeability between the two segments as calculated by \code{\link{gather_perm}}.
+#' @param pass The passability between the two segments as calculated by \code{\link{gather_perm}}.
 #' @param nodes An \code{\link{sf}} object of the nodes of the \code{\link{river_net}} object with river attributes joined.
 #'
 #' @return The sub-segmental DCI component between given pair of segments.
 #'
 #' @keywords internal
 #' @export
-gather_dci <- function(net, from, to, distance, perm, nodes, seg_weights, threshold, totweight, weighted){
+gather_dci <- function(net, from, to, distance, pass, nodes, seg_weights, threshold, totweight, weighted){
 
   # Case when from and to segment are the same
   if(from == to){
@@ -455,7 +455,7 @@ gather_dci <- function(net, from, to, distance, perm, nodes, seg_weights, thresh
   neighb_rel <- neighb_length / from_length
 
   # Calculate sub-segmental DCI for pair of segments
-  DCI <- from_length/totweight * to_length/totweight * neighb_rel * perm * 100
+  DCI <- from_length/totweight * to_length/totweight * neighb_rel * pass * 100
   return(DCI)
 
 }
@@ -508,11 +508,11 @@ gather_dist <- function(from, to, nodes){
 
 }
 
-#' Gather permeability between two nodes
+#' Gather passability between two nodes
 #'
 #' @inheritParams gather_dist
 #'
-#' @return The permeability from 0 to 1 between the given nodes.
+#' @return The passability from 0 to 1 between the given nodes.
 #'
 #' @keywords internal
 #' @export
@@ -540,9 +540,9 @@ gather_perm <- function(from, to, nodes){
   # Gather permeabilities across path
   path_perm <- prod(nodes %>%
                       dplyr::filter(.data$node.label %in% path) %>%
-                      dplyr::pull(.data$perm))
+                      dplyr::pull(.data$pass))
 
-  # Return permeability between segments
+  # Return passability between segments
   return(path_perm)
 
 }
