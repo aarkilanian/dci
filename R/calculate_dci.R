@@ -588,9 +588,3 @@ path_to_root <- function(seg){
   # Return list of nodes to the root
   return(path_out)
 }
-
-#' @export
-# print.dci.results <- function(x, ...){
-#   cat("a")
-#   invisible(x)
-# }
