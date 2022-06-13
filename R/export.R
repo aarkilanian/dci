@@ -23,11 +23,7 @@ export_dci <- function(net, results, type = "rivers"){
    rivers <- rivers[,!(names(rivers) == "node.label")]
 
    # Plot result
-   print(
-     ggplot() +
-     geom_sf(data = rivers, aes(col = DCI)) +
-     scale_colour_viridis_b()
-   )
+   plot(rivers["DCI"])
 
    # Return result
    invisible(rivers)
@@ -41,12 +37,7 @@ export_dci <- function(net, results, type = "rivers"){
    barriers <- barriers[,!(names(barriers) == "node.label")]
 
    # Plot results
-   print(
-   ggplot() +
-     geom_sf(data = sf::st_as_sf(activate(net, edges)), col = "gray50") +
-     geom_sf(data = barriers, aes(col = DCI)) +
-     scale_colour_viridis_b()
-   )
+   plot(barriers["DCI"])
 
    # Return result
    invisible(barriers)
@@ -60,12 +51,7 @@ export_dci <- function(net, results, type = "rivers"){
    others <- others[,!(names(others) == "node.label")]
 
    # Plot results
-   print(
-   ggplot() +
-     geom_sf(data = sf::st_as_sf(activate(net, edges)), col = "gray50") +
-     geom_sf(data = others, aes(col = DCI)) +
-     scale_colour_viridis_b()
-   )
+   plot(others["DCI"])
 
    # Return result
    invisible(others)
