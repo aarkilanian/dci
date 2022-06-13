@@ -37,7 +37,7 @@ calculate_dci <- function(net, form, perm = NULL, weight = NULL, threshold = NUL
       }
     )
     # Set non-barrier node permeabilities to 1
-    non_bar <- which(!net_nodes$type == "barrier")
+    non_bar <- which(net_nodes$type != "barrier")
     user_perm[non_bar] <- 1
     # Check that permeability is between 0 and 1
     if(any(user_perm > 1)){
