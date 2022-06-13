@@ -9,10 +9,10 @@ correct_complex(net, correct = TRUE)
 \arguments{
 \item{net}{A \code{\link{river_net}} object.}
 
-\item{correct}{A logical value, when \code{FALSE}, the default, corrections are not automatically applied and a \code{\link{sf}} object of lines is returned with topological errors indicated. If \code{TRUE} errors are automatically corrected.}
+\item{correct}{A logical value, when \code{FALSE}, the default, corrections are not automatically applied and a \code{\link[sf]{sf}} object of lines is returned with topological errors indicated. If \code{TRUE} errors are automatically corrected.}
 }
 \value{
-If correct is \code{TRUE} a \code{\link{sf}} object of rivers with complex confluences separated into two closely located valid confluences. If correct is \code{FALSE} a \code{\link{sf}} object with rivers participating in complex confluences labeled with the same number ina  new "complex" column.
+If correct is \code{TRUE} a \code{\link[sf]{sf}} object of rivers with complex confluences separated into two closely located valid confluences. If correct is \code{FALSE} a \code{\link[sf]{sf}} object with rivers participating in complex confluences labeled with the same number ina  new "complex" column.
 }
 \description{
 Correct complex confluences

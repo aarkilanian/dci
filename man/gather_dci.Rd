@@ -5,6 +5,7 @@
 \title{Calculate sub-segmental DCI component between a single pair of segments}
 \usage{
 gather_dci(
+  net,
   from,
   to,
   distance,
@@ -17,6 +18,8 @@ gather_dci(
 )
 }
 \arguments{
+\item{net}{A \code{\link{river_net}} object.}
+
 \item{from}{The origin segment's membership label.}
 
 \item{to}{The destination segment's membership label.}

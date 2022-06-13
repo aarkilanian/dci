@@ -154,7 +154,7 @@ calculate_dci <- function(net, form, perm = NULL, weight = NULL, threshold = NUL
     else weighted <- FALSE
 
     # Potamodromous case
-    if(form == "potamodromous") DCIs <- calculate_dci_pot_thresh(all_members, net_nodes, seg_weights, weighted, threshold, totweight)
+    if(form == "potamodromous") DCIs <- calculate_dci_pot_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight)
 
     # Diadromous case
     if(form == "diadromous"){
@@ -165,7 +165,7 @@ calculate_dci <- function(net, form, perm = NULL, weight = NULL, threshold = NUL
         dplyr::pull(.data$member.label)
 
       # Calculate DCI
-      DCIs <- calculate_dci_dia_thresh(all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg)
+      DCIs <- calculate_dci_dia_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg)
     }
 
     # If sites are supplied, associate results to them
@@ -281,7 +281,7 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg){
 #'
 #' @keywords internal
 #' @export
-calculate_dci_pot_thresh <- function(all_members, net_nodes, seg_weights, weighted, threshold, totweight){
+calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight){
 
   # Determine segment pairs
   from_segment <- rep(all_members,
@@ -304,7 +304,7 @@ calculate_dci_pot_thresh <- function(all_members, net_nodes, seg_weights, weight
   perms <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
 
   # Calculate DCI
-  DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(nodes = net_nodes, seg_weights, threshold, totweight, weighted))
+  DCIs <- mapply(gather_dci, net, from_segment, to_segment, distances, perms, MoreArgs = list(nodes = net_nodes, seg_weights, threshold, totweight, weighted))
   DCI_glob <- sum(DCIs, na.rm = TRUE)
 
   # Return result
@@ -325,7 +325,7 @@ calculate_dci_pot_thresh <- function(all_members, net_nodes, seg_weights, weight
 #'
 #' @keywords internal
 #' @export
-calculate_dci_dia_thresh <- function(all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg){
+calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg){
 
   # Determine segment pairs
   from_segment <- rep(outlet_seg, times = length(all_members))
@@ -346,7 +346,7 @@ calculate_dci_dia_thresh <- function(all_members, net_nodes, seg_weights, weight
   perms <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
 
   # Calculate DCI
-  DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(nodes = net_nodes, seg_weights, threshold, totweight, weighted))
+  DCIs <- mapply(gather_dci, net, from_segment, to_segment, distances, perms, MoreArgs = list(nodes = net_nodes, seg_weights, threshold, totweight, weighted))
   DCI_glob <- sum(DCIs)
 
   # Return result
@@ -372,7 +372,7 @@ calculate_dci_dia_thresh <- function(all_members, net_nodes, seg_weights, weight
 #'
 #' @keywords internal
 #' @export
-gather_dci <- function(from, to, distance, perm, nodes, seg_weights, threshold, totweight, weighted){
+gather_dci <- function(net, from, to, distance, perm, nodes, seg_weights, threshold, totweight, weighted){
 
   # Case when from and to segment are the same
   if(from == to){
@@ -430,8 +430,10 @@ gather_dci <- function(from, to, distance, perm, nodes, seg_weights, threshold, 
   rem_length <- threshold - distance
 
   # Gather neighbourhood around exit (from segment)
+  neighb_w <- as.data.frame(activate(net, nodes))
+  neighb_w <- neighb_w$riv_length
   neighb <- net %>%
-    dplyr::filter(tidygraph::node_distance_from(sf::st_nearest_feature(exit, net), mode = "all", weights = riv_length) <= threshold) %>%
+    dplyr::filter(tidygraph::node_distance_from(sf::st_nearest_feature(exit, .data), mode = "all", weights = neighb_w) <= threshold) %>%
     dplyr::filter(.data$member.label == from)
   neighb_length <- sum(neighb$riv_length)
 

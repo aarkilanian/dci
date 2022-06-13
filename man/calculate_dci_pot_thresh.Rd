@@ -5,6 +5,7 @@
 \title{Calculate thresholded potamodromous DCI}
 \usage{
 calculate_dci_pot_thresh(
+  net,
   all_members,
   net_nodes,
   seg_weights,
@@ -14,6 +15,8 @@ calculate_dci_pot_thresh(
 )
 }
 \arguments{
+\item{net}{A \code{\link{river_net}} object.}
+
 \item{all_members}{An integer vector holding all assigned membership labels in the \code{\link{river_net}} object.}
 
 \item{net_nodes}{An \code{\link{sf}} object of the nodes of the \code{\link{river_net}} object with river attributes joined.}
