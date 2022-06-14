@@ -109,22 +109,31 @@ Once a valid 'river_net' object is constructed all the elements are present to c
 * the 'weight' parameter - Similar to the 'pass' parameter, the 'weight' parameter allows for the selection of a relevant weighting variable in the river data. Again, these values are required to be between 0 and 1 since they are applied to the river lengths. A possible application is to use habitat suitability estimates as river weighting to achieve a more specific measure of landscape connectivity for a species.
 * the 'threshold parameter - The 'threshold' parameter gives the option of considering a dispersal limit when calculating the DCI. The thresholded DCI prunes any connections between segments that are further away than the dispersal limit. The non-thresholded DCI can be thought of the DCI calculated with a dispersal limit of infinity.
 
-In the example below the DCI is calculated for a potamodromous species with a dispersal limit of 1,200m. No weighting is used in this case.
+In the example below the DCI is calculated for a potamodromous species with a dispersal limit of 5,000m. No weighting is used in this case.
 ```{r}
 yamaska_res <- calculate_dci(net = net,
                              form = "potamodromous",
                              pass = "pass_1",
                              weight = NULL,
-                             threshold = 1200)
+                             threshold = NULL)
+yamaska_res
 ```
+The 'calculate_dci' function returns a table where each river segment is assigned a raw DCI score along with a standardized relative DCI score. The raw scores are useful when comparisons are desired between different watersheds. On the other hand, the relative scores allow for a clearer picture of differences within a watershed. An additional function, 'export_dci', is provided to rejoin these results to the original line or point data. This is explained in the next section.
 
 ## Extracting results
 
-A convenient 'export_dci' function is included in this package to simplify the exporting of dci results in a simple format. The functionality of this code is presented below.
+A convenient 'export_dci' function is included in this package to simplify the exporting of dci results with the original 'river_net' inputs. The function will return the specified type of data: either rivers, barriers, or points of interest, along with the appropriately joined DCI scores for different locations. Along with returning the spatial data requested, the function will produce a plot of the results. The plots always indicate the raw DCI scores. The functionality of this code is presented below.
 ```{r}
+# Results can be rejoined to the river lines
+res_riv <- export_dci(net = net, results = yamaska_res, type = "rivers")
+res_riv
 
+# Results can also be rejoined to the barriers
+res_bar <- export_dci(net = net, results = yamaska_res, type = "barriers")
+
+# If points of interest (poi) were included in the river_net object, the DCI values for these points can be joined too
+res_poi <- export_dci(net = net, results = yamaska_res, type = "poi")
 ```
-
 
 ## References
 
