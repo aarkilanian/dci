@@ -115,7 +115,6 @@ membership_labeler <- function(node, parent, path, env, ...){
     old_labels <- get("labels", envir = env)
     # Choose new label
     member_label <- old_labels[1]
-    print(member_label)
     # Remove label from list
     assign("labels", old_labels[-1], envir = env)
     return(member_label)

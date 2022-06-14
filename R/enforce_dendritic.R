@@ -56,7 +56,8 @@ correct_divergences <- function(net, correct = TRUE){
     riv_divergences <- sf::st_as_sf(activate(net, edges)) %>%
       dplyr::group_by(.data$from) %>%
       dplyr::mutate(grp_size = dplyr::n()) %>%
-      dplyr::mutate(divergent = dplyr::if_else(.data$grp_size > 1, .data$from, NA_integer_))
+      dplyr::mutate(divergent = dplyr::if_else(.data$grp_size > 1, .data$from, NA_integer_)) %>%
+      dplyr::ungroup(.data)
     # Return non-corrected divergences
     invisible(riv_divergences)
   }
@@ -70,7 +71,8 @@ correct_divergences <- function(net, correct = TRUE){
   # Identify components
   net_comp <- activate(net_corrected, nodes) %>%
     dplyr::mutate(component = tidygraph::group_components()) %>%
-    dplyr::group_by(.data$component)
+    dplyr::group_by(.data$component)%>%
+    tidygraph::ungroup(.data)
 
   # Determine largest component and extract
   comps <- as.data.frame(activate(net_comp, nodes))$component
@@ -153,10 +155,12 @@ correct_complex <- function(net, correct = TRUE){
     new_nodes <- buff_intersect %>%
       dplyr::group_by(.data$complexID, .data$to) %>%
       dplyr::tally() %>%
-      dplyr::filter(.data$n == 1)
+      dplyr::filter(.data$n == 1) %>%
+      dplyr::ungroup()
     # Identify associated rivers
-    new_nodes <- dplyr::left_join(new_nodes, as.data.frame(buff_intersect[c("to", "rivID")]))
-    new_nodes <- new_nodes[c("complexID", "rivID")]
+    new_nodes <- dplyr::left_join(new_nodes, as.data.frame(buff_intersect[c("to", "rivID")]), by = c("to" = "rivID"))
+    new_nodes <- new_nodes[c("complexID", "to")]
+    names(new_nodes)[names(new_nodes) == "to"] <- "rivID"
     # Find closest rivers to new points
     modify_rivers <- integer(length = nrow(complex_nodes))
     for(confluence in new_nodes$complexID){
