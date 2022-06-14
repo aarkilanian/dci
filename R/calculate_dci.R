@@ -304,7 +304,7 @@ calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights, w
   perms <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
 
   # Calculate DCI
-  DCIs <- mapply(gather_dci, net, from_segment, to_segment, distances, perms, MoreArgs = list(nodes = net_nodes, seg_weights, threshold, totweight, weighted))
+  DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted))
   DCI_glob <- sum(DCIs, na.rm = TRUE)
 
   # Return result
@@ -346,7 +346,7 @@ calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, w
   perms <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
 
   # Calculate DCI
-  DCIs <- mapply(gather_dci, net, from_segment, to_segment, distances, perms, MoreArgs = list(nodes = net_nodes, seg_weights, threshold, totweight, weighted))
+  DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net, nodes = net_nodes, seg_weights, threshold, totweight, weighted))
   DCI_glob <- sum(DCIs)
 
   # Return result
@@ -422,20 +422,20 @@ gather_dci <- function(net, from, to, distance, pass, nodes, seg_weights, thresh
     # Select most downstream barrier as exit, extract geometry
     barriers <- full_path[full_path$type == "barrier",]
     barriers$depth <- unlist(lapply(barriers$node.label, length))
-    exit_label <- barriers[which.min(barriers$depth),]$node.label
-    exit <- sf::st_geometry(nodes[nodes$node.label %in% exit_label,])
+    exit_label <- as.integer(rownames(barriers[which.min(barriers$depth),]))
   }
 
   # Calculate length remaining after segment-segment distance
   rem_length <- threshold - distance
 
   # Gather neighbourhood around exit (from segment)
-  neighb_w <- as.data.frame(activate(net, nodes))
-  neighb_w <- neighb_w$riv_length
-  neighb <- net %>%
-    dplyr::filter(tidygraph::node_distance_from(sf::st_nearest_feature(exit, .data), mode = "all", weights = neighb_w) <= threshold) %>%
-    dplyr::filter(.data$member.label == from)
-  neighb_length <- sum(neighb$riv_length)
+  weights <- as.data.frame(activate(net, edges))
+  weights <- weights$riv_length
+  target <- seq_len(igraph::gorder(net))
+  source <- exit_label
+  dist <- igraph::distances(graph = net %>% tidygraph::.G(), v = source, to = target,
+                             mode = "all", weights = weights, algorithm = "automatic")
+  neighb_length <- sum(dist[dist <= 1200])
 
   if(weighted){
     # Calculate length of from neighbourhood
