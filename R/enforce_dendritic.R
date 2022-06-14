@@ -53,13 +53,16 @@ correct_divergences <- function(net, correct = TRUE){
   # If no corrections desired, find and return divergences
   if(!correct){
     # Find and identify divergent pairs
-    riv_divergences <- sf::st_as_sf(activate(net, edges)) %>%
+    riv_divergences <- activate(net, edges) %>%
       dplyr::group_by(.data$from) %>%
       dplyr::mutate(grp_size = dplyr::n()) %>%
       dplyr::mutate(divergent = dplyr::if_else(.data$grp_size > 1, .data$from, NA_integer_)) %>%
-      dplyr::ungroup(.data)
+      dplyr::ungroup()
+    # Print number of divergences
+    num_div <- length(unique(as.data.frame(activate(riv_divergences, edges))$divergent)) - 1
+    message(paste0(num_div, " divergences have been found."))
     # Return non-corrected divergences
-    invisible(riv_divergences)
+    return(riv_divergences)
   }
 
   # Find and correct divergences. Always keep longest stream
@@ -144,7 +147,9 @@ correct_complex <- function(net, correct = TRUE){
 
     # If manual editing desired, identify complex confluence rivers
     if(!correct){
-      complex_riv <- sf::st_join(rivers, buffer, left = FALSE)
+      complex_riv <- sf::st_join(rivers, buffer, left = TRUE)
+      # Remove unnecessary columns
+      complex_riv <- subset(complex_riv, select = -c(grp_size, rivID, degree))
       return(complex_riv)
     }
 
