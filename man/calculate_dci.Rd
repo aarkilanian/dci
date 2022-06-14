@@ -7,7 +7,7 @@
 calculate_dci(
   net,
   form,
-  perm = NULL,
+  pass = NULL,
   weight = NULL,
   threshold = NULL,
   sites = NULL
@@ -18,7 +18,7 @@ calculate_dci(
 
 \item{form}{A string specifying the form of the DCI to calculate: either "potamodromous", "catadromous", or "all".}
 
-\item{perm}{The name of a column in the nodes table of net which holds the numeric permeability of nodes. If none is specified all barriers are automatically considered to have 0 permeability.}
+\item{pass}{The name of a column in the nodes table of net which holds the numeric passability of nodes. If none is specified all barriers are automatically considered to have 0 passability.}
 
 \item{weight}{The name of column in the edges tables of net which holds numeric weights to be applied to river lengths. If none is specified, the DCI is calculated only with river lengths.}
 

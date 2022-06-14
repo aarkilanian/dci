@@ -16,4 +16,60 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(dci)
+library(dplyr)
 ```
+
+The dci package provides an R interface for the measurement of connectivity in river networks with the dendritic connectivity index (Cote et al., 2009). The main class of the package is the river_net class which links river lines to barriers, optional points of interest, and the outlet of the river network. It inherits the structure of the sfnetwork class from the [sfnetworks package](https://luukvdmeer.github.io/sfnetworks/) which itself inherits the tbl_graph class from the [tidygraph package](https://tidygraph.data-imaginist.com/index.html) further inherited by the igraph class from the [igraph package](https://igraph.org/). These dependencies on other packages provide a rich set of tools and algorithms which remain applicable to all instances of the river_net class. Therefore, further and more complex analyses can be carried out with functions from the 'igraph', 'tidygraph', and 'sfnetworks' packages. Further, the tbl_graph class from 'tidygraph' is created with the [tidyverse](https://www.tidyverse.org/) in mind and, thus, allows for the development of workflows using 'tidyverse' packages.
+
+## Importing
+
+A 'river_net' object is constructed using three pieces of required data: river lines, barrier points, and the outlet location; in addition to some optional points of interest which could, for example, represent fish survey locations where connectivity scores are desired. These input spatial data must first be imported with 'import_rivers' and 'import_points' functions. 
+
+Rivers can be imported from either the path to a shapefile or an object of the 'sf' class. This function performs some basic error checking, extracts the largest fully connected component in the supplied data, and calculates river lengths. A plot with changes highlighted in red is printed alongside the function unless the 'quiet' parameter is set to 'TRUE'. River importing is illustrated below with the path to a shapefile. The shapefile represents the rivers of the Yamaska watershed in Southern Quebec.
+```{r}
+# Importing rivers from a shapefile
+rivers_in <- import_rivers("../inst/extdata/yamaska_riv.shp")
+```
+
+Similarly, all point data can be imported with the 'import_points' function along with the 'type' parameter specifying the type of point. Possible values are: "barriers", "outlet", or "poi" (for points of interest).
+```{r}
+# Import barriers
+barriers_in <- import_points("../inst/extdata/yamaska_bars.shp", type = "barriers")
+outlet_in <- import_points("../inst/extdata/yamaska_out.shp", type = "outlet")
+poi_in <- import_points("../inst/extdata/yamaska_poi.shp", type = "poi")
+barriers_in
+```
+
+## Construction
+
+Once all required and any additional data have been pre-processed with the import functions they can be joined together in the 'river_net' function to generate an object of the 'river_net' class. Messages are printed indicating the topoligcal corrections that are being performed on the river network. These are explained in more detail in the next section.
+```{r}
+# Combine rivers, barriers, and outlet
+net <- river_net(rivers = rivers_in, barriers = barriers_in, outlet = outlet_in, poi = poi_in) 
+net
+```
+
+### Dendritic topology
+
+Since the 'river_net' class inherits from the 'sfnetworks' class it shares the enforcement of certain network rules from the 'sfnetworks' package: nodes should have 'POINT' geometries, edges should be spatially explicit and have "LINESTRING" geometries, and both nodes and edges should have the same CRS. In addition to these, the 'dci' package enforces additional rules pertaining to the dendritic topology of river networks. A dendritic topology is defined as a directional network topology in which at most two upstream edges combine at a node to form a single outgoing downstream edge. In the case of a barrier there would be one incoming edge while in the case of natural confluences two incoming edges combine. This topological rule is enforced because it allows for the design of custom river network path finding algorithms which run quicker than traditional network algorithms such as Djiktra's algorithm which makes no assumption about network structure.
+
+The 'river_net' provides functionality for correcting some common topological errors:
+
+1.  *Divergent rivers* - Divergent rivers occur where a single upstream river splits into two downstream rivers. This often occurs because of large obstacles in the waterway of large rivers causing a single river to split and recombine further downstream. If the 'river_net' function is run with the 'clean' parameter set to 'TRUE' divergences are corrected by deleting the shortest of the two downstream rivers. If more fine-tuned corrections are preferred the 'enforce_dendritic' function can be called directly on the rivers imported by 'import_rivers'. This functionality is illustrated below.
+2.  *Complex confluences* - Complex confluences occur when a confluence node has over 3 incident edges. These often occur as a limitation of data resolution where two very close confluences merge into one. If the 'river_net' function is run with the 'clean' parameter set to 'TRUE' complex confluences are corrected by moving one of the incident edges further downstream on the main channel. When a complex confluence is present with over 4 incident edges the function will quit and a manual correction will be required.
+
+By default the 'river_net' constructor performs these topological corrections automatically. However, if manual corrections are desired the 'enforce_dendritic' function can be called directly with the river lines data and the 'correct' parameter set to 'FALSE'. Then, when constructing the 'river_net' object, the 'check' parameter can be set to false since the topology has already been corrected.
+```{r}
+# Identify topological errors in rivers
+river_errors <- enforce_dendritic(rivers = rivers_in, correct = FALSE)
+```
+
+
+### Labeling
+
+## Calculating the DCI
+
+
+## References
+
+Cote, D., Kehler, D. G., Bourne, C., & Wiersma, Y. F. (2009). A new measure of longitudinal connectivity for stream networks. Landscape Ecology, 24(1), 101-113.

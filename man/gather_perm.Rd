@@ -2,7 +2,7 @@
 % Please edit documentation in R/calculate_dci.R
 \name{gather_perm}
 \alias{gather_perm}
-\title{Gather permeability between two nodes}
+\title{Gather passability between two nodes}
 \usage{
 gather_perm(from, to, nodes)
 }
@@ -14,9 +14,9 @@ gather_perm(from, to, nodes)
 \item{nodes}{An \code{\link{sf}} object of the nodes of the \code{\link{river_net}} object with river attributes joined.}
 }
 \value{
-The permeability from 0 to 1 between the given nodes.
+The passability from 0 to 1 between the given nodes.
 }
 \description{
-Gather permeability between two nodes
+Gather passability between two nodes
 }
 \keyword{internal}

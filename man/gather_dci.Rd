@@ -9,7 +9,7 @@ gather_dci(
   from,
   to,
   distance,
-  perm,
+  pass,
   nodes,
   seg_weights,
   threshold,
@@ -26,7 +26,7 @@ gather_dci(
 
 \item{distance}{The distance, in map units, between the two segments as calculated by \code{\link{gather_dist}}.}
 
-\item{perm}{The permeability between the two segments as calculated by \code{\link{gather_perm}}.}
+\item{pass}{The passability between the two segments as calculated by \code{\link{gather_perm}}.}
 
 \item{nodes}{An \code{\link{sf}} object of the nodes of the \code{\link{river_net}} object with river attributes joined.}
 
