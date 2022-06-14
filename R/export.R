@@ -36,11 +36,8 @@ export_dci <- function(net, results, type = "rivers"){
      dplyr::left_join(results, by = c("member.label" = "segment"))
    barriers <- barriers[,!(names(barriers) == "node.label")]
 
-   # Get rivers for plotting
-   plot(sf::st_geometry(sf::st_as_sf(activate(net, edges))), col = "grey75")
-
    # Plot results
-   plot(barriers["DCI"], add = TRUE)
+   plot(barriers["DCI"])
 
    # Return result
    invisible(barriers)
@@ -53,11 +50,8 @@ export_dci <- function(net, results, type = "rivers"){
      dplyr::left_join(results, by = c("member.label" = "segment"))
    others <- others[,!(names(others) == "node.label")]
 
-   # Get rivers for plotting
-   plot(sf::st_geometry(sf::st_as_sf(activate(net, edges))), col = "grey75")
-
    # Plot results
-   plot(others["DCI"], add = TRUE)
+   plot(others["DCI"])
 
    # Return result
    invisible(others)
