@@ -163,9 +163,8 @@ correct_complex <- function(net, correct = TRUE){
       dplyr::filter(.data$n == 1) %>%
       dplyr::ungroup()
     # Identify associated rivers
-    new_nodes <- dplyr::left_join(new_nodes, as.data.frame(buff_intersect[c("to", "rivID")]), by = c("to" = "rivID"))
-    new_nodes <- new_nodes[c("complexID", "to")]
-    names(new_nodes)[names(new_nodes) == "to"] <- "rivID"
+    new_nodes <- dplyr::left_join(new_nodes, as.data.frame(buff_intersect[c("to", "rivID")]), by = c("to" = "to"))
+    new_nodes <- new_nodes[c("complexID", "rivID")]
     # Find closest rivers to new points
     modify_rivers <- integer(length = nrow(complex_nodes))
     for(confluence in new_nodes$complexID){
