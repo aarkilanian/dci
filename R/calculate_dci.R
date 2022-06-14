@@ -312,7 +312,7 @@ calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights, w
   DCI_res <- DCI_res %>%
     dplyr::group_by(.data$from_segment) %>%
     dplyr::summarise(DCI = sum(.data$DCIs, na.rm = TRUE))
-  DCI_res$DCI_rel <- DCI_res$DCI * DCI_glob * 100
+  DCI_res$DCI_rel <- DCI_res$DCI / DCI_glob * 100
   names(DCI_res)[names(DCI_res) == "from_segment"] <- "segment"
   DCI_res <- as.data.frame(DCI_res)
   return(DCI_res)
