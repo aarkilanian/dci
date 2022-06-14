@@ -402,24 +402,14 @@ gather_dci <- function(net, from, to, distance, pass, nodes, seg_weights, thresh
   # If from segment is upstream of to segment
   if(length(unlist(from_sink)) > length(unlist(to_sink))){
 
-    # Set exit to one node upstream of from outlet, extract geometry
+    # Set exit to one node upstream of from outlet, extract row index
     exit_label <- list(append(unlist(from_sink), FALSE))
-    exit <- sf::st_geometry(nodes[nodes$node.label %in% exit_label,])
-
-    # Select most downstream barrier as entrance, extract geometry
-    barriers <- full_path[full_path$type == "barrier",]
-    barriers$depth <- unlist(lapply(barriers$node.label, length))
-    entrance_label <- barriers[which.min(barriers$depth),]$node.label
-    entrance <- sf::st_geometry(nodes[nodes$node.label %in% entrance_label,])
+    exit_label <- as.integer(rownames(nodes[nodes$node.label %in% exit_label,]))
 
     # If from segment is downstream of to segment
   } else {
 
-    # Set entrance to one node upstream of to outlet, extract geometry
-    entrance_label <- list(append(unlist(to_sink), FALSE))
-    entrance <- sf::st_geometry(nodes[nodes$node.label %in% entrance_label,])
-
-    # Select most downstream barrier as exit, extract geometry
+    # Select most downstream barrier as exit, extract row index
     barriers <- full_path[full_path$type == "barrier",]
     barriers$depth <- unlist(lapply(barriers$node.label, length))
     exit_label <- as.integer(rownames(barriers[which.min(barriers$depth),]))
@@ -433,7 +423,7 @@ gather_dci <- function(net, from, to, distance, pass, nodes, seg_weights, thresh
   weights <- weights$riv_length
   target <- seq_len(igraph::gorder(net))
   source <- exit_label
-  dist <- igraph::distances(graph = net %>% tidygraph::.G(), v = source, to = target,
+  dist <- igraph::distances(graph = net, v = source, to = target,
                              mode = "all", weights = weights, algorithm = "automatic")
   neighb_length <- sum(dist[dist <= 1200])
 
@@ -587,4 +577,18 @@ path_to_root <- function(seg){
                      path, len, SIMPLIFY = TRUE)
   # Return list of nodes to the root
   return(path_out)
+}
+
+#' Gather total length of neighbourhood around given source node
+#'
+#' @param net
+#' @param source
+#' @param distance
+#'
+#' @return A numeric value indicating the total length of the neihbourhood
+#'
+#' @keywords internal
+#' @export
+gather_neighb <- function(net, source, distance){
+
 }
