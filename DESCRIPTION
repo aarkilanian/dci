@@ -24,7 +24,8 @@ Imports:
     units,
     sf,
     tidygraph,
-    sfnetworks
+    sfnetworks,
+    igraph
 VignetteBuilder: knitr
 Depends: 
     R (>= 2.10)
