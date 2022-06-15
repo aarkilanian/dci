@@ -23,12 +23,6 @@ The dci package provides an R interface for the measurement of connectivity in r
 
 This vignette illustrates the 'dci' package using river and barrier data from the Yamaska watershed in Southern Quebec.
 
-## River network terminology
-
-For ease of understanding a few definitions are provided relating to terminology for rivers at multiple scales in a river network
-
--- Include and edit illustration
-
 ## Importing
 
 A 'river_net' object is constructed using three pieces of required data: river lines, barrier points, and the outlet location; in addition to some optional points of interest which could, for example, represent fish survey locations where connectivity scores are desired. These input spatial data must first be imported with 'import_rivers' and 'import_points' functions. 
@@ -66,11 +60,6 @@ The 'river_net' provides functionality for correcting some common topological er
 1.  *Divergent rivers* - Divergent rivers occur where a single upstream river splits into two downstream rivers. This often occurs because of large obstacles in the waterway of large rivers causing a single river to split and recombine further downstream. If the 'river_net' function is run with the 'clean' parameter set to 'TRUE' divergences are corrected by deleting the shortest of the two downstream rivers. If more fine-tuned corrections are preferred the 'enforce_dendritic' function can be called directly on the rivers imported by 'import_rivers'. This functionality is illustrated below.
 2.  *Complex confluences* - Complex confluences occur when a confluence node has over 3 incident edges. These often occur as a limitation of data resolution where two very close confluences merge into one. If the 'river_net' function is run with the 'clean' parameter set to 'TRUE' complex confluences are corrected by moving one of the incident edges further downstream on the main channel. When a complex confluence is present with over 4 incident edges the function will quit and a manual correction will be required.
 
-```{r}
-# Topological error ilustrations
-```
-
-
 By default the 'river_net' constructor performs these topological corrections automatically. However, if manual corrections are desired the 'enforce_dendritic' function can be called directly with the river lines data and the 'correct' parameter set to 'FALSE'. Then, when constructing the 'river_net' object, the 'check' parameter can be set to 'FALSE' since the topology has already been corrected.
 ```{r}
 # Identify topological errors in rivers
@@ -92,13 +81,9 @@ plot(river_errors["complexID"], add = TRUE)
 
 There are 2 types of labeling performed on a 'river_net' object.
 
-  1. Node labeling - Node labeling makes use of a binary code to, essentially, give an address to each node in the network relative to the outlet. Labeling begins at the outlet with a label of 0 and proceeds upstream. At the first split, the two children of the outlet node are given labels 00 and 01. These labels allow for rapid path tracing in river networks to gather the watercourse distance between two nodes or the passability of barriers which lie on that path. The task of finding the least-cost path between points is a computationally intensive network theory problem and it's an important one when considering connectivity in terrestrial landscapes. However, river networks which follow a dendritic topology exhibit an important property - there is only one path between any two points in the network. Common path-finding algorithms like Djikstra's algorithm are made to be general and don't make these types of assumptions about network structure. This labeling allows for the design of custom, rapid algorithms to gather the path between nodes in the network. The node labeling is illustrated below.
+  1. Node labeling - Node labeling makes use of a binary code to, essentially, give an address to each node in the network relative to the outlet. Labeling begins at the outlet with a label of 0 and proceeds upstream. At the first split, the two children of the outlet node are given labels 00 and 01. These labels allow for rapid path tracing in river networks to gather the watercourse distance between two nodes or the passability of barriers which lie on that path. The task of finding the least-cost path between points is a computationally intensive network theory problem and it's an important one when considering connectivity in terrestrial landscapes. However, river networks which follow a dendritic topology exhibit an important property - there is only one path between any two points in the network. Common path-finding algorithms like Djikstra's algorithm are made to be general and don't make these types of assumptions about network structure. This labeling allows for the design of custom, rapid algorithms to gather the path between nodes in the network.
   
-  2. Membership labeling - Membership labeling is much more simple than the node labeling. Membership labels simply classify nodes into specific river isolated segments bounded on all sides by either barriers or terminal nodes of the network (sources and the outlet). These labels are simply integers from 0 to the number of segments. The membership labeling is illustrated below.
-  
-```{r}
-# Illustration of both labeling styles
-```
+  2. Membership labeling - Membership labeling is much more simple than the node labeling. Membership labels simply classify nodes into specific river isolated segments bounded on all sides by either barriers or terminal nodes of the network (sources and the outlet). These labels are simply integers from 0 to the number of segments.
 
 ## Calculating the DCI
 
