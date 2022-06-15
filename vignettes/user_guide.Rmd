@@ -42,7 +42,7 @@ rivers_in <- import_rivers(rivers = "../inst/extdata/yamaska_riv.shp")
 Similarly, all point data can be imported with the 'import_points' function along with the 'type' parameter specifying the type of point. Possible values are: "barriers", "outlet", or "poi" (for points of interest).
 ```{r}
 # Import barriers
-barriers_in <- import_points("../inst/extdata/yamaska_bars.shp", type = "barriers")
+barriers_in <- import_points("..inst/extdata/yamaska_bars.shp", type = "barriers")
 outlet_in <- import_points("../inst/extdata/yamaska_out.shp", type = "outlet")
 poi_in <- import_points("../inst/extdata/yamaska_poi.shp", type = "poi")
 barriers_in
@@ -120,9 +120,36 @@ yamaska_res
 ```
 The 'calculate_dci' function returns a table where each river segment is assigned a raw DCI score along with a standardized relative DCI score. The raw scores are useful when comparisons are desired between different watersheds. On the other hand, the relative scores allow for a clearer picture of differences within a watershed. An additional function, 'export_dci', is provided to rejoin these results to the original line or point data. This is explained in the next section.
 
+### Distance thresholds
+
+The 'threshold' parameter of the 'calculate_dci' function allows for the inclusion of a distance threshold above which river fragments aren't considered connected. In terms of the DCI equation, this would mean that not all pairs of segments will participate in the summation. In addition, the threshold distance is used to generate an additional weighting term based on the amount of habitat in the source fragment that can be considered connected to the exit node. This is done by generating an isodistance map around the source fragment's exit node and gathering the total distance of rivers from the source fragment within that isodistance map. This length is then divided by the total length of the river network.
+
+The use of a distance threshold can be useful to derive a clearer picture of connectivity when a species' dispersal limit is known. Below is an example done with the same Yamaska watershed using a distance threshold of 1.5km. This distance is written in the default map units which are meters.
+```{r}
+yamaska_res_thr <- calculate_dci(net = net,
+                             form = "potamodromous",
+                             pass = "pass_1",
+                             weight = NULL,
+                             threshold = 1500)
+yamaska_res_thr
+```
+
+### River weights
+
+An additional option with the DCI calculation is to include a weighting term with the river data. By default the DCI only considers the length of rivers as a measure of amount of habitat. However, certain cases might benefit from a more specific definition of amount of habitat. The 'weight' parameter of the 'calculate_dci' function can use one of the variables included with the river data as a weighting term applied to the river lengths. These values are rescaled between 0 and 1 before applying the weighting. An example using a habitat suitability weighting is demonstrated below.
+```{r}
+yamaska_res_w <- calculate_dci(net = net,
+                             form = "potamodromous",
+                             pass = "pass_1",
+                             weight = "qual",
+                             threshold = NULL)
+yamaska_res_w
+```
+
+
 ## Extracting results
 
-A convenient 'export_dci' function is included in this package to simplify the exporting of dci results with the original 'river_net' inputs. The function will return the specified type of data: either rivers, barriers, or points of interest, along with the appropriately joined DCI scores for different locations. Along with returning the spatial data requested, the function will produce a plot of the results. The plots always indicate the raw DCI scores. The functionality of this code is presented below.
+A convenient 'export_dci' function is included in this package to simplify the exporting of dci results with the original 'river_net' inputs. The function will return the specified type of data: either rivers, barriers, or points of interest, along with the appropriately joined DCI scores for different locations. Along with returning the spatial data requested, the function will produce a simple plot of the results. The plots always indicate the raw DCI scores. The functionality of this code is presented below.
 ```{r}
 # Results can be rejoined to the river lines
 res_riv <- export_dci(net = net, results = yamaska_res, type = "rivers")
@@ -133,6 +160,26 @@ res_bar <- export_dci(net = net, results = yamaska_res, type = "barriers")
 
 # If points of interest (poi) were included in the river_net object, the DCI values for these points can be joined too
 res_poi <- export_dci(net = net, results = yamaska_res, type = "poi")
+```
+
+## Visualizing results
+
+More sophisticated visualization of river networks and the results of the DCI analysis are beyond the scope of this package. However, some code to visualize these networks and DCI results with the ggplot2 package is provided below.
+```{r eval=FALSE}
+# Visualize river network with nodes coloured according to their type
+ggplot() +
+  geom_sf(data = net %>% tidygraph::activate(edges) %>% sf::st_as_sf()) +
+  geom_sf(data = net %>% tidygraph::activate(nodes) %>% sf::st_as_sf(), aes(col = type))
+
+# Visualize the DCI color coded river network with the barriers
+ggplot() +
+  geom_sf(data = res_riv, aes(col = DCI)) +
+  geom_sf(data = net %>% tidygraph::activate(nodes) %>% sf::st_as_sf() %>% dplyr::filter(type == "barrier"))
+
+# Visualize points of interest coloured by their DCI score along with the underlying river network
+ggplot() +
+  geom_sf(data = net %>% tidygraph::activate(edges) %>% sf::st_as_sf(), col = "grey60") +
+  geom_sf(data = res_poi, aes(col = DCI))
 ```
 
 ## References
