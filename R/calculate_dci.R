@@ -60,6 +60,11 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
         stop("Supplied weight field cannot be assigned:", e, call. = FALSE)
       }
     )
+    # If 0s are present, shift values by 1
+    if(any(user_weight == 0)){
+      warning("Weights of 0 were found, all weighting values will be shifted up by 1.")
+      user_weight <- user_weight + 1
+    }
     # Replace NA values with 0
     if(any(is.na(user_weight))){
       warning("NAs found in weight column, NA weighted rivers will be excluded...")
