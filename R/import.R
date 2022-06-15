@@ -45,7 +45,8 @@ import_rivers <- function(rivers, quiet = FALSE){
   # Identify components
   net <- sfnetworks::as_sfnetwork(rivers) %>%
     dplyr::mutate(component = tidygraph::group_components()) %>%
-    dplyr::group_by(.data$component)
+    dplyr::group_by(.data$component) %>%
+    dplyr::ungroup()
  comps <- activate(net, nodes) %>%
    as.data.frame(.data) %>%
    dplyr::select(.data$component)
@@ -58,6 +59,9 @@ import_rivers <- function(rivers, quiet = FALSE){
 
   # Calculate river lengths
   rivers$riv_length <- as.double(sf::st_length(rivers))
+
+  # Remove from and to columns
+  rivers <- subset(rivers, select = -c(from, to))
 
   # Plot rivers if quiet is set to FALSE
   if(quiet == FALSE){
