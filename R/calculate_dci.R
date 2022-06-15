@@ -508,8 +508,6 @@ gather_dist <- function(from, to, nodes){
 #' @export
 gather_perm <- function(from, to, nodes){
 
-  message(paste0("From ", from, " to ", to))
-
   # Condition when from and to are the same
   if(from == to){
     return(1)
