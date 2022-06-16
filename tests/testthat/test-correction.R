@@ -18,7 +18,9 @@ test_that("Divergence correction removes one river per divergence", {
 
   # Run test
   new_net <- suppressWarnings(correct_divergences(net))
-  expect_equal(new_net %>% sfnetworks::activate(edges) %>% length(), 10)
+  new_riv <- sfnetworks::activate(new_net, edges)
+  new_riv <- as.data.frame(new_riv)
+  expect_equal(nrow(new_riv), 10)
 
 })
 
