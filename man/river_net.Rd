@@ -27,6 +27,6 @@ An object of class \code{\link{river_net}} representing the river network formed
 }
 \examples{
 \dontrun{ river_net(rivers = river_data, barriers = barrier_data, outlet = outlet_data)}
-\dontrun{ river_net(rivers = river_data, barriers = barrier_data, outlet = outlet_data, poi = extra_data)}
-\dontrun{ river_net(rivers = river_data, barriers = barrier_data, outlet = outlet_data, tolerance = 15}
+\dontrun{ river_net(river_data, barrier_data, outlet_data, poi = extra_data)}
+\dontrun{ river_net(river_data, barrier_data, outlet_data, tolerance = 15}
 }

@@ -56,7 +56,7 @@ correct_divergences <- function(net, correct = TRUE){
   # If no corrections desired, find and return divergences
   if(!correct){
     # Find and identify divergent pairs
-    riv_divergence <- activate(net, edges) %>%
+    riv_divergences <- activate(net, edges) %>%
         dplyr::group_by(.data$from) %>%
         dplyr::mutate(grp_size = dplyr::n()) %>%
         dplyr::mutate(divergent = dplyr::if_else(.data$grp_size > 1, .data$from, NA_integer_)) %>%
