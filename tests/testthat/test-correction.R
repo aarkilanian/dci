@@ -17,7 +17,7 @@ test_that("Divergence correction removes one river per divergence", {
   net <- sfnetworks::as_sfnetwork(rivers, length_as_weight = TRUE)
 
   # Run test
-  new_net <- correct_divergences(net)
+  new_net <- suppressWarnings(correct_divergences(net))
   expect_equal(new_net %>% sfnetworks::activate(edges) %>% length(), 10)
 
 })
@@ -33,7 +33,7 @@ test_that("Message is written when no divergences", {
   net <- sfnetworks::as_sfnetwork(rivers, length_as_weight = TRUE)
 
   # Run test
-  expect_message(correct_divergences(net), "No divergences detected.")
+  expect_message(suppressWarnings(correct_divergences(net)), "No divergences detected.")
 
 })
 

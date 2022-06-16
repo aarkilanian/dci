@@ -5,24 +5,22 @@
 \alias{yamaska}
 \title{River network for the Yamaska watershed}
 \format{
-An object of class \code{\link{river_net}} holding an \code{\link[sf]{sf}} edges object with 588 \code{LINESTRING} geometries and 7 columns :
+An object of class \code{\link{river_net}} holding a pair of \code{\link[sf]{sf}} objects representing the edges (588 \code{LINESTRING} geometries and 7 columns) and the nodes (589 \code{POINT} geometries and 7 columns) :
 \describe{
-\item{geometry}{the geometry list column}
-\item{pass_1}{the passability of nodes in the network from 0 to 1}
-\item{pass_2}{the binary passability of nodes in the network, 0 if a barrier and 1 otherwise}
-\item{type}{the type of the node}
-\item{id}{an id column}
-\item{node.label}{a logical vector representing each node's unique topoligical ID}
-\item{member.label}{the segment membership of the node}
-} and an \code{\link[sf]{sf}} nodes object with 589 \code{POINT} geometries and 7 columns:
-\describe{
-\item{from}{the origin node of the line}
-\item{to}{the destination node of the line}
-\item{OBJECTID}{a unique river line id}
-\item{geometry}{the geometry list column}
-\item{riv_length}{the length of rivers, in meters}
-\item{weight}{a river weighting term}
-\item{rivID}{a unique river id}
+\item{geometry (edges)}{the geometry list column}
+\item{pass_1 (edges)}{the passability of nodes in the network from 0 to 1}
+\item{pass_2 (edges)}{the binary passability of nodes in the network, 0 if a barrier and 1 otherwise}
+\item{type (edges)}{the type of the node}
+\item{id (edges)}{an id column}
+\item{node.label (edges)}{a logical vector representing each node's unique topoligical ID}
+\item{member.label (edges)}{the segment membership of the node}
+\item{from (nodes)}{the origin node of the line}
+\item{to (nodes)}{the destination node of the line}
+\item{OBJECTID (nodes)}{a unique river line id}
+\item{geometry (nodes)}{the geometry list column}
+\item{riv_length (nodes)}{the length of rivers, in meters}
+\item{weight (nodes)}{a river weighting term}
+\item{rivID (nodes)}{a unique river id}
 ...
 }
 }

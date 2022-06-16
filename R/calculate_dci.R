@@ -17,6 +17,7 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
 
   # Check that network is valid
   if(!("river_net" %in% class(net))){
+    stop("A valid river_net object is required.")
   }
   # Check that form is valid
   if(!(form %in% c("potamodromous", "diadromous", "all"))){

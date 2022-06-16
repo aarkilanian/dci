@@ -56,11 +56,11 @@ correct_divergences <- function(net, correct = TRUE){
   # If no corrections desired, find and return divergences
   if(!correct){
     # Find and identify divergent pairs
-    riv_divergences <- activate(net, edges) %>%
-      dplyr::group_by(.data$from) %>%
-      dplyr::mutate(grp_size = dplyr::n()) %>%
-      dplyr::mutate(divergent = dplyr::if_else(.data$grp_size > 1, .data$from, NA_integer_)) %>%
-      dplyr::ungroup()
+    riv_divergence <- activate(net, edges) %>%
+        dplyr::group_by(.data$from) %>%
+        dplyr::mutate(grp_size = dplyr::n()) %>%
+        dplyr::mutate(divergent = dplyr::if_else(.data$grp_size > 1, .data$from, NA_integer_)) %>%
+        dplyr::ungroup()
     # Print number of divergences
     num_div <- length(unique(as.data.frame(activate(riv_divergences, edges))$divergent)) - 1
     message(paste0(num_div, " divergences have been found."))
@@ -70,15 +70,15 @@ correct_divergences <- function(net, correct = TRUE){
 
   # Find and correct divergences. Always keep longest stream
   net_corrected <- activate(net, edges) %>%
-    dplyr::group_by(.data$from) %>%
-    dplyr::filter(.data$weight == max(.data$weight)) %>%
-    tidygraph::ungroup(.data)
+      dplyr::group_by(.data$from) %>%
+      dplyr::filter(.data$weight == max(.data$weight)) %>%
+      tidygraph::ungroup(.data)
 
   # Identify components
   net_comp <- activate(net_corrected, nodes) %>%
-    dplyr::mutate(component = tidygraph::group_components()) %>%
-    dplyr::group_by(.data$component)%>%
-    tidygraph::ungroup(.data)
+      dplyr::mutate(component = tidygraph::group_components()) %>%
+      dplyr::group_by(.data$component)%>%
+      tidygraph::ungroup(.data)
 
   # Determine largest component and extract
   comps <- as.data.frame(activate(net_comp, nodes))$component
@@ -157,11 +157,12 @@ correct_complex <- function(net, correct = TRUE){
     buff_intersect <- sf::st_intersection(rivers, buffer)
     buff_intersect <- buff_intersect[c("rivID", "complexID", "to")]
     # Select points out of buffer intersections for new confluence nodes on downstream edges
-    new_nodes <- buff_intersect %>%
-      dplyr::group_by(.data$complexID, .data$to) %>%
-      dplyr::tally() %>%
-      dplyr::filter(.data$n == 1) %>%
-      dplyr::ungroup()
+    new_nodes <-  buff_intersect %>%
+        dplyr::group_by(.data$complexID, .data$to) %>%
+        dplyr::tally() %>%
+        dplyr::filter(.data$n == 1) %>%
+        dplyr::ungroup()
+
     # Identify associated rivers
     new_nodes <- dplyr::left_join(new_nodes, as.data.frame(buff_intersect[c("to", "rivID")]), by = c("to" = "to"))
     new_nodes <- new_nodes[c("complexID", "rivID")]

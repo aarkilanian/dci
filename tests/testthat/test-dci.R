@@ -69,3 +69,4 @@ test_that("Diadromous DCI works", {
   expect_snapshot(dci$DCIs)
 
 })
+

@@ -17,3 +17,7 @@ Object of class barriers, outlet, or poi prepared for input to \code{\link{river
 \description{
 Read and prepare geospatial point data for dci.
 }
+\examples{
+\dontrun{ import_points(pts = path_to_shapefile)}
+\dontrun{ import_points(pts = sf_point_object)}
+}

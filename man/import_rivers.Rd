@@ -17,3 +17,7 @@ Object of class rivers prepared for input to \code{\link{river_net}}
 \description{
 Read and prepare geospatial river lines data for dci.
 }
+\examples{
+\dontrun{ import_rivers(rivers = path_to_shapefile)}
+\dontrun{ import_rivers{rivers = sf_line_object}}
+}

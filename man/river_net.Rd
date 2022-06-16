@@ -4,21 +4,14 @@
 \alias{river_net}
 \title{Create a \code{river_net} object}
 \usage{
-river_net(
-  rivers,
-  barriers,
-  outlet = NULL,
-  poi = NULL,
-  check = TRUE,
-  tolerance = NULL
-)
+river_net(rivers, barriers, outlet, poi = NULL, check = TRUE, tolerance = NULL)
 }
 \arguments{
 \item{rivers}{A \code{rivers} object returned by \code{\link{import_rivers}}.}
 
 \item{barriers}{A \code{barriers} object returned by \code{\link{import_points}}.}
 
-\item{outlet}{A \code{outlet} object returned by \code{\link{import_points}}. This data is optional.}
+\item{outlet}{A \code{outlet} object returned by \code{\link{import_points}}.}
 
 \item{poi}{A \code{poi} object (points of interest) returned by \code{\link{import_points}}. This data is optional.}
 
@@ -31,4 +24,9 @@ An object of class \code{\link{river_net}} representing the river network formed
 }
 \description{
 \code{river_net} is a geospatial network structure of river data. It extends the tidy representation of geospatial network data from the \code{\link[sfnetworks]{sfnetwork}} data structure.
+}
+\examples{
+\dontrun{ river_net(rivers = river_data, barriers = barrier_data, outlet = outlet_data)}
+\dontrun{ river_net(rivers = river_data, barriers = barrier_data, outlet = outlet_data, poi = extra_data)}
+\dontrun{ river_net(rivers = river_data, barriers = barrier_data, outlet = outlet_data, tolerance = 15}
 }

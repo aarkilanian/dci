@@ -28,8 +28,12 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
 
     # Place points on rivers
     riv_pts <- sf::st_sf(sf::st_line_sample(rivers[riv_ind,], density = 1/1))
-    riv_pts <- sf::st_cast(riv_pts, "POINT") %>%
-      dplyr::mutate(group = 1)
+    riv_pts <- tryCatch({
+      sf::st_cast(riv_pts, "POINT") %>%
+        dplyr::mutate(group = 1)
+    }, warning = function(w) {
+      print(paste('warning:', w))
+    })
 
     # Find nearest point (except start and end)
     nrst_ind <- which.min(sf::st_distance(pts[i,], riv_pts[-c(1, length(riv_pts)),])) + 2

@@ -70,8 +70,8 @@ test_that("Start and end point are preserved", {
     sf::st_as_sf(wkt = "geometry")
 
   # Mark river start and end points
-  riv_start <- sf::st_cast(riv, "POINT")[1,]
-  riv_end <- sf::st_cast(riv, "POINT")[2,]
+  riv_start <- suppressWarnings(sf::st_cast(riv, "POINT"))[1,]
+  riv_end <- suppressWarnings(sf::st_cast(riv, "POINT"))[2,]
 
   # Single point, single river
   split_riv <- split_rivers_at_points(riv, pnt[1,])

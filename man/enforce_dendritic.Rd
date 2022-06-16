@@ -24,3 +24,7 @@ Complex confluences occur when confluences have over 2 input tributaries. In a d
 
 If errors are being corrected manually, all divergent pairs must be reduced to only one river and complex confluences modified such that only 2 rivers join together. When corrections are done automatically the shorted divergent stream is kept.
 }
+\examples{
+\dontrun{enforce_dendritic(rivers = sf_line_object)}
+\dontrun{enforce_dendritic(rivers = sf_line_object, correct = TRUE)}
+}
