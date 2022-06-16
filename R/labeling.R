@@ -5,7 +5,6 @@
 #' @return A \code{\link{river_net}} object with nodes assigned binary topological labels.
 #'
 #' @keywords internal
-#' @export
 node_labeling <- function(net){
   # Create new env
   labelenv <- new.env(parent = emptyenv())
@@ -29,7 +28,6 @@ node_labeling <- function(net){
 #' @return A \code{\link{river_net}} object with nodes assigned segment membership labels.
 #'
 #' @keywords internal
-#' @export
 membership_labeling <- function(net){
   # Retrieve number of barriers
   num_bar <- as.data.frame(activate(net, nodes)) %>%
@@ -59,7 +57,6 @@ membership_labeling <- function(net){
 #' @return The correct node label. Either TRUE or FALSE.
 #'
 #' @keywords internal
-#' @export
 node_labeler <- function(node, parent, path, env, ...){
   cur.type <- tidygraph::.N()$type[node]
   if(cur.type == "outlet"){
@@ -99,7 +96,6 @@ node_labeler <- function(node, parent, path, env, ...){
 #' @return An integer representing the current node's segment membership.
 #'
 #' @keywords internal
-#' @export
 membership_labeler <- function(node, parent, path, env, ...){
   cur.type <- tidygraph::.N()$type[node]
   if(cur.type == "outlet"){

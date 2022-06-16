@@ -15,6 +15,10 @@
 #' @return If \code{correct} is \code{FALSE}, a \code{\link[sf]{sf}} object with non-dendritic topology indicated in columns "divergent" and "complex". These error columns indicate for each river line if that river is part of a divergent pair or complex confluence. The columns are populated by integers which indicate with which river they share a topological error. If \code{correct} is \code{TRUE}, a \code{rivers} object with automatic topological corrections applied is returned.
 #'
 #' @export
+#'
+#' @examples
+#' \dontrun{enforce_dendritic(rivers = sf_line_object)}
+#' \dontrun{enforce_dendritic(rivers = sf_line_object, correct = TRUE)}
 enforce_dendritic <- function(rivers, correct = FALSE){
 
   # Create river network
@@ -47,7 +51,6 @@ enforce_dendritic <- function(rivers, correct = FALSE){
 #' @return If correct is \code{TRUE} a \code{\link{river_net}} object with the shorter of each divergent pair removed. If correct is \code{FALSE} a \code{\link[sf]{sf}} object with divergent pairs identified with a shared number in the new "divergent" column.
 #'
 #' @keywords internal
-#' @export
 correct_divergences <- function(net, correct = TRUE){
 
   # If no corrections desired, find and return divergences
@@ -107,7 +110,6 @@ correct_divergences <- function(net, correct = TRUE){
 #' @return If correct is \code{TRUE} a \code{\link[sf]{sf}} object of rivers with complex confluences separated into two closely located valid confluences. If correct is \code{FALSE} a \code{\link[sf]{sf}} object with rivers participating in complex confluences labeled with the same number ina  new "complex" column.
 #'
 #' @keywords internal
-#' @export
 correct_complex <- function(net, correct = TRUE){
 
   # Identify complex confluences

@@ -8,6 +8,9 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{ export_dci(net = net_name, results = dci_results, type = "rivers)}
+#' \dontrun{ export_dci(net = net_name, results = dci_results, type = "poi)}
+#' \dontrun{ export_dci(net = net_name, results = dci_results, type = "barriers)}
 export_dci <- function(net, results, type = "rivers"){
 
  if(type == "rivers"){

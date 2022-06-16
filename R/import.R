@@ -8,6 +8,10 @@
 #' @return Object of class rivers prepared for input to \code{\link{river_net}}
 #'
 #' @export
+#'
+#' @examples
+#' \dontrun{ import_rivers(rivers = path_to_shapefile)}
+#' \dontrun{ import_rivers{rivers = sf_line_object}}
 
 import_rivers <- function(rivers, quiet = FALSE){
   # Check for path type
@@ -84,6 +88,10 @@ import_rivers <- function(rivers, quiet = FALSE){
 #' @return Object of class barriers, outlet, or poi prepared for input to \code{\link{river_net}}
 #'
 #' @export
+#'
+#' @examples
+#' \dontrun{ import_points(pts = path_to_shapefile)}
+#' \dontrun{ import_points(pts = sf_point_object)}
 import_points <- function(pts, type){
 
   # Check that type is valid

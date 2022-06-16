@@ -7,7 +7,6 @@
 #' @return A \code{\link{rivers}} object with non-split rivers replaced with two new features each at opposite sides of the node which splits it. All attributes assumed to be constant.
 #'
 #' @keywords internal
-#' @export
 split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
 
   # Remove sinks if present
@@ -95,7 +94,6 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
 #' @return A \code{\link{river_net}} object with the supplied nodes' attributes joined to its nodes.
 #'
 #' @keywords internal
-#' @export
 join_attributes <- function(net, nodes, tolerance = NULL){
 
   # Extract network nodes
