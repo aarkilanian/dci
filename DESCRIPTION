@@ -2,8 +2,8 @@ Package: dci
 Title: Calculate the Dendritic Connectivity in River Networks
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+    person("Alex", "Arkilanian", , "a.arkilanian@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-5427-2867"))
 Description: Calculate and analyze ecological connectivity across the watercourse of river networks using the Dendritic Connectivity Index.
 License: MIT + file LICENSE
 Encoding: UTF-8
@@ -28,5 +28,5 @@ Imports:
     igraph
 VignetteBuilder: knitr
 Depends: 
-    R (>= 2.10)
+    R (>= 3.50)
 LazyData: true
