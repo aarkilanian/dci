@@ -148,8 +148,6 @@ correct_complex <- function(net, correct = TRUE){
     # If manual editing desired, identify complex confluence rivers
     if(!correct){
       complex_riv <- sf::st_join(rivers, buffer, left = TRUE)
-      # Remove unnecessary columns
-      complex_riv <- subset(complex_riv, select = -c(grp_size, rivID, degree))
       return(complex_riv)
     }
 
