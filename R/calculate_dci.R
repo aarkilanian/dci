@@ -1,21 +1,22 @@
 #' Calculate different forms of the DCI for a \code{\link{river_net}} object
 #'
 #' @param net A \code{\link{river_net}} object.
-#' @param form A string specifying the form of the DCI to calculate: either "potamodromous", "catadromous", or "all".
+#' @param form A string specifying the form of the DCI to calculate: either "potamodromous", "diadromous", or "all".
 #' @param pass The name of a column in the nodes table of net which holds the numeric passability of nodes. If none is specified all barriers are automatically considered to have 0 passability.
 #' @param weight The name of column in the edges tables of net which holds numeric weights to be applied to river lengths. If none is specified, the DCI is calculated only with river lengths.
 #' @param threshold An optional numeric value specifying a dispersal limit in map units. If NULL, the default, no limit is considered.
-#' @param sites The name of a type of nodes in the node table of net. If specified, DCI results will be calculated at these sites and returned. If not specified, the DCI results will be reported on the rivers. See details for more.
 #'
-#' @return A \code{\link{sf}} object of the rivers from the provided \code{\link{river_net}} object with new columns speciying the segmental DCI values at each river location. If sites is not \code{NULL}, a \code{\link{sf}} object of the site points with their associated DCI scores.
+#' @return A \code{\link{sf}} object of the rivers from the provided \code{\link{river_net}} object with new columns specifying the segmental DCI values at each river location. If sites is not \code{NULL}, a \code{\link{sf}} object of the site points with their associated DCI scores.
 #' @export
 #'
 #' @examples
-calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NULL, sites = NULL){
+#' \dontrun{ calculate_dci(net = net_name, form = "all", pass = "pass", weight = "river_weight, threshold = 1500) }
+#' \dontrun{ calculate_dci(net = net_name, form = "potamodromous") }
+#' \dontrun{ calculate_dci{net = net_nqme, form = "diadromous", threshold = 2100} }
+calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NULL){
 
   # Check that network is valid
   if(!("river_net" %in% class(net))){
-    stop("A valid river_net object is required.")
   }
   # Check that form is valid
   if(!(form %in% c("potamodromous", "diadromous", "all"))){
@@ -139,14 +140,6 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
         dplyr::left_join(.data, DCIs_dia, by = "segment", suffix = c("_pot", "_dia"))
     }
 
-    # If sites are supplied, associate results to them
-    if(!is.null(sites)){
-      # Isolate site nodes
-      site_nodes <- net_nodes[net_nodes$type == sites,]
-      # Join results based on segment membership
-      DCIs <- dplyr::left_join(site_nodes, DCIs, by = c("member.label" = "segment"))
-    }
-
     # Return calculated DCI values
     DCIs <- structure(DCIs, class = c("dci.results", class(DCIs)))
     return(DCIs)
@@ -173,14 +166,6 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
       DCIs <- calculate_dci_dia_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg)
     }
 
-    # If sites are supplied, associate results to them
-    if(!is.null(sites)){
-      # Isolate site nodes
-      site_nodes <- net_nodes[net_nodes$type == sites,]
-      # Join results based on segment membership
-      DCIs <- dplyr::left_join(site_nodes, DCIs, by = c("member.label" = "segment"))
-    }
-
     # Return calculated DCI values
     DCIs <- structure(DCIs, class = c("dci.results", class(DCIs)))
     return(DCIs)
@@ -197,7 +182,6 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
 #' @return A data frame which holds raw and relative DCI scores for each segment.
 #'
 #' @keywords internal
-#' @export
 calculate_dci_pot <- function(all_members, net_nodes, seg_weights){
 
   # Determine segment pairs
@@ -241,7 +225,6 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights){
 #' @return A data frame which holds raw and relative DCI scores for each segment.
 #'
 #' @keywords internal
-#' @export
 calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg){
 
   # Determine segment pairs
@@ -285,7 +268,6 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg){
 #' @return A data frame which holds raw and relative DCI scores for each segment.
 #'
 #' @keywords internal
-#' @export
 calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight){
 
   # Determine segment pairs
@@ -329,7 +311,6 @@ calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights, w
 #' @param outlet_seg An integer indicating the membership label of the outlet segment
 #'
 #' @keywords internal
-#' @export
 calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg){
 
   # Determine segment pairs
@@ -376,7 +357,6 @@ calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, w
 #' @return The sub-segmental DCI component between given pair of segments.
 #'
 #' @keywords internal
-#' @export
 gather_dci <- function(net, from, to, distance, pass, nodes, seg_weights, threshold, totweight, weighted){
 
   # Case when from and to segment are the same
@@ -464,7 +444,6 @@ gather_dci <- function(net, from, to, distance, pass, nodes, seg_weights, thresh
 #' @return The distance, in map units, between the two given segments.
 #'
 #' @keywords internal
-#' @export
 gather_dist <- function(from, to, nodes){
 
   # Extract sinks and barriers
@@ -510,7 +489,6 @@ gather_dist <- function(from, to, nodes){
 #' @return The passability from 0 to 1 between the given nodes.
 #'
 #' @keywords internal
-#' @export
 gather_perm <- function(from, to, nodes){
 
   # Condition when from and to are the same
@@ -549,7 +527,6 @@ gather_perm <- function(from, to, nodes){
 #' @return A list of logical vectors in order to move from the origin to the destination node.
 #'
 #' @keywords internal
-#' @export
 path_between <- function(s1, s2){
   # Get path from segments to root
   s1_path <- path_to_root(s1)
@@ -570,7 +547,6 @@ path_between <- function(s1, s2){
 #' @return A list of logical vectors in order to move from the origin to the root (outlet).
 #'
 #' @keywords internal
-#' @export
 path_to_root <- function(seg){
   # Prepare input vectors
   path <- rep(seg, each = length(unlist(seg)))
@@ -580,18 +556,4 @@ path_to_root <- function(seg){
                      path, len, SIMPLIFY = TRUE)
   # Return list of nodes to the root
   return(path_out)
-}
-
-#' Gather total length of neighbourhood around given source node
-#'
-#' @param net
-#' @param source
-#' @param distance
-#'
-#' @return A numeric value indicating the total length of the neihbourhood
-#'
-#' @keywords internal
-#' @export
-gather_neighb <- function(net, source, distance){
-
 }
