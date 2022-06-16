@@ -24,7 +24,7 @@ The goal of the `dci` package is to provide an R interface to the Dendritic Conn
 
 ## Installation
 
-To install the package from this github page follow these instructions
+To install the `dci` package from this github page follow these instructions:
 ```{r}
 require(devtools)
 install_github("aarkilanian/dci")
