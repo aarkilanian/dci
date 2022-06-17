@@ -19,15 +19,15 @@ library(dci)
 library(dplyr)
 ```
 
-The dci package provides an R interface for the measurement of connectivity in river networks with the dendritic connectivity index (Cote et al., 2009). The main class of the package is the river_net class which links river lines to barriers, optional points of interest, and the outlet of the river network. It inherits the structure of the sfnetwork class from the [sfnetworks package](https://luukvdmeer.github.io/sfnetworks/) which itself inherits the tbl_graph class from the [tidygraph package](https://tidygraph.data-imaginist.com/index.html) further inherited by the igraph class from the [igraph package](https://igraph.org/). These dependencies on other packages provide a rich set of tools and algorithms which remain applicable to all instances of the river_net class. Therefore, further and more complex analyses can be carried out with functions from the 'igraph', 'tidygraph', and 'sfnetworks' packages. Further, the tbl_graph class from 'tidygraph' is created with the [tidyverse](https://www.tidyverse.org/) in mind and, thus, allows for the development of workflows using 'tidyverse' packages.
+The dci package provides an R interface for the measurement of connectivity in river networks with the dendritic connectivity index (Cote et al., 2009). The main class of the package is the river_net class which links river lines to barriers, optional points of interest, and the outlet of the river network. It inherits the structure of the sfnetwork class from the [sfnetworks package](https://luukvdmeer.github.io/sfnetworks/) which itself inherits the tbl_graph class from the [tidygraph package](https://tidygraph.data-imaginist.com/index.html) further inherited by the igraph class from the [igraph package](https://igraph.org/). These dependencies on other packages provide a rich set of tools and algorithms which remain applicable to all instances of the river_net class. Therefore, further and more complex analyses can be carried out with functions from the `igraph`, `tidygraph`, and `sfnetworks` packages. Further, the tbl_graph class from `tidygraph` is created with the [tidyverse](https://www.tidyverse.org/) in mind and, thus, allows for the development of workflows using `tidyverse` packages.
 
-This vignette illustrates the 'dci' package using river and barrier data from the Yamaska watershed in Southern Quebec.
+This vignette illustrates the `dci` package using river and barrier data from the Yamaska watershed in Southern Quebec.
 
 ## Importing
 
-A 'river_net' object is constructed using three pieces of required data: river lines, barrier points, and the outlet location; in addition to some optional points of interest which could, for example, represent fish survey locations where connectivity scores are desired. These input spatial data must first be imported with 'import_rivers' and 'import_points' functions. 
+A `river_net` object is constructed using three pieces of required data: river lines, barrier points, and the outlet location; in addition to some optional points of interest which could, for example, represent fish survey locations where connectivity scores are desired. These input spatial data must first be imported with `import_rivers` and `import_points` functions. 
 
-Rivers can be imported from either the path to a shapefile or an object of the 'sf' class. This function performs some basic error checking, extracts the largest fully connected component in the supplied data, and calculates river lengths. A plot with changes highlighted in red is printed alongside the function unless the 'quiet' parameter is set to 'TRUE'. River importing is illustrated below with the path to a shapefile representing the Yamaska river lines.
+Rivers can be imported from either the path to a shapefile or an object of the `sf` class. This function performs some basic error checking, extracts the largest fully connected component in the supplied data, and calculates river lengths. A plot with changes highlighted in red is printed alongside the function unless the `quiet` parameter is set to `TRUE`. River importing is illustrated below with the path to a shapefile representing the Yamaska river lines.
 ```{r}
 # Loading river sf object
 load("../data/yamaska_riv.RData")
@@ -36,7 +36,7 @@ load("../data/yamaska_riv.RData")
 rivers_in <- import_rivers(rivers = yamaska_riv)
 ```
 
-Similarly, all point data can be imported with the 'import_points' function along with the 'type' parameter specifying the type of point. Possible values are: "barriers", "outlet", or "poi" (for points of interest).
+Similarly, all point data can be imported with the `import_points` function along with the `type` parameter specifying the type of point. Possible values are: "barriers", "outlet", or "poi" (for points of interest).
 ```{r}
 # Loading sf objects
 load("../data/yamaska_bar.RData")
@@ -52,7 +52,7 @@ barriers_in
 
 ## Construction
 
-Once all required and any additional data have been pre-processed with the import functions they can be joined together in the 'river_net' function to generate an object of the 'river_net' class. Messages are printed indicating the topological corrections that are being performed on the river network. These are explained in more detail in the next section.
+Once all required and any additional data have been pre-processed with the import functions they can be joined together in the `river_net` function to generate an object of the `river_net` class. Messages are printed indicating the topological corrections that are being performed on the river network. These are explained in more detail in the next section.
 ```{r}
 # Combine rivers, barriers, and outlet
 net <- river_net(rivers = rivers_in, barriers = barriers_in, outlet = outlet_in, poi = poi_in) 
@@ -61,20 +61,20 @@ net
 
 ### Dendritic topology
 
-Since the 'river_net' class inherits from the 'sfnetworks' class it shares the enforcement of certain network rules from the 'sfnetworks' package: nodes should have 'POINT' geometries, edges should be spatially explicit and have "LINESTRING" geometries, and both nodes and edges should have the same CRS. In addition to these, the 'dci' package enforces additional rules pertaining to the dendritic topology of river networks. A dendritic topology is defined as a directional network topology in which at most two upstream edges combine at a node to form a single outgoing downstream edge. In the case of a barrier there would be one incoming edge while in the case of natural confluences two incoming edges combine. This topological rule is enforced because it allows for the design of custom river network path finding algorithms which run quicker than traditional network algorithms. This is explained in more detail in the labeling section.
+Since the `river_net` class inherits from the `sfnetworks` class it shares the enforcement of certain network rules from the `sfnetworks` package: nodes should have `POINT` geometries, edges should be spatially explicit and have "LINESTRING" geometries, and both nodes and edges should have the same CRS. In addition to these, the `dci` package enforces additional rules pertaining to the dendritic topology of river networks. A dendritic topology is defined as a directional network topology in which at most two upstream edges combine at a node to form a single outgoing downstream edge. In the case of a barrier there would be one incoming edge while in the case of natural confluences two incoming edges combine. This topological rule is enforced because it allows for the design of custom river network path finding algorithms which run quicker than traditional network algorithms. This is explained in more detail in the labeling section.
 
-The 'river_net' provides functionality for correcting some common topological errors. These errors are illustrated below:
+The `river_net` provides functionality for correcting some common topological errors. These errors are illustrated below:
 
-1.  *Divergent rivers* - Divergent rivers occur where a single upstream river splits into two downstream rivers. This often occurs because of large obstacles in the waterway of large rivers causing a single river to split and recombine further downstream. If the 'river_net' function is run with the 'clean' parameter set to 'TRUE' divergences are corrected by deleting the shortest of the two downstream rivers. If more fine-tuned corrections are preferred the 'enforce_dendritic' function can be called directly on the rivers imported by 'import_rivers'. This functionality is illustrated below.
-2.  *Complex confluences* - Complex confluences occur when a confluence node has over 3 incident edges. These often occur as a limitation of data resolution where two very close confluences merge into one. If the 'river_net' function is run with the 'clean' parameter set to 'TRUE' complex confluences are corrected by moving one of the incident edges further downstream on the main channel. When a complex confluence is present with over 4 incident edges the function will quit and a manual correction will be required.
+1.  *Divergent rivers* - Divergent rivers occur where a single upstream river splits into two downstream rivers. This often occurs because of large obstacles in the waterway of large rivers causing a single river to split and recombine further downstream. If the `river_net` function is run with the `clean` parameter set to `TRUE` divergences are corrected by deleting the shortest of the two downstream rivers. If more fine-tuned corrections are preferred the `enforce_dendritic` function can be called directly on the rivers imported by `import_rivers`. This functionality is illustrated below.
+2.  *Complex confluences* - Complex confluences occur when a confluence node has over 3 incident edges. These often occur as a limitation of data resolution where two very close confluences merge into one. If the `river_net` function is run with the `clean` parameter set to `TRUE` complex confluences are corrected by moving one of the incident edges further downstream on the main channel. When a complex confluence is present with over 4 incident edges the function will quit and a manual correction will be required.
 
-By default the 'river_net' constructor performs these topological corrections automatically. However, if manual corrections are desired the 'enforce_dendritic' function can be called directly with the river lines data and the 'correct' parameter set to 'FALSE'. Then, when constructing the 'river_net' object, the 'check' parameter can be set to 'FALSE' since the topology has already been corrected.
+By default the `river_net` constructor performs these topological corrections automatically. However, if manual corrections are desired the `enforce_dendritic` function can be called directly with the river lines data and the `correct` parameter set to `FALSE`. Then, when constructing the `river_net` object, the `check` parameter can be set to `FALSE` since the topology has already been corrected.
 ```{r}
 # Identify topological errors in rivers
 river_errors <- enforce_dendritic(rivers = rivers_in, correct = FALSE)
 river_errors
 ```
-In the above example a manual dendritic correction is requested which returns the input river lines augmented with a 'divergent' variable which links divergent rivers from the same pair and a 'complex' variable which indicates which rivers take part in complex confluences. These variables can then be used in a dedicated GIS software or R and the corrected rivers can be used to construct a 'river_net' object. This manual correction might be beneficial in situations where an important barrier or point of interest is lost during automatic correction or rivers with the highest habitat suitability in a divergent want to be kept instead just the longest river.
+In the above example a manual dendritic correction is requested which returns the input river lines augmented with a `divergent` variable which links divergent rivers from the same pair and a `complex` variable which indicates which rivers take part in complex confluences. These variables can then be used in a dedicated GIS software or R and the corrected rivers can be used to construct a `river_net` object. This manual correction might be beneficial in situations where an important barrier or point of interest is lost during automatic correction or rivers with the highest habitat suitability in a divergent want to be kept instead just the longest river.
 ```{r}
 # Visualize divergence locations
 plot(sf::st_geometry(rivers_in), col = "grey75")
@@ -87,20 +87,20 @@ plot(river_errors["complexID"], add = TRUE)
 
 ### Labeling
 
-There are 2 types of labeling performed on a 'river_net' object.
+There are 2 types of labeling performed on a `river_net` object.
 
-  1. Node labeling - Node labeling makes use of a binary code to, essentially, give an address to each node in the network relative to the outlet. Labeling begins at the outlet with a label of 0 and proceeds upstream. At the first split, the two children of the outlet node are given labels 00 and 01. These labels allow for rapid path tracing in river networks to gather the watercourse distance between two nodes or the passability of barriers which lie on that path. The task of finding the least-cost path between points is a computationally intensive network theory problem and it's an important one when considering connectivity in terrestrial landscapes. However, river networks which follow a dendritic topology exhibit an important property - there is only one path between any two points in the network. Common path-finding algorithms like Djikstra's algorithm are made to be general and don't make these types of assumptions about network structure. This labeling allows for the design of custom, rapid algorithms to gather the path between nodes in the network.
+  1. Node labeling - Node labeling makes use of a binary code to, essentially, give an address to each node in the network relative to the outlet. Labeling begins at the outlet with a label of 0 and proceeds upstream. At the first split, the two children of the outlet node are given labels 00 and 01. These labels allow for rapid path tracing in river networks to gather the watercourse distance between two nodes or the passability of barriers which lie on that path. The task of finding the least-cost path between points is a computationally intensive network theory problem and it's an important one when considering connectivity in terrestrial landscapes. However, river networks which follow a dendritic topology exhibit an important property - there is only one path between any two points in the network. Common path-finding algorithms like Djikstra's algorithm are made to be general and don`t make these types of assumptions about network structure. This labeling allows for the design of custom, rapid algorithms to gather the path between nodes in the network.
   
   2. Membership labeling - Membership labeling is much more simple than the node labeling. Membership labels simply classify nodes into specific river isolated segments bounded on all sides by either barriers or terminal nodes of the network (sources and the outlet). These labels are simply integers from 0 to the number of segments.
 
 ## Calculating the DCI
 
-Once a valid 'river_net' object is constructed all the elements are present to calculate the DCI. The DCI comes in a few flavours and they can all be derived from the single 'calculate_dci' function. The parameters of the function will dictate what type of connectivity is being estimated:
+Once a valid `river_net` object is constructed all the elements are present to calculate the DCI. The DCI comes in a few flavours and they can all be derived from the single `calculate_dci` function. The parameters of the function will dictate what type of connectivity is being estimated:
 
-* the 'form' parameter - The form of the DCI relates to the dispersal style of the target organism. The accepted forms are "potamodromous", "diadromous", and "all". This will dictate the form of the DCI equation that is calculated, more details can be found in (Cote et al., 2009). This is the only parameter that is required to calculate the DCI.
-* the 'pass' parameter - The 'pass' parameter allows for the selection of a relevant passability variable in the barrier data. Passability probabilities for barriers must range from 0 to 1. If they are not within that range the data will automatically be normalized. If the parameter is left blank all barriers will receive a passability of 0.
-* the 'weight' parameter - Similar to the 'pass' parameter, the 'weight' parameter allows for the selection of a relevant weighting variable in the river data. Again, these values are required to be between 0 and 1 since they are applied to the river lengths. A possible application is to use habitat suitability estimates as river weighting to achieve a more specific measure of landscape connectivity for a species.
-* the 'threshold parameter - The 'threshold' parameter gives the option of considering a dispersal limit when calculating the DCI. The thresholded DCI prunes any connections between segments that are further away than the dispersal limit. The non-thresholded DCI can be thought of the DCI calculated with a dispersal limit of infinity.
+* the `form` parameter - The form of the DCI relates to the dispersal style of the target organism. The accepted forms are "potamodromous", "diadromous", and "all". This will dictate the form of the DCI equation that is calculated, more details can be found in (Cote et al., 2009). This is the only parameter that is required to calculate the DCI.
+* the `pass` parameter - The `pass` parameter allows for the selection of a relevant passability variable in the barrier data. Passability probabilities for barriers must range from 0 to 1. If they are not within that range the data will automatically be normalized. If the parameter is left blank all barriers will receive a passability of 0.
+* the `weight` parameter - Similar to the `pass` parameter, the `weight` parameter allows for the selection of a relevant weighting variable in the river data. Again, these values are required to be between 0 and 1 since they are applied to the river lengths. A possible application is to use habitat suitability estimates as river weighting to achieve a more specific measure of landscape connectivity for a species.
+* the `threshold` parameter - The `threshold` parameter gives the option of considering a dispersal limit when calculating the DCI. The thresholded DCI prunes any connections between segments that are further away than the dispersal limit. The non-thresholded DCI can be thought of the DCI calculated with a dispersal limit of infinity.
 
 In the example below the DCI is calculated for a potamodromous species with a dispersal limit of 5,000m. No weighting is used in this case.
 ```{r}
@@ -111,13 +111,13 @@ yamaska_res <- calculate_dci(net = net,
                              threshold = NULL)
 yamaska_res
 ```
-The 'calculate_dci' function returns a table where each river segment is assigned a raw DCI score along with a standardized relative DCI score. The raw scores are useful when comparisons are desired between different watersheds. On the other hand, the relative scores allow for a clearer picture of differences within a watershed. An additional function, 'export_dci', is provided to rejoin these results to the original line or point data. This is explained in the next section.
+The `calculate_dci` function returns a table where each river segment is assigned a raw DCI score along with a standardized relative DCI score. The raw scores are useful when comparisons are desired between different watersheds. On the other hand, the relative scores allow for a clearer picture of differences within a watershed. An additional function, `export_dci`, is provided to rejoin these results to the original line or point data. This is explained in the next section.
 
 ### Distance thresholds
 
-The 'threshold' parameter of the 'calculate_dci' function allows for the inclusion of a distance threshold above which river fragments aren't considered connected. In terms of the DCI equation, this would mean that not all pairs of segments will participate in the summation. In addition, the threshold distance is used to generate an additional weighting term based on the amount of habitat in the source fragment that can be considered connected to the exit node. This is done by generating an isodistance map around the source fragment's exit node and gathering the total distance of rivers from the source fragment within that isodistance map. This length is then divided by the total length of the river network.
+The `threshold` parameter of the `calculate_dci` function allows for the inclusion of a distance threshold above which river fragments aren't considered connected. In terms of the DCI equation, this would mean that not all pairs of segments will participate in the summation. In addition, the threshold distance is used to generate an additional weighting term based on the amount of habitat in the source fragment that can be considered connected to the exit node. This is done by generating an isodistance map around the source fragment`s exit node and gathering the total distance of rivers from the source fragment within that isodistance map. This length is then divided by the total length of the river network.
 
-The use of a distance threshold can be useful to derive a clearer picture of connectivity when a species' dispersal limit is known. Below is an example done with the same Yamaska watershed using a distance threshold of 1.5km. This distance is written in the default map units which are meters.
+The use of a distance threshold can be useful to derive a clearer picture of connectivity when a species` dispersal limit is known. Below is an example done with the same Yamaska watershed using a distance threshold of 1.5km. This distance is written in the default map units which are meters.
 ```{r}
 yamaska_res_thr <- calculate_dci(net = net,
                              form = "potamodromous",
@@ -129,7 +129,7 @@ yamaska_res_thr
 
 ### River weights
 
-An additional option with the DCI calculation is to include a weighting term with the river data. By default the DCI only considers the length of rivers as a measure of amount of habitat. However, certain cases might benefit from a more specific definition of amount of habitat. The 'weight' parameter of the 'calculate_dci' function can use one of the variables included with the river data as a weighting term applied to the river lengths. These values are rescaled between 0 and 1 before applying the weighting. An example using a habitat suitability weighting is demonstrated below.
+An additional option with the DCI calculation is to include a weighting term with the river data. By default the DCI only considers the length of rivers as a measure of amount of habitat. However, certain cases might benefit from a more specific definition of amount of habitat. The `weight` parameter of the `calculate_dci` function can use one of the variables included with the river data as a weighting term applied to the river lengths. These values are rescaled between 0 and 1 before applying the weighting. An example using a habitat suitability weighting is demonstrated below.
 ```{r}
 yamaska_res_w <- calculate_dci(net = net,
                              form = "potamodromous",
@@ -142,7 +142,7 @@ yamaska_res_w
 
 ## Extracting results
 
-A convenient 'export_dci' function is included in this package to simplify the exporting of dci results with the original 'river_net' inputs. The function will return the specified type of data: either rivers, barriers, or points of interest, along with the appropriately joined DCI scores for different locations. Along with returning the spatial data requested, the function will produce a simple plot of the results. The plots always indicate the raw DCI scores. The functionality of this code is presented below.
+A convenient `export_dci` function is included in this package to simplify the exporting of dci results with the original `river_net` inputs. The function will return the specified type of data: either rivers, barriers, or points of interest, along with the appropriately joined DCI scores for different locations. Along with returning the spatial data requested, the function will produce a simple plot of the results. The plots always indicate the raw DCI scores. The functionality of this code is presented below.
 ```{r}
 # Results can be rejoined to the river lines
 res_riv <- export_dci(net = net, results = yamaska_res, type = "rivers")
