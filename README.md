@@ -9,6 +9,7 @@
 [![Project Status: Active – The project has reached a stable, usable
 state and is being actively
 developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+[![Codecov test coverage](https://codecov.io/gh/aarkilanian/dci/branch/master/graph/badge.svg)](https://codecov.io/gh/aarkilanian/dci?branch=master)
 <!-- badges: end -->
 
 The `dci` package provides an R interface to the Dendritic Connectivity Index (DCI) allowing for the analysis of longitudinal connectivity in river networks. Given a set of spatial data representing river lines, barrier point locations and the location of the target watershed's outlet the `dci` package provides tools to calculate ecological connectivity with the DCI. There are options to calculate the potamodromous or diadromous form of the DCI as well as options to consider a distance threshold and/or weights to be applied to river lengths.

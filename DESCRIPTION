@@ -12,6 +12,7 @@ RoxygenNote: 7.1.2
 URL: https://github.com/aarkilanian/dci
 BugReports: https://github.com/aarkilanian/dci/issues
 Suggests: 
+    covr,
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)
