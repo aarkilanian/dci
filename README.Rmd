@@ -29,7 +29,7 @@ This package extends the tidy representation of geospatial network data from the
 ### From GitHub
 
 To install the development version of the `dci` package from this github page follow these instructions:
-```{r}
+```{r eval=FALSE}
 require(devtools)
 install_github("aarkilanian/dci")
 ```
