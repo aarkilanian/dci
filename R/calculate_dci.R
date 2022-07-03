@@ -213,6 +213,9 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights){
   DCIs$DCI_rel <- DCIs$DCI / DCI_glob * 100
   DCIs <- as.data.frame(DCIs)
 
+  # Print global dci
+  message(paste0("potamodromous DCI: ", DCI_glob))
+
   # Return DCIs summary
   return(DCIs)
 
@@ -253,6 +256,9 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg){
   DCI_glob <- sum(DCIs$DCI)
   DCIs$DCI_rel <- DCIs$DCI / DCI_glob * 100
   DCIs <- as.data.frame(DCIs)
+
+  # Print global dci
+  message(paste0("diadromous DCI: ", DCI_glob))
 
   # Return DCIs summary
   return(DCIs)
@@ -295,6 +301,9 @@ calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights, w
   DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted))
   DCI_glob <- sum(DCIs, na.rm = TRUE)
 
+  # Print global dci
+  message(paste0("potamodromous DCI with distance limit of ", threshold, ": ", DCI_glob))
+
   # Return result
   DCI_res <- data.frame(from_segment, to_segment, DCIs)
   DCI_res <- DCI_res %>%
@@ -335,6 +344,9 @@ calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, w
   # Calculate DCI
   DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net, nodes = net_nodes, seg_weights, threshold, totweight, weighted))
   DCI_glob <- sum(DCIs)
+
+  # Print global dci
+  message(paste0("diadromous DCI with distance limit of ", threshold, ": ", DCI_glob))
 
   # Return result
   DCI_res <- data.frame(from_segment, to_segment, DCIs)
