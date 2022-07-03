@@ -110,7 +110,7 @@ Once a valid `river_net` object is constructed all the elements are present to c
 * the `weight` parameter - Similar to the `pass` parameter, the `weight` parameter allows for the selection of a relevant weighting variable in the river data. Again, these values are required to be between 0 and 1 since they are applied to the river lengths. Weights of 0 will fully exclude rivers while weights of 1 will fully include them. A possible application is to use habitat suitability estimates as river weighting to achieve a more specific measure of landscape connectivity for a species.
 * the `threshold` parameter - The `threshold` parameter gives the option of considering a dispersal limit when calculating the DCI. The thresholded DCI prunes any connections between segments that are further away than the dispersal limit. The non-thresholded DCI can be thought of the DCI calculated with a dispersal limit of infinity.
 
-In the example below the DCI is calculated for a potamodromous species with a dispersal limit of 5,000m. No weighting is used in this case.
+In the example below the DCI is calculated for a potamodromous species. No weighting is used in this case.
 ```{r}
 yamaska_res <- calculate_dci(net = net,
                              form = "potamodromous",
