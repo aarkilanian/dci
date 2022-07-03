@@ -15,7 +15,7 @@ import_rivers(rivers, quiet = FALSE)
 Object of class rivers prepared for input to \code{\link{river_net}}
 }
 \description{
-Read and prepare geospatial river lines data for dci.
+Read and prepare geospatial river lines data for \code{\link{river_net}}. Only the largest fully connected component will be preserved, river lines taking part in secondary networks will be discarded.
 }
 \examples{
 \dontrun{ import_rivers(rivers = path_to_shapefile)}

@@ -1,6 +1,6 @@
 #' Prepare rivers for \code{\link{river_net}} connectivity analyses
 #'
-#'Read and prepare geospatial river lines data for dci.
+#'Read and prepare geospatial river lines data for \code{\link{river_net}}. Only the largest fully connected component will be preserved, river lines taking part in secondary networks will be discarded.
 #'
 #' @param rivers A character string or \code{\link{sf}} object, the path to a shapefile of river lines or \code{\link{sf}} object of rivers.
 #' @param quiet A logical value, if \code{FALSE} edited rivers are plotted with the original. Defaults to \code{FALSE}.
