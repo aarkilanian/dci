@@ -23,3 +23,17 @@ A \code{\link{sf}} object of the rivers from the provided \code{\link{river_net}
 \description{
 Calculate different forms of the DCI for a \code{\link{river_net}} object
 }
+\details{
+Passability values are probabilities from 0 to 1 where 0 indicates fully impassable and 1 indicates fully passable. If the values in the supplied passability column are not within this range they will be normalized.
+
+Similarly weighting values are probability from 0 to 1. Rivers with weights of either 0 or NA will not be considered when calculating the DCI.
+
+When DCI results are returned succesfully teh global DCI of the given river network will be printed to the console.
+}
+\examples{
+\dontrun{
+calculate_dci(net = net_name, form = "all", pass = "pass", weight = "river_weight", threshold = 1500)
+calculate_dci(net = net_name, form = "potamodromous")
+calculate_dci(net = net_name, form = "diadromous", threshold = 2100)
+}
+}

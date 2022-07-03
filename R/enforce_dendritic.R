@@ -17,8 +17,10 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{enforce_dendritic(rivers = sf_line_object)}
-#' \dontrun{enforce_dendritic(rivers = sf_line_object, correct = TRUE)}
+#' \dontrun{
+#' enforce_dendritic(rivers = sf_line_object)
+#' enforce_dendritic(rivers = sf_line_object, correct = TRUE)
+#' }
 enforce_dendritic <- function(rivers, correct = FALSE){
 
   # Create river network

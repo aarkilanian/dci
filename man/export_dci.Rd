@@ -19,3 +19,10 @@ A \code{\link[sf]{sf}} object with the corresponding DCI results joined to each 
 \description{
 Export DCI results to spatial format
 }
+\examples{
+\dontrun{
+export_dci(net = net_name, results = dci_results, type = "rivers")
+export_dci(net = net_name, results = dci_results, type = "poi")
+export_dci(net = net_name, results = dci_results, type = "barriers")
+}
+}

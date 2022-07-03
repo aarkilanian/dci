@@ -1,5 +1,12 @@
 #' Calculate different forms of the DCI for a \code{\link{river_net}} object
 #'
+#' @details
+#' Passability values are probabilities from 0 to 1 where 0 indicates fully impassable and 1 indicates fully passable. If the values in the supplied passability column are not within this range they will be normalized.
+#'
+#' Similarly weighting values are probability from 0 to 1. Rivers with weights of either 0 or NA will not be considered when calculating the DCI.
+#'
+#' When DCI results are returned succesfully teh global DCI of the given river network will be printed to the console.
+#'
 #' @param net A \code{\link{river_net}} object.
 #' @param form A string specifying the form of the DCI to calculate: either "potamodromous", "diadromous", or "all".
 #' @param pass The name of a column in the nodes table of net which holds the numeric passability of nodes. If none is specified all barriers are automatically considered to have 0 passability.
@@ -7,12 +14,15 @@
 #' @param threshold An optional numeric value specifying a dispersal limit in map units. If NULL, the default, no limit is considered.
 #'
 #' @return A \code{\link{sf}} object of the rivers from the provided \code{\link{river_net}} object with new columns specifying the segmental DCI values at each river location. If sites is not \code{NULL}, a \code{\link{sf}} object of the site points with their associated DCI scores.
+#'
 #' @export
 #'
 #' @examples
-#' \dontrun{ calculate_dci(net = net_name, form = "all", pass = "pass", weight = "river_weight, threshold = 1500) }
-#' \dontrun{ calculate_dci(net = net_name, form = "potamodromous") }
-#' \dontrun{ calculate_dci{net = net_nqme, form = "diadromous", threshold = 2100} }
+#' \dontrun{
+#' calculate_dci(net = net_name, form = "all", pass = "pass", weight = "river_weight", threshold = 1500)
+#' calculate_dci(net = net_name, form = "potamodromous")
+#' calculate_dci(net = net_name, form = "diadromous", threshold = 2100)
+#' }
 calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NULL){
 
   # Check that network is valid
@@ -43,7 +53,6 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
     user_perm[non_bar] <- 1
     # Check that passability is between 0 and 1
     if(any(user_perm > 1)){
-      warning("passability values are not between 0 and 1, normalizing values...")
       user_perm <- (user_perm - min(user_perm)) / (max(user_perm) - min(user_perm))
     }
     # Set active passability column
@@ -62,19 +71,12 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
         stop("Supplied weight field cannot be assigned:", e, call. = FALSE)
       }
     )
-    # If 0s are present, shift values by 1
-    if(any(user_weight == 0)){
-      warning("Weights of 0 were found, all weighting values will be shifted up by 1.")
-      user_weight <- user_weight + 1
-    }
     # Replace NA values with 0
     if(any(is.na(user_weight))){
-      warning("NAs found in weight column, NA weighted rivers will be excluded...")
       user_weight[is.na(user_weight)] <- 0
     }
     # Check that weight is between 0 and 1
     if(any(user_weight > 1)){
-      warning("Weight values must be between 0 and 1, normalizing data...")
       user_weight <- (user_weight - min(user_weight)) / (max(user_weight) - min(user_weight))
     }
     # Set active weighting column
