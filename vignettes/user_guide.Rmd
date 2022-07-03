@@ -23,6 +23,14 @@ The dci package provides an R interface for the measurement of connectivity in r
 
 This vignette illustrates the `dci` package using river and barrier data from the Yamaska watershed in Southern Quebec.
 
+## Requried data
+
+DCI analysis with the `dci` package requires three pieces of required spatial data:
+
+* *River lines*: Data representing river lines which will make up the edges of the spatial network. The `import_rivers` function of the package will extract the largest fully connected component of the provided data and other isolated rivers will be discarded.
+* *Barrier points*: Points representing barriers along the river network. Points are not required to be perfectly snapped to the river lines, the tolerance parameter of the `river_net` function can perform this snapping.
+* *Outlet point*: A single point representing the outlet of the river network. This point should be accurate for the calculation of the diadromous DCI.
+
 ## Importing
 
 A `river_net` object is constructed using three pieces of required data: river lines, barrier points, and the outlet location; in addition to some optional points of interest which could, for example, represent fish survey locations where connectivity scores are desired. These input spatial data must first be imported with `import_rivers` and `import_points` functions. 
@@ -99,7 +107,7 @@ Once a valid `river_net` object is constructed all the elements are present to c
 
 * the `form` parameter - The form of the DCI relates to the dispersal style of the target organism. The accepted forms are "potamodromous", "diadromous", and "all". This will dictate the form of the DCI equation that is calculated, more details can be found in (Cote et al., 2009). This is the only parameter that is required to calculate the DCI.
 * the `pass` parameter - The `pass` parameter allows for the selection of a relevant passability variable in the barrier data. Passability probabilities for barriers must range from 0 to 1. If they are not within that range the data will automatically be normalized. If the parameter is left blank all barriers will receive a passability of 0.
-* the `weight` parameter - Similar to the `pass` parameter, the `weight` parameter allows for the selection of a relevant weighting variable in the river data. Again, these values are required to be between 0 and 1 since they are applied to the river lengths. A possible application is to use habitat suitability estimates as river weighting to achieve a more specific measure of landscape connectivity for a species.
+* the `weight` parameter - Similar to the `pass` parameter, the `weight` parameter allows for the selection of a relevant weighting variable in the river data. Again, these values are required to be between 0 and 1 since they are applied to the river lengths. Weights of 0 will fully exclude rivers while weights of 1 will fully include them. A possible application is to use habitat suitability estimates as river weighting to achieve a more specific measure of landscape connectivity for a species.
 * the `threshold` parameter - The `threshold` parameter gives the option of considering a dispersal limit when calculating the DCI. The thresholded DCI prunes any connections between segments that are further away than the dispersal limit. The non-thresholded DCI can be thought of the DCI calculated with a dispersal limit of infinity.
 
 In the example below the DCI is calculated for a potamodromous species with a dispersal limit of 5,000m. No weighting is used in this case.
