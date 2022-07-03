@@ -423,7 +423,7 @@ gather_dci <- function(net, from, to, distance, pass, nodes, seg_weights, thresh
   source <- exit_label
   dist <- igraph::distances(graph = net, v = source, to = target,
                              mode = "all", weights = weights, algorithm = "automatic")
-  neighb_length <- sum(dist[dist <= 1200])
+  neighb_length <- sum(dist[dist <= rem_length])
 
   if(weighted){
     # Calculate length of from neighbourhood
