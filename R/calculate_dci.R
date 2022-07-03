@@ -342,7 +342,7 @@ calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, w
   perms <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
 
   # Calculate DCI
-  DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net, nodes = net_nodes, seg_weights, threshold, totweight, weighted))
+  DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted))
   DCI_glob <- sum(DCIs)
 
   # Print global dci
