@@ -3,11 +3,12 @@
 #' @inheritParams river_net
 #'
 #' @param pts An \code{\link[sf]{sf}} object, points at which to split river lines.
+#' @param force A logical value indicating whether points which are too close to confluences should be ignored or not
 #'
 #' @return A \code{\link{rivers}} object with non-split rivers replaced with two new features each at opposite sides of the node which splits it. All attributes assumed to be constant.
 #'
 #' @keywords internal
-split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
+split_rivers_at_points <- function(rivers, pts, force, tolerance = NULL){
 
   # Remove sinks if present
   if("Sink" %in% pts$type){
@@ -37,6 +38,16 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
 
     # Find nearest point (except start and end)
     nrst_ind <- which.min(sf::st_distance(pts[i,], riv_pts[-c(1, length(riv_pts)),])) + 2
+
+    # Case when point is too close to confluence
+    if(nrst_ind == 1 | length(nrst_ind) == 0 ){
+      if(force == TRUE){
+        warning("Point(s) found too close to confluence, removing point(s).")
+        next()
+      } else{
+        stop("Point(s) found too close to confluences, cannot split lines at point locations.")
+      }
+    }
 
     # Create first segment
     riv_start <- sf::st_geometry(rivers[riv_ind,])
