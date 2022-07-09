@@ -3,12 +3,12 @@
 #' @inheritParams river_net
 #'
 #' @param pts An \code{\link[sf]{sf}} object, points at which to split river lines.
-#' @param force A logical value indicating whether points which are too close to confluences should be ignored or not
+#' @param force_nodes A logical value indicating whether points which are too close to confluences should be ignored or not
 #'
 #' @return A \code{\link{rivers}} object with non-split rivers replaced with two new features each at opposite sides of the node which splits it. All attributes assumed to be constant.
 #'
 #' @keywords internal
-split_rivers_at_points <- function(rivers, pts, force, tolerance = NULL){
+split_rivers_at_points <- function(rivers, pts, force_nodes, tolerance = NULL){
 
   # Remove sinks if present
   if("Sink" %in% pts$type){
