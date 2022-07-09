@@ -21,7 +21,7 @@ split_rivers_at_points <- function(rivers, pts, force_nodes, tolerance = NULL){
     riv_distances <- sf::st_distance(rivers, pts[i,])
 
     # If node is too close to line ends issue error
-    if(sum(riv_distances <= 0.1) >= 2){
+    if(sum(riv_distances <= units::set_units(0.1, m)) >= 2){
       stop("Nodes found too close to river ends.")
     }
 
