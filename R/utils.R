@@ -19,6 +19,13 @@ split_rivers_at_points <- function(rivers, pts, force_nodes, tolerance = NULL){
 
     # Update nearest river features
     riv_distances <- sf::st_distance(rivers, pts[i,])
+
+    # If node is too close to line ends issue error
+    if(sum(riv_distances <= 0.1) >= 2){
+      stop("Nodes found too close to river ends.")
+    }
+
+    # Identify closest river
     riv_ind <- which.min(riv_distances)
 
     # Skip if distance is above threshold
