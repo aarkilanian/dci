@@ -41,7 +41,7 @@ split_rivers_at_points <- function(rivers, pts, force_nodes, tolerance = NULL){
 
     # Case when point is on confluence
     if(length(nrst_ind) == 0){
-      if(force == TRUE){
+      if(force_nodes == TRUE){
         warning("Point(s) found too close to confluence, removing point(s).")
         next()
       } else{
@@ -51,7 +51,7 @@ split_rivers_at_points <- function(rivers, pts, force_nodes, tolerance = NULL){
 
     # Case when point is too close to confluence
     if(nrst_ind == 1){
-      if(force == TRUE){
+      if(force_nodes == TRUE){
         warning("Point(s) found too close to confluence, removing point(s).")
         next()
       } else{
