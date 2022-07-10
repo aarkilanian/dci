@@ -41,7 +41,7 @@ split_rivers_at_points <- function(rivers, pts, force_nodes, tolerance = NULL){
 
     # Place points on rivers
     riv_pts <- sf::st_sf(sf::st_line_sample(rivers[riv_ind,], density = 1/1))
-    print(nrow(riv_pts))
+    riv_pts
     riv_pts <- tryCatch({
       sf::st_cast(riv_pts, "POINT") %>%
         dplyr::mutate(group = 1)
