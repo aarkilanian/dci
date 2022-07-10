@@ -17,6 +17,7 @@ split_rivers_at_points <- function(rivers, pts, force_nodes, tolerance = NULL){
 
   for(i in 1:nrow(pts)){
 
+    print(i)
     # Update nearest river features
     riv_distances <- sf::st_distance(rivers, pts[i,])
 
@@ -59,8 +60,6 @@ split_rivers_at_points <- function(rivers, pts, force_nodes, tolerance = NULL){
     if(nrst_ind == 1) nrst_ind <- 2
     # If nearest point is at end of line move back one point
     if(nrst_ind == nrow(riv_pts)) nrst_ind <- nrst_ind - 1
-
-    print(paste0(i, " - ", nrst_ind))
 
     # Create first segment
     riv_start <- sf::st_geometry(rivers[riv_ind,])
