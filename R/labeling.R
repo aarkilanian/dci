@@ -68,6 +68,7 @@ node_labeler <- function(node, parent, path, env, ...){
     return(node_label)
   }
   # Get parent label
+  print(length(path$result))
   par_label <- path$result[[length(path$result)]]
   # Create new label
   node_label <- append(par_label, FALSE)
