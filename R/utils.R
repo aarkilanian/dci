@@ -10,7 +10,6 @@
 #' @keywords internal
 split_rivers_at_points <- function(rivers, pts, force_nodes, tolerance = NULL){
 
-  print(force_nodes)
   # Remove sinks if present
   if("Sink" %in% pts$type){
   pts <- pts[pts$type != "Sink"]
@@ -50,7 +49,8 @@ split_rivers_at_points <- function(rivers, pts, force_nodes, tolerance = NULL){
     })
 
     # Find nearest point (except start and end)
-    nrst_ind <- which.min(sf::st_distance(pts[i,], riv_pts[-c(1, length(riv_pts)),])) + 2
+    nrst_ind <- which.min(sf::st_distance(pts[i,], riv_pts[-c(1, length(riv_pts)),]))
+    print(nrst_ind)
 
     # Create first segment
     riv_start <- sf::st_geometry(rivers[riv_ind,])
