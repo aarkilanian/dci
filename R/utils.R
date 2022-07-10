@@ -17,7 +17,7 @@ split_rivers_at_points <- function(rivers, pts, force_nodes, tolerance = NULL){
   }
 
   for(i in 1:(nrow(pts)-1)){
-
+print(i)
     # Update nearest river features
     riv_distances <- sf::st_distance(rivers, pts[i,])
 
