@@ -24,7 +24,7 @@ river_net <- function(rivers,
                    poi = NULL,
                    check = TRUE,
                    tolerance = NULL,
-                   force_nodes = FALSE){
+                   force_nodes){
 
   # Check rivers
   if(!("rivers" %in% class(rivers))){
@@ -68,7 +68,7 @@ river_net <- function(rivers,
   }
 
   # Split rivers at user node locations
-  rivers <- split_rivers_at_points(rivers, user_nodes, tolerance, force_nodes) %>%
+  rivers <- split_rivers_at_points(rivers, user_nodes, tolerance, force_nodes = force_nodes) %>%
     dplyr::mutate(rivID = 1:dplyr::n())
 
   # Create final sfnetwork
