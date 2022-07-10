@@ -58,7 +58,7 @@ river_net <- function(rivers,
     # Combine nodes
     user_nodes <- dplyr::bind_rows(barriers, outlet, poi)
   } else{
-    user_nodes <- dplyr::bind_rows(barriers, outlet)
+    user_nodes <- rbind(barriers, outlet)
   }
 
   print(user_nodes)
