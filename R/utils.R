@@ -10,6 +10,7 @@
 #' @keywords internal
 split_rivers_at_points <- function(rivers, pts, force_nodes, tolerance = NULL){
 
+  print(force_nodes)
   # Remove sinks if present
   if("Sink" %in% pts$type){
   pts <- pts[pts$type != "Sink"]
