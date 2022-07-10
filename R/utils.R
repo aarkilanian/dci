@@ -11,11 +11,11 @@
 split_rivers_at_points <- function(rivers, pts, force_nodes, tolerance = NULL){
 
   # Remove sinks if present
-  if("Sink" %in% pts$type){
-  pts <- pts[pts$type != "Sink"]
+  if("outlet" %in% pts$type){
+  pts <- pts[pts$type != "outlet"]
   }
 
-  for(i in 1:(nrow(pts)-1)){
+  for(i in 1:(nrow(pts))){
 
     print(i)
     # Update nearest river features
