@@ -51,26 +51,6 @@ split_rivers_at_points <- function(rivers, pts, force_nodes, tolerance = NULL){
     # Find nearest point (except start and end)
     nrst_ind <- which.min(sf::st_distance(pts[i,], riv_pts[-c(1, length(riv_pts)),])) + 2
 
-    # Case when point is on confluence
-    if(length(nrst_ind) == 0){
-      if(force_nodes == TRUE){
-        warning("Point(s) found too close to confluence, removing point(s).")
-        next()
-      } else{
-        stop("Point(s) found too close to confluences, cannot split lines at point locations.")
-      }
-    }
-
-    # Case when point is too close to confluence
-    if(nrst_ind == 1){
-      if(force_nodes == TRUE){
-        warning("Point(s) found too close to confluence, removing point(s).")
-        next()
-      } else{
-        stop("Point(s) found too close to confluences, cannot split lines at point locations.")
-      }
-    }
-
     # Create first segment
     riv_start <- sf::st_geometry(rivers[riv_ind,])
     riv_len <- length(riv_start[[1]])
