@@ -32,6 +32,7 @@ split_rivers_at_points <- function(rivers, pts, force_nodes, tolerance = NULL){
 
     # Identify closest river
     riv_ind <- which.min(riv_distances)
+    print(rivers[riv_ind,])
 
     # Skip if distance is above threshold
     if(!is.null(tolerance)){
@@ -41,7 +42,6 @@ split_rivers_at_points <- function(rivers, pts, force_nodes, tolerance = NULL){
 
     # Place points on rivers
     riv_pts <- sf::st_sf(sf::st_line_sample(rivers[riv_ind,], density = 1/1))
-    riv_pts
     riv_pts <- tryCatch({
       sf::st_cast(riv_pts, "POINT") %>%
         dplyr::mutate(group = 1)
