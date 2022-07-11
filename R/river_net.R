@@ -61,8 +61,6 @@ river_net <- function(rivers,
     user_nodes <- dplyr::bind_rows(barriers, outlet)
   }
 
-  print(user_nodes)
-
   # Clean up topology if requested
   if(check == TRUE){
     # Perform necessary corrections

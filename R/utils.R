@@ -13,7 +13,7 @@ split_rivers_at_points <- function(rivers, pts, force_nodes, tolerance = NULL){
   # Remove sinks if present
   if("outlet" %in% pts$type){
     print("found outlet")
-    pts <- pts[pts$type != "outlet"]
+    pts <- pts[pts$type != "outlet",]
   }
 
   for(i in 1:(nrow(pts)-1)){
