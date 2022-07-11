@@ -25,7 +25,8 @@ Imports:
     sf,
     tidygraph,
     sfnetworks,
-    igraph
+    igraph,
+    parallel
 VignetteBuilder: knitr
 Depends: 
     R (>= 3.50)
