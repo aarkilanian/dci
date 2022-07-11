@@ -23,7 +23,7 @@
 #' calculate_dci(net = net_name, form = "potamodromous")
 #' calculate_dci(net = net_name, form = "diadromous", threshold = 2100)
 #' }
-calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NULL){
+calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NULL, parallel = NULL){
 
   # Check that network is valid
   if(!("river_net" %in% class(net))){
@@ -185,7 +185,7 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
 #' @return A data frame which holds raw and relative DCI scores for each segment.
 #'
 #' @keywords internal
-calculate_dci_pot <- function(all_members, net_nodes, seg_weights){
+calculate_dci_pot <- function(all_members, net_nodes, seg_weights, parallel){
 
   # Determine segment pairs
   from_segment <- rep(all_members,
@@ -231,7 +231,7 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights){
 #' @return A data frame which holds raw and relative DCI scores for each segment.
 #'
 #' @keywords internal
-calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg){
+calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg, parallel){
 
   # Determine segment pairs
   from_segment <- rep(outlet_seg, times = length(all_members))
@@ -277,7 +277,7 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg){
 #' @return A data frame which holds raw and relative DCI scores for each segment.
 #'
 #' @keywords internal
-calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight){
+calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, parallel){
 
   # Determine segment pairs
   from_segment <- rep(all_members,
@@ -323,7 +323,7 @@ calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights, w
 #' @param outlet_seg An integer indicating the membership label of the outlet segment
 #'
 #' @keywords internal
-calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg){
+calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, parallel){
 
   # Determine segment pairs
   from_segment <- rep(outlet_seg, times = length(all_members))
