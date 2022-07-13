@@ -121,7 +121,7 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
     seg_weights$segweight <- seg_weights$segweight / totweight
 
     # Potamodromous case
-    if(form == "potamodromous") DCIs <- calculate_dci_pot(all_members, net_nodes, seg_weights)
+    if(form == "potamodromous") DCIs <- calculate_dci_pot(all_members, net_nodes, seg_weights, parallel)
 
     # Diadromous case
     if(form == "diadromous"){
@@ -194,7 +194,11 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights, parallel){
                     times = length(all_members))
 
   # Calculate passability between each pair of segments
-  pass <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
+  if(parallel){
+    pass <- parallel::mcmapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes), mc.cores = 12)
+  } else{
+    pass <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
+  }
 
   # Gather DCI inputs and calculate sub-segmental DCI
   DCIs_sub <- data.frame(from = from_segment,
