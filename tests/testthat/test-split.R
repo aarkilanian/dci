@@ -6,7 +6,7 @@ test_that("Split rivers returns correct number of sections", {
     sf::st_as_sf(wkt = "geometry")
   riv <- sf::st_as_sf(riv, wkt = "x")
   riv$riv_length <- 10
-  pnt <- sf::st_as_sf(sf::st_sfc(sf::st_point(c(5,1)), sf::st_point(c(10,10)))) %>%
+  pnt <- sf::st_as_sf(sf::st_sfc(sf::st_point(c(7,1)), sf::st_point(c(10,10)))) %>%
     dplyr::rename("geometry" = "x") %>%
     sf::st_as_sf(wkt = "geometry")
 

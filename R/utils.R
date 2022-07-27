@@ -8,7 +8,7 @@
 #' @return A \code{\link{rivers}} object with non-split rivers replaced with two new features each at opposite sides of the node which splits it. All attributes assumed to be constant.
 #'
 #' @keywords internal
-split_rivers_at_points <- function(rivers, pts, force_nodes, tolerance = NULL){
+split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
 
   # Remove sinks if present
   if("outlet" %in% pts$type){
@@ -16,19 +16,15 @@ split_rivers_at_points <- function(rivers, pts, force_nodes, tolerance = NULL){
     pts <- pts[pts$type != "outlet"]
   }
 
-  for(i in 1:(nrow(pts)-1)){
+  for(i in 1:(nrow(pts))){
 print(i)
     # Update nearest river features
     riv_distances <- sf::st_distance(rivers, pts[i,])
 
     # If node is too close to line ends issue error
-    if(sum(riv_distances <= units::set_units(0.1, m)) >= 2){
-      if(force_nodes){
+    if(sum(as.vector(riv_distances) <= 0.1) >= 2){
         warning(paste0("Node ", i, " too close to river ends"))
         next()
-      } else{
-        stop("Nodes found too close to river ends.")
-      }
     }
 
     # Identify closest river
