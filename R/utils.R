@@ -29,7 +29,6 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
     # Identify closest river
     riv_ind <- which.min(riv_distances)
 
-    print("found closest river")
     # Skip if distance is above threshold
     if(!is.null(tolerance)){
       min_dist <- riv_distances[riv_ind]
@@ -44,7 +43,6 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
     }, warning = function(w) {
       print(paste('warning:', w))
     })
-    print("generated sample points")
     # If river only has 2 points skip
     if(nrow(riv_pts) == 2){
       warning("River too short to perform splitting.")
@@ -58,7 +56,6 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
     # If nearest point is at end of line move back one point
     if(nrst_ind == nrow(riv_pts)) nrst_ind <- nrst_ind - 1
 
-    print("found nearest point")
     # Create first segment
     riv_start <- sf::st_geometry(rivers[riv_ind,])
     riv_len <- length(riv_start[[1]])
@@ -77,7 +74,6 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL){
     river1$riv_length <- as.double(sf::st_length(river1))
     river1 <- sf::st_sf(river1, crs = sf::st_crs(rivers))
 
-    print("first segment")
     # Create second segment
     # If point is close to end of river line
     if(nrow(riv_pts) == nrst_ind){
