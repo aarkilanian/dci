@@ -285,7 +285,7 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg, n
 #' @return A data frame which holds raw and relative DCI scores for each segment.
 #'
 #' @keywords internal
-calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, parallel){
+calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, n.cores){
 
   # Determine segment pairs
   from_segment <- rep(all_members,
@@ -294,7 +294,11 @@ calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights, w
                     times = length(all_members))
 
   # Calculate segment-segment distance between each pair
-  distances <- mapply(gather_dist, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
+  if(n.cores > 1){
+    distances <- parallel::mcmapply(gather_dist, from_segment, to_segment, MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
+  } else{
+    distances <- mapply(gather_dist, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
+  }
 
   # Remove pairs with distances larger than the threshold
   discard_pairs <- which(distances > threshold)
@@ -305,10 +309,18 @@ calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights, w
   }
 
   # Calculate passability between remaining pairs
-  perms <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
+  if(n.cores > 1){
+    perms <- parallel::mcmapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
+  } else{
+    perms <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
+  }
 
   # Calculate DCI
-  DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted))
+  if(n.cores > 1){
+    DCIs <- parallel::mcmapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted), mc.cores = n.cores)
+  } else{
+    DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted))
+  }
   DCI_glob <- sum(DCIs, na.rm = TRUE)
 
   # Print global dci
@@ -331,14 +343,18 @@ calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights, w
 #' @param outlet_seg An integer indicating the membership label of the outlet segment
 #'
 #' @keywords internal
-calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, parallel){
+calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, n.cores){
 
   # Determine segment pairs
   from_segment <- rep(outlet_seg, times = length(all_members))
   to_segment <- all_members
 
   # Remove pairs of segments further than threshold
-  distances <- mapply(gather_dist, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
+  if(n.cores > 1){
+    distances <- parallel::mcmapply(gather_dist, from_segment, to_segment, MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
+  } else{
+    distances <- mapply(gather_dist, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
+  }
 
   # Remove pairs with distances larger than the threshold
   discard_pairs <- which(distances > threshold)
@@ -349,10 +365,18 @@ calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, w
   }
 
   # Calculate passability between remaining pairs
-  perms <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
+  if(n.cores > 1){
+    perms <- parallel::mcmapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
+  } else{
+    perms <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
+  }
 
   # Calculate DCI
-  DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted))
+  if(n.cores > 1){
+    DCIs <- parallel::mcmapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted), mc.cores = n.cores)
+  } else{
+    DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted))
+  }
   DCI_glob <- sum(DCIs)
 
   # Print global dci
