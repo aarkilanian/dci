@@ -23,7 +23,7 @@
 #' calculate_dci(net = net_name, form = "potamodromous")
 #' calculate_dci(net = net_name, form = "diadromous", threshold = 2100)
 #' }
-calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NULL, parallel = NULL){
+calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NULL, n.cores = 1){
 
   # Check that network is valid
   if(!("river_net" %in% class(net))){
@@ -121,7 +121,7 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
     seg_weights$segweight <- seg_weights$segweight / totweight
 
     # Potamodromous case
-    if(form == "potamodromous") DCIs <- calculate_dci_pot(all_members, net_nodes, seg_weights, parallel)
+    if(form == "potamodromous") DCIs <- calculate_dci_pot(all_members, net_nodes, seg_weights, n.cores)
 
     # Diadromous case
     if(form == "diadromous"){
@@ -132,7 +132,7 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
         dplyr::pull(.data$member.label)
 
       # Calculate DCI
-      DCIs <- calculate_dci_dia(all_members, net_nodes, seg_weights, outlet_seg)
+      DCIs <- calculate_dci_dia(all_members, net_nodes, seg_weights, outlet_seg, n.cores)
     }
 
     # Both DCI forms
@@ -185,7 +185,7 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
 #' @return A data frame which holds raw and relative DCI scores for each segment.
 #'
 #' @keywords internal
-calculate_dci_pot <- function(all_members, net_nodes, seg_weights, parallel){
+calculate_dci_pot <- function(all_members, net_nodes, seg_weights, n.cores){
 
   # Determine segment pairs
   from_segment <- rep(all_members,
@@ -194,8 +194,8 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights, parallel){
                     times = length(all_members))
 
   # Calculate passability between each pair of segments
-  if(parallel){
-    pass <- parallel::mcmapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes), mc.cores = 12)
+  if(n.cores > 1){
+    pass <- parallel::mcmapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
   } else{
     pass <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
   }
@@ -235,14 +235,18 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights, parallel){
 #' @return A data frame which holds raw and relative DCI scores for each segment.
 #'
 #' @keywords internal
-calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg, parallel){
+calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg, n.cores){
 
   # Determine segment pairs
   from_segment <- rep(outlet_seg, times = length(all_members))
   to_segment <- all_members
 
   # Calculate passability between each pair of segments
-  pass <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
+  if(n.cores > 1){
+    pass <- parallel::mcmapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
+  } else{
+    pass <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
+  }
 
   # Gather DCI inputs and calculate sub-segmental DCI
   DCIs_sub <- data.frame(from = from_segment,
