@@ -556,9 +556,7 @@ gather_perm <- function(from, to, nodes){
   path <- path_between(from_sink, to_sink)
 
   # Gather permeabilities across path
-  path_perm <- prod(nodes %>%
-                      dplyr::filter(.data$node.label %in% path) %>%
-                      dplyr::pull(.data$pass))
+  path_perm <- prod(nodes[nodes$node.label %in% path,]$pass)
 
   # Return passability between segments
   return(path_perm)
