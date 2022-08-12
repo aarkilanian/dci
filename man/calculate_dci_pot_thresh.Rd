@@ -11,7 +11,8 @@ calculate_dci_pot_thresh(
   seg_weights,
   weighted,
   threshold,
-  totweight
+  totweight,
+  n.cores
 )
 }
 \arguments{

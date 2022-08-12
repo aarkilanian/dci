@@ -4,15 +4,7 @@
 \alias{river_net}
 \title{Create a \code{river_net} object}
 \usage{
-river_net(
-  rivers,
-  barriers,
-  outlet,
-  poi = NULL,
-  check = TRUE,
-  tolerance = NULL,
-  force_nodes = FALSE
-)
+river_net(rivers, barriers, outlet, poi = NULL, check = TRUE, tolerance = NULL)
 }
 \arguments{
 \item{rivers}{A \code{rivers} object returned by \code{\link{import_rivers}}.}
@@ -26,8 +18,6 @@ river_net(
 \item{check}{A logical value, if \code{TRUE}, the default, dendritic topology of the river network is enforced with \code{\link{enforce_dendritic}}.}
 
 \item{tolerance}{A numeric value specifying the distance in map units that points should be snapped to rivers. Set to NULL by default.}
-
-\item{force_nodes}{A logical value indicating whether river network construction should be forced leadingto points potentially being deleted from the network to conform to dendritic network structure. Set to \code{FALSE} by default.}
 }
 \value{
 An object of class \code{\link{river_net}} representing the river network formed by the geospatial lines and points provided.

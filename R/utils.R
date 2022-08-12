@@ -3,7 +3,6 @@
 #' @inheritParams river_net
 #'
 #' @param pts An \code{\link[sf]{sf}} object, points at which to split river lines.
-#' @param force_nodes A logical value indicating whether points which are too close to confluences should be ignored or not
 #'
 #' @return A \code{\link{rivers}} object with non-split rivers replaced with two new features each at opposite sides of the node which splits it. All attributes assumed to be constant.
 #'

@@ -4,7 +4,14 @@
 \alias{calculate_dci}
 \title{Calculate different forms of the DCI for a \code{\link{river_net}} object}
 \usage{
-calculate_dci(net, form, pass = NULL, weight = NULL, threshold = NULL)
+calculate_dci(
+  net,
+  form,
+  pass = NULL,
+  weight = NULL,
+  threshold = NULL,
+  n.cores = 1
+)
 }
 \arguments{
 \item{net}{A \code{\link{river_net}} object.}

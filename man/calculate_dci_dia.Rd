@@ -4,7 +4,7 @@
 \alias{calculate_dci_dia}
 \title{Calculate non-thresholded diadromous DCI}
 \usage{
-calculate_dci_dia(all_members, net_nodes, seg_weights, outlet_seg)
+calculate_dci_dia(all_members, net_nodes, seg_weights, outlet_seg, n.cores)
 }
 \arguments{
 \item{all_members}{An integer vector holding all assigned membership labels in the \code{\link{river_net}} object.}

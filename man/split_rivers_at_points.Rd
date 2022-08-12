@@ -4,14 +4,12 @@
 \alias{split_rivers_at_points}
 \title{Split river lines around point locations}
 \usage{
-split_rivers_at_points(rivers, pts, force, tolerance = NULL)
+split_rivers_at_points(rivers, pts, tolerance = NULL)
 }
 \arguments{
 \item{rivers}{A \code{rivers} object returned by \code{\link{import_rivers}}.}
 
 \item{pts}{An \code{\link[sf]{sf}} object, points at which to split river lines.}
-
-\item{force}{A logical value indicating whether points which are too close to confluences should be ignored or not}
 
 \item{tolerance}{A numeric value specifying the distance in map units that points should be snapped to rivers. Set to NULL by default.}
 }

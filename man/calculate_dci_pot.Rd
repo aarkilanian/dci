@@ -4,7 +4,7 @@
 \alias{calculate_dci_pot}
 \title{Calculate non-thresholded potamodromous DCI}
 \usage{
-calculate_dci_pot(all_members, net_nodes, seg_weights)
+calculate_dci_pot(all_members, net_nodes, seg_weights, n.cores)
 }
 \arguments{
 \item{all_members}{An integer vector holding all assigned membership labels in the \code{\link{river_net}} object.}
