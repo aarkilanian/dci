@@ -122,6 +122,15 @@ join_attributes <- function(net, nodes, tolerance = NULL){
 
   # Find nearest river network node
   nrst <-  sf::st_nearest_feature(nodes, net_nodes)
+
+  # Handle duplicates
+  if(any(duplicated(nrst))){
+    warning("Nodes found too close together, removing duplicates.")
+    nodes <- nodes[!(duplicated(nrst)),]
+    nrst <- nrst[!(duplicated(nrst))]
+  }
+
+  # Assign node keys
   nodes$key <- nrst
 
   # If a tolerance is specified, avoid joining nodes outside that tolerance
