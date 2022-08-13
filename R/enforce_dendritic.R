@@ -124,7 +124,9 @@ correct_complex <- function(net, correct = TRUE){
     dplyr::select(.data$degree)
 
   # If confluences have over 4 inputs recommend manual correction
-  if(any(complex_nodes$degree > 4)) stop("Complex confluences with over 3 input tributaries have been detected. Use the standalone `enforce_dendritic()` and correct returned errors manually.")
+  if(any(complex_nodes$degree > 4)){
+    if(correct) stop("Complex confluences with over 3 input tributaries have been detected. Use the standalone `enforce_dendritic()` and correct returned errors manually.")
+  }
   # If no errors return unchanged rivers
   if(length(complex_nodes$degree) == 0){
     message("No complex confluences found.")
