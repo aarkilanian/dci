@@ -457,23 +457,25 @@ gather_dci <- function(net, from, to, distance, pass, nodes, seg_weights, thresh
   source <- exit_label
   dist <- igraph::distances(graph = net, v = source, to = target,
                              mode = "all", weights = weights, algorithm = "automatic")
-  neighb_length <- sum(dist[dist <= rem_length])
+  neighb_nodes <- which(dist <= rem_length)
+  neighb_nodes <- nodes[nodes$nodeID %in% neighb_nodes,]
+  neighb_nodes <- neighb_nodes[neighb_nodes$member.label == from,]
+  neighb_length <- sum(neighb_nodes$riv_length, na.rm = T)
 
   if(weighted){
-    # Calculate length of from neighbourhood
+    # Calculate full length of from neighbourhood
     from_length <- sum(nodes[nodes$member.label == from,]$riv_length * nodes[nodes$member.label == from,]$riv_weight, na.rm = TRUE)
-    # Calculate length of to neighbourhood
+    # Calculate full length of to neighbourhood
     to_length <- sum(nodes[nodes$member.label == to,]$riv_length * nodes[nodes$member.label == to,]$riv_weight, na.rm = TRUE)
 
   } else{
-    # Calculate length of from neighbourhood
+    # Calculate full length of from neighbourhood
     from_length <- sum(nodes[nodes$member.label == from,]$riv_length)
-    # Calculate length of to neighbourhood
+    # Calculate full length of to neighbourhood
     to_length <- sum(nodes[nodes$member.label == to,]$riv_length)
   }
 
   # Calculate relative neighbourhood length for segment
-  from_length <- sum(nodes[nodes$member.label == from,]$riv_length)
   neighb_rel <- neighb_length / from_length
 
   # Calculate sub-segmental DCI for pair of segments
