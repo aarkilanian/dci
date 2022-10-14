@@ -167,7 +167,7 @@ correct_complex <- function(net, correct = TRUE){
         dplyr::filter(.data$n == 1) %>%
         dplyr::ungroup()
     # If there are multiple matches pick only one node per complex confluence
-    new_nodes[!duplicated(new_nodes$complexID),]
+    new_nodes <- new_nodes[!duplicated(new_nodes$complexID),]
     # Identify associated rivers
     new_nodes <- dplyr::left_join(new_nodes, as.data.frame(buff_intersect[c("to", "rivID")]), by = c("to" = "to"))
     new_nodes <- new_nodes[c("complexID", "rivID")]
