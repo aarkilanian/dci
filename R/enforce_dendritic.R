@@ -169,7 +169,7 @@ correct_complex <- function(net, correct = TRUE){
     # If there are multiple matches pick only one node per complex confluence
     new_nodes <- new_nodes[!duplicated(new_nodes$complexID),]
     # Identify associated rivers
-    new_nodes <- dplyr::left_join(new_nodes, as.data.frame(buff_intersect[c("to", "rivID")]), by = c("to" = "to"))
+    new_nodes <- sf::st_join(new_nodes, buff_intersect, suffix = c("", ".new"))
     new_nodes <- new_nodes[c("complexID", "rivID")]
     # Find closest rivers to new points
     modify_rivers <- integer(length = nrow(complex_nodes))
