@@ -37,6 +37,9 @@ map units. If NULL, the default, no limit is considered.}
 \item{totweight}{The total length or weighted length of the whole network.}
 
 \item{outlet_seg}{An integer indicating the membership label of the outlet segment}
+
+\item{n.cores}{An optional integer value indicating the number of cores to
+use. Defaults to 1. Currently only works on MacOS and Linux.}
 }
 \description{
 Calculate thresholded diadromous DCI

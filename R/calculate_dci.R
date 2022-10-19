@@ -22,7 +22,7 @@
 #'   DCI is calculated only with river lengths.
 #' @param threshold An optional numeric value specifying a dispersal limit in
 #'   map units. If NULL, the default, no limit is considered.
-#' @param n.nodes An optional integer value indicating the number of cores to
+#' @param n.cores An optional integer value indicating the number of cores to
 #'   use. Defaults to 1. Currently only works on MacOS and Linux.
 #'
 #' @return A \code{\link{sf}} object of the rivers from the provided

@@ -30,7 +30,7 @@ DCI is calculated only with river lengths.}
 \item{threshold}{An optional numeric value specifying a dispersal limit in
 map units. If NULL, the default, no limit is considered.}
 
-\item{n.nodes}{An optional integer value indicating the number of cores to
+\item{n.cores}{An optional integer value indicating the number of cores to
 use. Defaults to 1. Currently only works on MacOS and Linux.}
 }
 \value{

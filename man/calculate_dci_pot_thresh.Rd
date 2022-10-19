@@ -34,6 +34,9 @@ seg_weights are weighted.}
 map units. If NULL, the default, no limit is considered.}
 
 \item{totweight}{The total length or weighted length of the whole network.}
+
+\item{n.cores}{An optional integer value indicating the number of cores to
+use. Defaults to 1. Currently only works on MacOS and Linux.}
 }
 \value{
 A data frame which holds raw and relative DCI scores for each segment.
