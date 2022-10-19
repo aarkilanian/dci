@@ -29,8 +29,8 @@ enforce_dendritic <- function(rivers, correct = FALSE){
   # Correct complex confluences
   # If automatically correcting topology, use network with divergences corrected
   if(correct){
-    net <- correct_complex(net)
     net <- correct_divergences(net)
+    net <- correct_complex(net)
     # Recalculate river lengths
     net$riv_length <- as.double(sf::st_length(net))
     # Return corrected rivers
