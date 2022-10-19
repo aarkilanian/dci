@@ -7,11 +7,17 @@
 calculate_dci_pot(all_members, net_nodes, seg_weights, n.cores)
 }
 \arguments{
-\item{all_members}{An integer vector holding all assigned membership labels in the \code{\link{river_net}} object.}
+\item{all_members}{An integer vector holding all assigned membership labels
+in the \code{\link{river_net}} object.}
 
-\item{net_nodes}{An \code{\link{sf}} object of the nodes of the \code{\link{river_net}} object with river attributes joined.}
+\item{net_nodes}{An \code{\link{sf}} object of the nodes of the \code{\link{river_net}}
+object with river attributes joined.}
 
-\item{seg_weights}{A data frame of each segments total length. Either weighted or unweighted depending on parameters.}
+\item{seg_weights}{A data frame of each segments total length. Either
+weighted or unweighted depending on parameters.}
+
+\item{n.nodes}{An optional integer value indicating the number of cores to
+use. Defaults to 1. Currently only works on MacOS and Linux.}
 }
 \value{
 A data frame which holds raw and relative DCI scores for each segment.

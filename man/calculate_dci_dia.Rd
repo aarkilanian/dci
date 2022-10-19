@@ -7,11 +7,14 @@
 calculate_dci_dia(all_members, net_nodes, seg_weights, outlet_seg, n.cores)
 }
 \arguments{
-\item{all_members}{An integer vector holding all assigned membership labels in the \code{\link{river_net}} object.}
+\item{all_members}{An integer vector holding all assigned membership labels
+in the \code{\link{river_net}} object.}
 
-\item{net_nodes}{An \code{\link{sf}} object of the nodes of the \code{\link{river_net}} object with river attributes joined.}
+\item{net_nodes}{An \code{\link{sf}} object of the nodes of the \code{\link{river_net}}
+object with river attributes joined.}
 
-\item{seg_weights}{A data frame of each segments total length. Either weighted or unweighted depending on parameters.}
+\item{seg_weights}{A data frame of each segments total length. Either
+weighted or unweighted depending on parameters.}
 
 \item{outlet_seg}{An integer indicating the membership label of the outlet segment}
 }
