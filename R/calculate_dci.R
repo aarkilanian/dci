@@ -12,6 +12,7 @@
 #' @param pass The name of a column in the nodes table of net which holds the numeric passability of nodes. If none is specified all barriers are automatically considered to have 0 passability.
 #' @param weight The name of column in the edges tables of net which holds numeric weights to be applied to river lengths. If none is specified, the DCI is calculated only with river lengths.
 #' @param threshold An optional numeric value specifying a dispersal limit in map units. If NULL, the default, no limit is considered.
+#' @param n.nodes An optional integer value indicating the number of cores to use. Defaults to 1. Currently only works on MacOS and Linux.
 #'
 #' @return A \code{\link{sf}} object of the rivers from the provided \code{\link{river_net}} object with new columns specifying the segmental DCI values at each river location. If sites is not \code{NULL}, a \code{\link{sf}} object of the site points with their associated DCI scores.
 #'
@@ -155,7 +156,7 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
     if(!is.null(weight)) weighted <- TRUE
 
     # Potamodromous case
-    if(form == "potamodromous") DCIs <- calculate_dci_pot_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight)
+    if(form == "potamodromous") DCIs <- calculate_dci_pot_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, n.cores)
 
     # Diadromous case
     if(form == "diadromous"){
@@ -166,7 +167,7 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
         dplyr::pull(.data$member.label)
 
       # Calculate DCI
-      DCIs <- calculate_dci_dia_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg)
+      DCIs <- calculate_dci_dia_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, n.cores)
     }
 
     # Return calculated DCI values
@@ -181,6 +182,7 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
 #' @param all_members An integer vector holding all assigned membership labels in the \code{\link{river_net}} object.
 #' @param net_nodes An \code{\link{sf}} object of the nodes of the \code{\link{river_net}} object with river attributes joined.
 #' @param seg_weights A data frame of each segments total length. Either weighted or unweighted depending on parameters.
+#' @param n.nodes An optional integer value indicating the number of cores to use. Defaults to 1. Currently only works on MacOS and Linux.
 #'
 #' @return A data frame which holds raw and relative DCI scores for each segment.
 #'
