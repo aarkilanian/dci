@@ -155,3 +155,28 @@ join_attributes <- function(net, nodes, tolerance = NULL){
   # Return joined network
   invisible(net)
 }
+
+
+#' Rename sf geometry column
+#'
+#' Code provided by user Spacedman
+#' https://gis.stackexchange.com/questions/386584/sf-geometry-column-naming-differences-r
+#'
+#' @param x an \code{\link[sf]{sf}} object
+#' @param name a new geometry column name
+#'
+#' @return the original \code{\link[sf]{sf}} object with a renamed geometry
+#'   column
+#'
+#' @keywords internal
+rename_geometry <- function(x, name){
+  # Get current geometry column
+  current = attr(x, "sf_column")
+  # Rename appropriate column
+  names(x)[names(x)==current] = name
+  # Reset geometry column name
+  st_geometry(x)=name
+  # Return corrected sf object
+  invisible(x)
+}
+

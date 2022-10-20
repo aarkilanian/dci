@@ -41,6 +41,18 @@ river_net <- function(rivers,
     }
   }
 
+  # Verify sf column naming matches
+  rivers_sf_col <- attr(rivers, "sf_column")
+  if(!(attr(barriers, "sf_column") == rivers_sf_col)){
+    rename_geometry(barriers, rivers_sf_col)
+  }
+  if(!(attr(outlet, "sf_column") == rivers_sf_col)){
+    rename_geometry(outlet, rivers_sf_col)
+  }
+  if(!(is.null(poi)) & !(attr(poi, "sf_column") == rivers_sf_col)){
+    rename_geometry(poi, rivers_sf_col)
+  }
+
   # Check points of interest
   if(!(is.null(poi))){
     if(!("poi" %in% class(poi))){
