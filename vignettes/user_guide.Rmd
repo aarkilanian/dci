@@ -7,8 +7,6 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-##### Talk about the addition of the force argument. And be honest about problems that might arise from multiple points on a river or if points are too close to the end vertices of lines. force is an argument which would allow for "legal" nodes to be incorporated into the river network while simply ignoring those which are problematic, effectively removing them from the network and subsequent dci calculations. At the moment, there is no method to identify which points are problematic.
-
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
