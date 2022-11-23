@@ -49,8 +49,9 @@ river_net <- function(rivers,
   if(!(attr(outlet, "sf_column") == rivers_sf_col)){
     rename_geometry(outlet, rivers_sf_col)
   }
-  if(!(is.null(poi)) & !(attr(poi, "sf_column") == rivers_sf_col)){
-    rename_geometry(poi, rivers_sf_col)
+  if(!(is.null(poi)))
+    if(!(attr(poi, "sf_column") == rivers_sf_col)){
+      rename_geometry(poi, rivers_sf_col)
   }
 
   # Check points of interest
