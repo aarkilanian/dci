@@ -12,7 +12,7 @@
 #' export_dci(net = net_name, results = dci_results, type = "rivers")
 #' export_dci(net = net_name, results = dci_results, type = "poi")
 #' export_dci(net = net_name, results = dci_results, type = "barriers")
-#' export_dci(net = net_name, results = list(a, b, c), type = "rivers)
+#' export_dci(net = net_name, results = list(a, b, c), type = "rivers")
 #' }
 export_dci <- function(net, results, type = "rivers"){
 
