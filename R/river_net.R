@@ -60,6 +60,11 @@ river_net <- function(rivers,
     user_nodes <- dplyr::bind_rows(barriers, outlet)
   }
 
+  # Ensure user_nodes has geometry column named "geometry"
+  if(!("geometry" %in% colnames(user_nodes))){
+    user_nodes <- rename_geometry(user_nodes, "geometry")
+  }
+
   # Clean up topology if requested
   if(check == TRUE){
     # Perform necessary corrections
@@ -69,6 +74,11 @@ river_net <- function(rivers,
   # Split rivers at user node locations
   rivers <- split_rivers_at_points(rivers, user_nodes, tolerance) %>%
     dplyr::mutate(rivID = 1:dplyr::n())
+
+  # Ensure rivers has geometry column named "geometry"
+  if(!("geometry" %in% colnames(rivers))){
+    rivers <- rename_geometry(rivers, "geometry")
+  }
 
   # Create final sfnetwork
   suppressWarnings(

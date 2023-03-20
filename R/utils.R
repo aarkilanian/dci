@@ -147,3 +147,19 @@ join_attributes <- function(net, nodes, tolerance = NULL){
   # Return joined network
   invisible(net)
 }
+
+
+#' Rename sf object geometry
+#'
+#' @param g object of class sf
+#' @param name name of new geometry column as a string
+#'
+#' @return object of class sf with geometry column renamed
+#'
+#' @keywords internal
+rename_geometry <- function(g, name){
+  current = attr(g, "sf_column")
+  names(g)[names(g)==current] = name
+  st_geometry(g)=name
+  g
+}
