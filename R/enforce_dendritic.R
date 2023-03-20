@@ -124,7 +124,9 @@ correct_complex <- function(net, correct = TRUE){
     dplyr::select(.data$degree)
 
   # If confluences have over 4 inputs recommend manual correction
-  if(any(complex_nodes$degree > 4)) stop("Complex confluences with over 3 input tributaries have been detected. Use the standalone `enforce_dendritic()` and correct returned errors manually.")
+  if(any(complex_nodes$degree > 4)){
+    if(correct) stop("Complex confluences with over 3 input tributaries have been detected. Use the standalone `enforce_dendritic()` and correct returned errors manually.")
+  }
   # If no errors return unchanged rivers
   if(length(complex_nodes$degree) == 0){
     message("No complex confluences found.")
@@ -158,15 +160,16 @@ correct_complex <- function(net, correct = TRUE){
     # Create points at intersection of rivers and buffers
     buff_intersect <- sf::st_intersection(rivers, buffer)
     buff_intersect <- buff_intersect[c("rivID", "complexID", "to")]
-    # Select points out of buffer intersections for new confluence nodes on downstream edges
+    # Select downstream river out of buffer intersections for new confluence nodes
     new_nodes <-  buff_intersect %>%
         dplyr::group_by(.data$complexID, .data$to) %>%
         dplyr::tally() %>%
         dplyr::filter(.data$n == 1) %>%
         dplyr::ungroup()
-
+    # If there are multiple matches pick only one node per complex confluence
+    new_nodes <- new_nodes[!duplicated(new_nodes$complexID),]
     # Identify associated rivers
-    new_nodes <- dplyr::left_join(new_nodes, as.data.frame(buff_intersect[c("to", "rivID")]), by = c("to" = "to"))
+    new_nodes <- sf::st_join(new_nodes, buff_intersect, suffix = c("", ".new"))
     new_nodes <- new_nodes[c("complexID", "rivID")]
     # Find closest rivers to new points
     modify_rivers <- integer(length = nrow(complex_nodes))
@@ -178,19 +181,23 @@ correct_complex <- function(net, correct = TRUE){
       ind <- which(distances == min(distances[distances > units::as_units(0, "m")]))
       modify_rivers[confluence] <- candidates$rivID[ind]
     }
+
+    # Save old rivers
+    rivers.old <- rivers
+
     # Move endpoints of closest river lines
     # Split outlet rivers at new confluence locations
     for(i in 1:length(modify_rivers)){
       # Move river to new confluence
       # Get river geometry
-      old_river <- sf::st_geometry(rivers[which(rivers$rivID == modify_rivers[i]),])
-      # Get point geometry
+      old_river <- sf::st_geometry(rivers.old[which(rivers.old$rivID == modify_rivers[i]),])
+      # Get new endpoint geometry
       new_point <- sf::st_geometry(new_nodes[i,])
       point_x <- new_point[[1]][1]
       point_y <- new_point[[1]][2]
       # Get number of coordinates on river line
       num_coord <- length(old_river[[1]])
-      # Update final coordinates with new point
+      # Update end coordinates with new point
       new_river <- old_river
       new_river[[1]][num_coord/2] <- point_x
       new_river[[1]][num_coord] <- point_y
@@ -198,7 +205,7 @@ correct_complex <- function(net, correct = TRUE){
       sf::st_geometry(rivers[which(rivers$rivID == modify_rivers[i]),]) <- sf::st_sfc(new_river)
       # Split outlet river at confluence
       # Get river geometry
-      old_river <- sf::st_geometry(rivers[rivers$rivID == new_nodes$rivID[i],])
+      old_river <- sf::st_geometry(rivers.old[rivers.old$rivID == new_nodes$rivID[i],])
       num_coord <- length(old_river[[1]])
       start_x <- old_river[[1]][1]
       start_y <- old_river[[1]][num_coord/2 + 1]

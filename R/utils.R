@@ -3,7 +3,6 @@
 #' @inheritParams river_net
 #'
 #' @param pts An \code{\link[sf]{sf}} object, points at which to split river lines.
-#' @param force_nodes A logical value indicating whether points which are too close to confluences should be ignored or not
 #'
 #' @return A \code{\link{rivers}} object with non-split rivers replaced with two new features each at opposite sides of the node which splits it. All attributes assumed to be constant.
 #'
@@ -123,6 +122,15 @@ join_attributes <- function(net, nodes, tolerance = NULL){
 
   # Find nearest river network node
   nrst <-  sf::st_nearest_feature(nodes, net_nodes)
+
+  # Handle duplicates
+  if(any(duplicated(nrst))){
+    warning("Nodes found too close together, removing duplicates.")
+    nodes <- nodes[!(duplicated(nrst)),]
+    nrst <- nrst[!(duplicated(nrst))]
+  }
+
+  # Assign node keys
   nodes$key <- nrst
 
   # If a tolerance is specified, avoid joining nodes outside that tolerance
@@ -148,18 +156,25 @@ join_attributes <- function(net, nodes, tolerance = NULL){
   invisible(net)
 }
 
-
-#' Rename sf object geometry
+#' Rename sf geometry column
 #'
-#' @param g object of class sf
-#' @param name name of new geometry column as a string
+#' Code provided by user Spacedman
+#' https://gis.stackexchange.com/questions/386584/sf-geometry-column-naming-differences-r
 #'
-#' @return object of class sf with geometry column renamed
+#' @param x an \code{\link[sf]{sf}} object
+#' @param name a new geometry column name
+#'
+#' @return the original \code{\link[sf]{sf}} object with a renamed geometry
+#'   column
 #'
 #' @keywords internal
-rename_geometry <- function(g, name){
-  current = attr(g, "sf_column")
-  names(g)[names(g)==current] = name
-  st_geometry(g)=name
-  g
+rename_geometry <- function(x, name){
+  # Get current geometry column
+  current = attr(x, "sf_column")
+  # Rename appropriate column
+  names(x)[names(x)==current] = name
+  # Reset geometry column name
+  st_geometry(x)=name
+  # Return corrected sf object
+  invisible(x)
 }

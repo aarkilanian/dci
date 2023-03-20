@@ -30,13 +30,16 @@ gather_dci(
 
 \item{nodes}{An \code{\link{sf}} object of the nodes of the \code{\link{river_net}} object with river attributes joined.}
 
-\item{seg_weights}{A data frame of each segments total length. Either weighted or unweighted depending on parameters.}
+\item{seg_weights}{A data frame of each segments total length. Either
+weighted or unweighted depending on parameters.}
 
-\item{threshold}{An optional numeric value specifying a dispersal limit in map units. If NULL, the default, no limit is considered.}
+\item{threshold}{An optional numeric value specifying a dispersal limit in
+map units. If NULL, the default, no limit is considered.}
 
 \item{totweight}{The total length or weighted length of the whole network.}
 
-\item{weighted}{A logical value indicating whether river lengths in seg_weights are weighted.}
+\item{weighted}{A logical value indicating whether river lengths in
+seg_weights are weighted.}
 }
 \value{
 The sub-segmental DCI component between given pair of segments.

@@ -1,25 +1,41 @@
 #' Calculate different forms of the DCI for a \code{\link{river_net}} object
 #'
 #' @details
-#' Passability values are probabilities from 0 to 1 where 0 indicates fully impassable and 1 indicates fully passable. If the values in the supplied passability column are not within this range they will be normalized.
+#' Passability values are probabilities from 0 to 1 where 0 indicates fully
+#'   impassable and 1 indicates fully passable. If the values in the supplied
+#'   passability column are not within this range they will be normalized.
 #'
-#' Similarly weighting values are probability from 0 to 1. Rivers with weights of either 0 or NA will not be considered when calculating the DCI.
+#' Similarly weighting values are probability from 0 to 1. Rivers with weights
+#'   of either 0 or NA will not be considered when calculating the DCI.
 #'
-#' When DCI results are returned succesfully teh global DCI of the given river network will be printed to the console.
+#' When DCI results are returned succesfully teh global DCI of the given river
+#'   network will be printed to the console.
 #'
 #' @param net A \code{\link{river_net}} object.
-#' @param form A string specifying the form of the DCI to calculate: either "potamodromous", "diadromous", or "all".
-#' @param pass The name of a column in the nodes table of net which holds the numeric passability of nodes. If none is specified all barriers are automatically considered to have 0 passability.
-#' @param weight The name of column in the edges tables of net which holds numeric weights to be applied to river lengths. If none is specified, the DCI is calculated only with river lengths.
-#' @param threshold An optional numeric value specifying a dispersal limit in map units. If NULL, the default, no limit is considered.
+#' @param form A string specifying the form of the DCI to calculate: either
+#'   "potamodromous", "diadromous", or "all".
+#' @param pass The name of a column in the nodes table of net which holds the
+#'   numeric passability of nodes. If none is specified all barriers are
+#'   automatically considered to have 0 passability.
+#' @param weight The name of column in the edges tables of net which holds
+#'   numeric weights to be applied to river lengths. If none is specified, the
+#'   DCI is calculated only with river lengths.
+#' @param threshold An optional numeric value specifying a dispersal limit in
+#'   map units. If NULL, the default, no limit is considered.
+#' @param n.cores An optional integer value indicating the number of cores to
+#'   use. Defaults to 1. Currently only works on MacOS and Linux.
 #'
-#' @return A \code{\link{sf}} object of the rivers from the provided \code{\link{river_net}} object with new columns specifying the segmental DCI values at each river location. If sites is not \code{NULL}, a \code{\link{sf}} object of the site points with their associated DCI scores.
+#' @return A \code{\link{sf}} object of the rivers from the provided
+#'   \code{\link{river_net}} object with new columns specifying the segmental
+#'   DCI values at each river location. If sites is not \code{NULL}, a \code{\link{sf}}
+#'   object of the site points with their associated DCI scores.
 #'
 #' @export
 #'
 #' @examples
 #' \dontrun{
-#' calculate_dci(net = net_name, form = "all", pass = "pass", weight = "river_weight", threshold = 1500)
+#' calculate_dci(net = net_name, form = "all", pass = "pass",
+#'   weight = "river_weight", threshold = 1500)
 #' calculate_dci(net = net_name, form = "potamodromous")
 #' calculate_dci(net = net_name, form = "diadromous", threshold = 2100)
 #' }
@@ -178,9 +194,14 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
 
 #' Calculate non-thresholded potamodromous DCI
 #'
-#' @param all_members An integer vector holding all assigned membership labels in the \code{\link{river_net}} object.
-#' @param net_nodes An \code{\link{sf}} object of the nodes of the \code{\link{river_net}} object with river attributes joined.
-#' @param seg_weights A data frame of each segments total length. Either weighted or unweighted depending on parameters.
+#' @param all_members An integer vector holding all assigned membership labels
+#'   in the \code{\link{river_net}} object.
+#' @param net_nodes An \code{\link{sf}} object of the nodes of the \code{\link{river_net}}
+#'   object with river attributes joined.
+#' @param seg_weights A data frame of each segments total length. Either
+#'   weighted or unweighted depending on parameters.
+#' @param n.nodes An optional integer value indicating the number of cores to
+#'   use. Defaults to 1. Currently only works on MacOS and Linux.
 #'
 #' @return A data frame which holds raw and relative DCI scores for each segment.
 #'
@@ -279,7 +300,8 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg, n
 #'
 #' @inheritParams calculate_dci_pot
 #' @inheritParams calculate_dci
-#' @param weighted A logical value indicating whether river lengths in seg_weights are weighted.
+#' @param weighted A logical value indicating whether river lengths in
+#'   seg_weights are weighted.
 #' @param totweight The total length or weighted length of the whole network.
 #'
 #' @return A data frame which holds raw and relative DCI scores for each segment.

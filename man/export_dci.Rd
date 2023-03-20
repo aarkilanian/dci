@@ -9,7 +9,7 @@ export_dci(net, results, type = "rivers")
 \arguments{
 \item{net}{A \code{\link{river_net}} object.}
 
-\item{results}{\code{dci.results} object of DCI results returned by \code{\link{calculate_dci}}.}
+\item{results}{\code{dci.results} object or a list of objects of DCI results returned by \code{\link{calculate_dci}}.}
 
 \item{type}{The element of the river network for which results should be reported. Can be either "rivers" or any of the nodes included in the \code{\link{river_net}} object such as "barriers" or "poi".}
 }
@@ -24,5 +24,6 @@ Export DCI results to spatial format
 export_dci(net = net_name, results = dci_results, type = "rivers")
 export_dci(net = net_name, results = dci_results, type = "poi")
 export_dci(net = net_name, results = dci_results, type = "barriers")
+export_dci(net = net_name, results = list(a, b, c), type = "rivers")
 }
 }

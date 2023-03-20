@@ -11,23 +11,32 @@ calculate_dci_pot_thresh(
   seg_weights,
   weighted,
   threshold,
-  totweight
+  totweight,
+  n.cores
 )
 }
 \arguments{
 \item{net}{A \code{\link{river_net}} object.}
 
-\item{all_members}{An integer vector holding all assigned membership labels in the \code{\link{river_net}} object.}
+\item{all_members}{An integer vector holding all assigned membership labels
+in the \code{\link{river_net}} object.}
 
-\item{net_nodes}{An \code{\link{sf}} object of the nodes of the \code{\link{river_net}} object with river attributes joined.}
+\item{net_nodes}{An \code{\link{sf}} object of the nodes of the \code{\link{river_net}}
+object with river attributes joined.}
 
-\item{seg_weights}{A data frame of each segments total length. Either weighted or unweighted depending on parameters.}
+\item{seg_weights}{A data frame of each segments total length. Either
+weighted or unweighted depending on parameters.}
 
-\item{weighted}{A logical value indicating whether river lengths in seg_weights are weighted.}
+\item{weighted}{A logical value indicating whether river lengths in
+seg_weights are weighted.}
 
-\item{threshold}{An optional numeric value specifying a dispersal limit in map units. If NULL, the default, no limit is considered.}
+\item{threshold}{An optional numeric value specifying a dispersal limit in
+map units. If NULL, the default, no limit is considered.}
 
 \item{totweight}{The total length or weighted length of the whole network.}
+
+\item{n.cores}{An optional integer value indicating the number of cores to
+use. Defaults to 1. Currently only works on MacOS and Linux.}
 }
 \value{
 A data frame which holds raw and relative DCI scores for each segment.
