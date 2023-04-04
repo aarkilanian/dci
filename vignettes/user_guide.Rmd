@@ -160,7 +160,7 @@ res_riv
 res_bar <- export_dci(net = net, results = yamaska_res, type = "barriers")
 
 # If points of interest (poi) were included in the river_net object, the DCI values for these points can be joined too
-res_poi <- export_dci(net = net, results = yamaska_res, type = "poi")
+# res_poi <- export_dci(net = net, results = yamaska_res, type = "poi")
 ```
 
 ## Visualizing results
