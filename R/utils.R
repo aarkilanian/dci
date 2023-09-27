@@ -147,10 +147,10 @@ join_attributes <- function(net, nodes, tolerance = NULL){
   # Join special nodes' attributes to network nodes
   net <- activate(net, nodes) %>%
     dplyr::mutate(rowID = dplyr::row_number()) %>%
-    dplyr::left_join(as.data.frame(nodes) %>% dplyr::select(-.data$geometry), by = c("rowID" = "key")) %>%
-    dplyr::select(-.data$rowID) %>%
+    dplyr::left_join(as.data.frame(nodes) %>% dplyr::select(-geometry), by = c("rowID" = "key")) %>%
+    dplyr::select(-rowID) %>%
     # Set node type of topological nodes
-    dplyr::mutate(type = dplyr::if_else(is.na(.data$type), "topo", .data$type))
+    dplyr::mutate(type = dplyr::if_else(is.na(type), "topo", type))
 
   # Return joined network
   invisible(net)
