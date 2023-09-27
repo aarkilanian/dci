@@ -13,7 +13,7 @@
 #'
 #' @param net A \code{\link{river_net}} object.
 #' @param form A string specifying the form of the DCI to calculate: either
-#'   "potamodromous", "diadromous", or "all".
+#'   "potamodromous", "diadromous", or "invasive".
 #' @param pass The name of a column in the nodes table of net which holds the
 #'   numeric passability of nodes. If none is specified all barriers are
 #'   automatically considered to have 0 passability.
@@ -46,7 +46,7 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
     stop("A valid river_net object is required.")
   }
   # Check that form is valid
-  if(!(form %in% c("potamodromous", "diadromous", "all"))){
+  if(!(form %in% c("potamodromous", "diadromous", "invasive"))){
     stop("A valid form of the DCI must be requested.")
   }
 
@@ -149,14 +149,6 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
 
       # Calculate DCI
       DCIs <- calculate_dci_dia(all_members, net_nodes, seg_weights, outlet_seg, n.cores)
-    }
-
-    # Both DCI forms
-    if(form == "all"){
-      DCIs_pot <- calculate_dci_pot(all_members, net_nodes, seg_weights)
-      DCIs_dia <- calculate_dci_dia(all_members, net_nodes, seg_weights)
-      DCIs <- DCIs_pot %>%
-        dplyr::left_join(.data, DCIs_dia, by = "segment", suffix = c("_pot", "_dia"))
     }
 
     # Return calculated DCI values
