@@ -6,6 +6,7 @@
 #' @param barriers A \code{barriers} object returned by \code{\link{import_points}}.
 #' @param outlet A \code{outlet} object returned by \code{\link{import_points}}.
 #' @param poi A \code{poi} object (points of interest) returned by \code{\link{import_points}}. This data is optional.
+#' @param invasions A \code{invasions} object returned by \code{\link{import_points}}. This data is optional
 #' @param check A logical value, if \code{TRUE}, the default, dendritic topology of the river network is enforced with \code{\link{enforce_dendritic}}.
 #' @param tolerance A numeric value specifying the distance in map units that points should be snapped to rivers. Set to NULL by default.
 #'
@@ -21,6 +22,7 @@ river_net <- function(rivers,
                    barriers,
                    outlet,
                    poi = NULL,
+                   invasions = NULL,
                    check = TRUE,
                    tolerance = NULL){
 
@@ -45,6 +47,13 @@ river_net <- function(rivers,
   if(!(is.null(poi))){
     if(!("poi" %in% class(poi))){
       stop("Points of interest must first be imported with `import_points`")
+    }
+  }
+
+  # Check invasions
+  if(!(is.null(invasions))){
+    if(!("invasions" %in% class(invasions))){
+      stop("Invasions must first be imported with `import_points`")
     }
   }
 

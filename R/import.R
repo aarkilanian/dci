@@ -95,14 +95,14 @@ import_rivers <- function(rivers, quiet = FALSE){
 import_points <- function(pts, type){
 
   # Check that type is valid
-  if(!(type %in% c("barriers", "outlet", "poi"))) stop("Points must be of 'barriers', 'outlet', or 'poi' type.")
+  if(!(type %in% c("barriers", "outlet", "poi", "invasions"))) stop("Points must be of 'barriers', 'outlet', 'poi', or 'invasions' type.")
 
   # Check for path type
   if(is.character(pts)) sf <- FALSE
   else sf <- TRUE
   # Read shapefile from path if not sf object
   if(!sf){
-    # Read in river with sf
+    # Read in points with sf
     pts <- tryCatch(sf::read_sf(pts),
                        error = function(e) rlang::abort("invalid spatial data provided")
     )
@@ -155,5 +155,16 @@ import_points <- function(pts, type){
     # Return others
     poi <- structure(poi, class = c("poi", class(poi)))
     return(poi)
+  }
+
+  # Invasions
+  if(type == "invasions"){
+    # Prepare poi points
+    # Remove Z/M dimensions
+    invasions <- sf::st_zm(invasions)
+
+    # Return others
+    invasions <- structure(invasions, class = c("invasions", class(invasions)))
+    return(invasions)
   }
 }
