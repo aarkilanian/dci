@@ -156,6 +156,33 @@ join_attributes <- function(net, nodes, tolerance = NULL){
   invisible(net)
 }
 
+#' Join invasions to river segments
+#'
+#' @inheritParams river_net
+#'
+#' @return A \code{\link{river_net}} object with the supplied invasions integrated to edges
+#'
+#' @keywords internal
+join_invasions <- function(net, invasions){
+
+  # Extract network edges
+  net_edges <- sf::st_as_sf(activate(net, edges))
+
+  # Find nearest edge for each invasion site
+  nrst <- sf::st_nearest_feature(invasions, net_edges)
+
+  # Extract member label from nearest features
+  invaded_members <- net_edges[nrst,]$member.label
+
+  # Add invaded attribute to river network
+  net <- activate(net, edges) %>%
+    dplyr::mutate(invaded = if_else(member.label %in% invaded_members, TRUE, FALSE))
+
+  # Return network
+  invisible(net)
+
+}
+
 #' Rename sf geometry column
 #'
 #' Code provided by user Spacedman

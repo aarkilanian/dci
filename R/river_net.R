@@ -102,6 +102,11 @@ river_net <- function(rivers,
   # Apply membership labelling
   net <- membership_labeling(net)
 
+  # If provided, combine invasions to river attributes
+  if(!(is.null(invasions))){
+    net <- join_invasions(net, invasions)
+  }
+
   # Define river_net class
   net <- structure(net, class = c("river_net", class(net)))
   invisible(net)
