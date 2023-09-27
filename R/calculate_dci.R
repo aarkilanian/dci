@@ -320,6 +320,42 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg, n
 #' @keywords internal
 calculate_dci_inv <- function(all_members, net_nodes, seg_weights, n.cores){
 
+  # Determine segment pairs
+  from_segment <- #
+  to_segment <- #
+
+  # Calculate passability between each pair of segments
+  if(n.cores > 1){
+    pass <- parallel::mcmapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
+  } else{
+    pass <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
+  }
+
+  # Gather DCI inputs and calculate sub-segmental DCI
+  DCIs_sub <- data.frame(from = from_segment,
+                         to = to_segment,
+                         pass)
+  DCIs_sub <- dplyr::left_join(DCIs_sub, seg_weights, by = c("from" = "member.label"))
+  names(DCIs_sub)[names(DCIs_sub) == "segweight"] <- "from_len"
+  DCIs_sub <- dplyr::left_join(DCIs_sub, seg_weights, by = c("to" = "member.label"))
+  names(DCIs_sub)[names(DCIs_sub) == "segweight"] <- "to_len"
+  DCIs_sub$DCIs <- DCIs_sub$from_len * DCIs_sub$to_len * DCIs_sub$pass * 100
+
+  # Group DCI results by from segment to obtain segmental DCI
+  DCIs <- DCIs_sub %>%
+    dplyr::group_by(.data$from) %>%
+    dplyr::summarise(DCI = sum(.data$DCIs))
+  names(DCIs)[names(DCIs) == "from"] <- "segment"
+  DCI_glob <- sum(DCIs$DCI)
+  DCIs$DCI_rel <- DCIs$DCI / DCI_glob * 100
+  DCIs <- as.data.frame(DCIs)
+
+  # Print global dci
+  message(paste0("invasive DCI: ", DCI_glob))
+
+  # Return DCIs summary
+  return(DCIs)
+
 }
 
 #' Calculate thresholded potamodromous DCI
@@ -451,6 +487,53 @@ calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, w
 #'
 #' @keywords internal
 calculate_dci_pot_inv <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, n.cores){
+
+  # Determine segment pairs
+  from_segment <- #
+  to_segment <- #
+
+  # Calculate segment-segment distance between each pair
+  if(n.cores > 1){
+    distances <- parallel::mcmapply(gather_dist, from_segment, to_segment, MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
+  } else{
+    distances <- mapply(gather_dist, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
+  }
+
+  # Remove pairs with distances larger than the threshold
+  discard_pairs <- which(distances > threshold)
+  if(length(discard_pairs) != 0){
+    from_segment <- from_segment[-discard_pairs]
+    to_segment <- to_segment[-discard_pairs]
+    distances <- distances[-discard_pairs]
+  }
+
+  # Calculate passability between remaining pairs
+  if(n.cores > 1){
+    perms <- parallel::mcmapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
+  } else{
+    perms <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
+  }
+
+  # Calculate DCI
+  if(n.cores > 1){
+    DCIs <- parallel::mcmapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted), mc.cores = n.cores)
+  } else{
+    DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted))
+  }
+  DCI_glob <- sum(DCIs, na.rm = TRUE)
+
+  # Print global dci
+  message(paste0("invasive DCI with distance limit of ", threshold, ": ", DCI_glob))
+
+  # Return result
+  DCI_res <- data.frame(from_segment, to_segment, DCIs)
+  DCI_res <- DCI_res %>%
+    dplyr::group_by(.data$from_segment) %>%
+    dplyr::summarise(DCI = sum(.data$DCIs, na.rm = TRUE))
+  DCI_res$DCI_rel <- DCI_res$DCI / DCI_glob * 100
+  names(DCI_res)[names(DCI_res) == "from_segment"] <- "segment"
+  DCI_res <- as.data.frame(DCI_res)
+  return(DCI_res)
 
 }
 
