@@ -151,6 +151,14 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
       DCIs <- calculate_dci_dia(all_members, net_nodes, seg_weights, outlet_seg, n.cores)
     }
 
+    # Invasive case
+    if(form == "invasive"){
+
+      # Calculate DCI
+      DCIs <- calculate_dci_inv(all_members, net_nodes, seg_weights, n.cores)
+
+    }
+
     # Return calculated DCI values
     DCIs <- structure(DCIs, class = c("dci.results", class(DCIs)))
     return(DCIs)
@@ -175,6 +183,14 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
 
       # Calculate DCI
       DCIs <- calculate_dci_dia_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, n.cores)
+    }
+
+    # Invasive case
+    if(form == "invasive"){
+
+      # Calculate DCI
+      DCIs <- calculate_dci_inv_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, n.cores)
+
     }
 
     # Return calculated DCI values
@@ -285,6 +301,24 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg, n
 
   # Return DCIs summary
   return(DCIs)
+
+}
+
+#' Calculate non-thresholded invasive DCI
+#'
+#' @param all_members An integer vector holding all assigned membership labels
+#'   in the \code{\link{river_net}} object.
+#' @param net_nodes An \code{\link{sf}} object of the nodes of the \code{\link{river_net}}
+#'   object with river attributes joined.
+#' @param seg_weights A data frame of each segments total length. Either
+#'   weighted or unweighted depending on parameters.
+#' @param n.nodes An optional integer value indicating the number of cores to
+#'   use. Defaults to 1. Currently only works on MacOS and Linux.
+#'
+#' @return A data frame which holds raw and relative DCI scores for each segment.
+#'
+#' @keywords internal
+calculate_dci_inv <- function(all_members, net_nodes, seg_weights, n.cores){
 
 }
 
@@ -405,6 +439,20 @@ calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, w
   return(DCI_res)
 }
 
+#' Calculate thresholded invasive DCI
+#'
+#' @inheritParams calculate_dci_inv
+#' @inheritParams calculate_dci
+#' @param weighted A logical value indicating whether river lengths in
+#'   seg_weights are weighted.
+#' @param totweight The total length or weighted length of the whole network.
+#'
+#' @return A data frame which holds raw and relative DCI scores for each segment.
+#'
+#' @keywords internal
+calculate_dci_pot_inv <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, n.cores){
+
+}
 
 #' Calculate sub-segmental DCI component between a single pair of segments
 #'
