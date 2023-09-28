@@ -112,18 +112,3 @@ river_net <- function(rivers,
   invisible(net)
 
 }
-
-river_net_add <- function(net,
-                          pass = NULL,
-                          weight = NULL,
-                          invasions = NULL){
-
-  # Check net
-
-  # Add passability
-
-  # Add weight
-
-  # Add invasives
-
-}
