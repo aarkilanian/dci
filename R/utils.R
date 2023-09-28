@@ -174,6 +174,9 @@ join_invasions <- function(net, invasions){
   # Extract member label from nearest features
   invaded_members <- net_edges[nrst,]$member.label
 
+  # Join member.label from nodes to rivers
+
+
   # Add invaded attribute to river network
   net <- activate(net, edges) %>%
     dplyr::mutate(invaded = dplyr::if_else(member.label %in% invaded_members, TRUE, FALSE))
