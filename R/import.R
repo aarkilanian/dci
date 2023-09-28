@@ -161,7 +161,7 @@ import_points <- function(pts, type){
   if(type == "invasions"){
     # Prepare poi points
     # Remove Z/M dimensions
-    invasions <- sf::st_zm(invasions)
+    invasions <- sf::st_zm(pts)
 
     # Return others
     invasions <- structure(invasions, class = c("invasions", class(invasions)))
