@@ -176,7 +176,7 @@ join_invasions <- function(net, invasions){
 
   # Add invaded attribute to river network
   net <- activate(net, edges) %>%
-    dplyr::mutate(invaded = if_else(member.label %in% invaded_members, TRUE, FALSE))
+    dplyr::mutate(invaded = dplyr::if_else(member.label %in% invaded_members, TRUE, FALSE))
 
   # Return network
   invisible(net)
