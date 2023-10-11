@@ -320,6 +320,16 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg, n
 #' @keywords internal
 calculate_dci_inv <- function(all_members, net_nodes, seg_weights, n.cores){
 
+  # Determine if there are multiple invasive sources
+
+  # If there is only one source calculate the diadromous form of the dci using
+  # the most upstream segment of the invaded region (Code should be able to
+  # select the appropriate node for the path determination)
+
+  # If there are multiple invasion sources the diadromous form of the dci
+  # should be run as a loop with a final score being the sum of individual
+  # invasion pathways
+
   # Determine segment pairs
   from_segment <- #
   to_segment <- #

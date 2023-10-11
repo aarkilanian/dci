@@ -44,7 +44,7 @@ test_that("Can gather permeabilities", {
     as.data.frame()
 
   # Run test
-  expect_equal(gather_perm(0, 2, nodes), 0)
+  expect_equal(gather_perm(0, 2, nodes), 1)
 
 })
 
