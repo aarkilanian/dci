@@ -103,7 +103,7 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
   # Weights from edges associated w/ upstream nodes
   net_nodes <- net_nodes %>%
     dplyr::mutate(nodeID = dplyr::row_number()) %>%
-    dplyr::left_join(net_edges, by = c("nodeID" = "from"))
+    dplyr::left_join(net_edges, by = c("nodeID" = "to"))
   net_nodes <- sf::st_as_sf(net_nodes, sf_column_name = "geometry.x")
   # Set outlet length to 0
   net_nodes[net_nodes$type == "outlet",]$riv_length <- 0
@@ -320,19 +320,12 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg, n
 #' @keywords internal
 calculate_dci_inv <- function(all_members, net_nodes, seg_weights, n.cores){
 
-  # Determine if there are multiple invasive sources
-
-  # If there is only one source calculate the diadromous form of the dci using
-  # the most upstream segment of the invaded region (Code should be able to
-  # select the appropriate node for the path determination)
-
-  # If there are multiple invasion sources the diadromous form of the dci
-  # should be run as a loop with a final score being the sum of individual
-  # invasion pathways
+  # Determine invasive sources
+  inv_sources <- unique(net_nodes$member.label[which(net_nodes$invaded)])
 
   # Determine segment pairs
-  from_segment <- #
-  to_segment <- #
+  from_segment <- inv_sources
+  to_segment <- rep(all_members, times = length(from_segment))
 
   # Calculate passability between each pair of segments
   if(n.cores > 1){
@@ -353,9 +346,9 @@ calculate_dci_inv <- function(all_members, net_nodes, seg_weights, n.cores){
 
   # Group DCI results by from segment to obtain segmental DCI
   DCIs <- DCIs_sub %>%
-    dplyr::group_by(.data$from) %>%
+    dplyr::group_by(.data$to) %>%
     dplyr::summarise(DCI = sum(.data$DCIs))
-  names(DCIs)[names(DCIs) == "from"] <- "segment"
+  names(DCIs)[names(DCIs) == "to"] <- "segment"
   DCI_glob <- sum(DCIs$DCI)
   DCIs$DCI_rel <- DCIs$DCI / DCI_glob * 100
   DCIs <- as.data.frame(DCIs)
