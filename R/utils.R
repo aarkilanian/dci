@@ -165,22 +165,18 @@ join_attributes <- function(net, nodes, tolerance = NULL){
 #' @keywords internal
 join_invasions <- function(net, invasions){
 
-  # Extract network edges
-  net_edges <- sf::st_as_sf(activate(net, edges)) %>%
-    # Join member.label from nodes to rivers
-    left_join(net %>% activate(nodes) %>% data.frame() %>% select(member.label) %>% mutate(rowID = dplyr::row_number()),
-              by = c("to" = "rowID"))
+  # Extract network nodes
+  net_nodes <- sf::st_as_sf(activate(net, nodes))
 
-  # Find nearest edge for each invasion site
-  nrst <- sf::st_nearest_feature(invasions, net_edges)
-  # Determine membership of near edges
-  nrst_member <- net_edges$member.label[nrst]
-  # Determine row index for each river in member segment
-  nrst_id_index <- which(net_edges$member.label %in% nrst_member)
+  # Find nearest node for each invasion site
+  nrst <- sf::st_nearest_feature(invasions, net_nodes)
 
-  # Add invaded attribute to river network
-  net <- activate(net, edges) %>%
-    dplyr::mutate(invaded = dplyr::if_else(dplyr::row_number() %in% nrst_id_index, TRUE, FALSE))
+  # Determine membership of near nodes
+  nrst_member <- net_nodes$member.label[nrst]
+
+  # Add invaded attribute to nodes with same membership
+  net <- activate(net, nodes) %>%
+    dplyr::mutate(invaded = dplyr::if_else(member.label %in% nrst_member, TRUE, FALSE))
 
   # Return network
   invisible(net)
