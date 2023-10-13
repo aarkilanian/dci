@@ -120,12 +120,12 @@ The `threshold` parameter of the `calculate_dci` function allows for the inclusi
 
 The use of a distance threshold can be useful to derive a clearer picture of connectivity when a species` dispersal limit is known. Below is an example done with the same Yamaska watershed using a distance threshold of 1.5km. This distance is written in the default map units which are meters.
 ```{r}
-#yamaska_res_thr <- calculate_dci(net = net,
-#                             form = "potamodromous",
-#                             pass = "pass_1",
-#                             weight = NULL,
-#                             threshold = 1500)
-#yamaska_res_thr
+yamaska_res_thr <- calculate_dci(net = net,
+                            form = "potamodromous",
+                            pass = "pass_1",
+                            weight = NULL,
+                            threshold = 1500)
+yamaska_res_thr
 ```
 
 ### River weights
@@ -140,6 +140,18 @@ yamaska_res_w <- calculate_dci(net = net,
 yamaska_res_w
 ```
 
+### Invasive connectivity
+
+Apart from calculating the DCI for potamodromous and diadromous species, `calculate_dci` can also be used to calculate an invasive form of the DCI. This invasive form uses known or predicted invaded sites within the river network (specified during the call to `river_net`) to calculate a measure of invasive connectivity. This calculation results in a global invasive DCI score from 0 to 100 indicating the risk of invasive expansion in the river network. Additionally, each segment receives a segment-level DCI indicating the risk of that specific segment being invaded by existing invasive populations.
+
+```{r}
+yamaska_res_inv <- calculate_dci(net = net,
+                             form = "invasive",
+                             pass = "pass_1",
+                             weight = NULL,
+                             threshold = NULL)
+yamaska_res_inv
+```
 
 ## Extracting results
 
