@@ -37,24 +37,16 @@ A `river_net` object is constructed using three pieces of required data: river l
 
 Rivers can be imported from either the path to a shapefile or an object of the `sf` class. This function performs some basic error checking, extracts the largest fully connected component in the supplied data, and calculates river lengths. A plot with changes highlighted in red is printed alongside the function unless the `quiet` parameter is set to `TRUE`. River importing is illustrated below with the path to a shapefile representing the Yamaska river lines.
 ```{r}
-# Loading river sf object
-load("../data/yamaska_riv.RData")
-
 # Importing rivers from a shapefile
-rivers_in <- import_rivers(rivers = yamaska_riv)
+rivers_in <- import_rivers(rivers = system.file("extdata/yam_riv.shp", package = "dci"))
 ```
 
 Similarly, all point data can be imported with the `import_points` function along with the `type` parameter specifying the type of point. Possible values are: "barriers", "outlet", or "poi" (for points of interest).
 ```{r}
-# Loading sf objects
-load("../data/yamaska_bar.RData")
-load("../data/yamaska_outlet.RData")
-load("../data/yamaska_poi.RData")
-
 # Import barriers
-barriers_in <- import_points(pts = yamaska_bar, type = "barriers")
-outlet_in <- import_points(pts = yamaska_outlet, type = "outlet")
-poi_in <- import_points(pts = yamaska_poi, type = "poi")
+barriers_in <- import_points(system.file("extdata/yam_bar.shp", package = "dci"), type = "barriers")
+outlet_in <- import_points(system.file("extdata/yam_out.shp", package = "dci"), type = "outlet")
+poi_in <- import_points(system.file("extdata/yam_poi.shp", package = "dci"), type = "poi")
 barriers_in
 ```
 
@@ -127,12 +119,12 @@ The `threshold` parameter of the `calculate_dci` function allows for the inclusi
 
 The use of a distance threshold can be useful to derive a clearer picture of connectivity when a species` dispersal limit is known. Below is an example done with the same Yamaska watershed using a distance threshold of 1.5km. This distance is written in the default map units which are meters.
 ```{r}
-yamaska_res_thr <- calculate_dci(net = net,
-                             form = "potamodromous",
-                             pass = "pass_1",
-                             weight = NULL,
-                             threshold = 1500)
-yamaska_res_thr
+#yamaska_res_thr <- calculate_dci(net = net,
+#                             form = "potamodromous",
+#                             pass = "pass_1",
+#                             weight = NULL,
+#                             threshold = 1500)
+#yamaska_res_thr
 ```
 
 ### River weights
