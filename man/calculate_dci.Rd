@@ -17,7 +17,7 @@ calculate_dci(
 \item{net}{A \code{\link{river_net}} object.}
 
 \item{form}{A string specifying the form of the DCI to calculate: either
-"potamodromous", "diadromous", or "all".}
+"potamodromous", "diadromous", or "invasive".}
 
 \item{pass}{The name of a column in the nodes table of net which holds the
 numeric passability of nodes. If none is specified all barriers are

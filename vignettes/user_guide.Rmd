@@ -44,9 +44,10 @@ rivers_in <- import_rivers(rivers = system.file("extdata/yam_riv.shp", package =
 Similarly, all point data can be imported with the `import_points` function along with the `type` parameter specifying the type of point. Possible values are: "barriers", "outlet", or "poi" (for points of interest).
 ```{r}
 # Import barriers
-barriers_in <- import_points(system.file("extdata/yam_bar.shp", package = "dci"), type = "barriers")
-outlet_in <- import_points(system.file("extdata/yam_out.shp", package = "dci"), type = "outlet")
-poi_in <- import_points(system.file("extdata/yam_poi.shp", package = "dci"), type = "poi")
+barriers_in <- import_points(pts = system.file("extdata/yam_bar.shp", package = "dci"), type = "barriers")
+outlet_in <- import_points(pts = system.file("extdata/yam_out.shp", package = "dci"), type = "outlet")
+poi_in <- import_points(pts = system.file("extdata/yam_poi.shp", package = "dci"), type = "poi")
+inv_in <- import_points(pts = system.file("extdata/yam_inv.shp", package = "dci"), type = "invasions")
 barriers_in
 ```
 
@@ -55,7 +56,7 @@ barriers_in
 Once all required and any additional data have been pre-processed with the import functions they can be joined together in the `river_net` function to generate an object of the `river_net` class. Messages are printed indicating the topological corrections that are being performed on the river network. These are explained in more detail in the next section.
 ```{r}
 # Combine rivers, barriers, and outlet
-net <- river_net(rivers = rivers_in, barriers = barriers_in, outlet = outlet_in, poi = poi_in) 
+net <- river_net(rivers = rivers_in, barriers = barriers_in, outlet = outlet_in, poi = poi_in, invasions = inv_in) 
 net
 ```
 
