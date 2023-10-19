@@ -291,11 +291,9 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg, n
   DCIs_sub <- data.frame(from = from_segment,
                          to = to_segment,
                          pass)
-  DCIs_sub <- dplyr::left_join(DCIs_sub, seg_weights, by = c("from" = "member.label"))
-  names(DCIs_sub)[names(DCIs_sub) == "segweight"] <- "from_len"
   DCIs_sub <- dplyr::left_join(DCIs_sub, seg_weights, by = c("to" = "member.label"))
   names(DCIs_sub)[names(DCIs_sub) == "segweight"] <- "to_len"
-  DCIs_sub$DCIs <- DCIs_sub$from_len * DCIs_sub$to_len * DCIs_sub$pass * 100
+  DCIs_sub$DCIs <- DCIs_sub$to_len * DCIs_sub$pass * 100
 
   # Group DCI results by from segment to obtain segmental DCI
   DCIs <- DCIs_sub %>%
