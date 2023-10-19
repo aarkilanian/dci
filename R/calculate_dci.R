@@ -634,7 +634,7 @@ calculate_dci_inv_thresh <- function(net, all_members, net_nodes, seg_weights, w
 gather_dci <- function(net, form, from, to, distance, pass, nodes, seg_weights, threshold, totweight, weighted){
 
   # Diadromous case
-  if(form = "diadromous"){
+  if(form == "diadromous"){
 
     # Case when from and to segment are the same
     if(from == to){
@@ -713,7 +713,7 @@ gather_dci <- function(net, form, from, to, distance, pass, nodes, seg_weights, 
   }
 
   # Potamodromous case
-  if(form = "potamodromous"){
+  if(form == "potamodromous"){
 
     # Case when from and to segment are the same
     if(from == to){
