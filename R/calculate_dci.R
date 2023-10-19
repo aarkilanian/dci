@@ -103,7 +103,7 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
   # Weights from edges associated w/ upstream nodes
   net_nodes <- net_nodes %>%
     dplyr::mutate(nodeID = dplyr::row_number()) %>%
-    dplyr::left_join(net_edges, by = c("nodeID" = "to"))
+    dplyr::left_join(net_edges, by = c("nodeID" = "from"), multiple = "any")
   net_nodes <- sf::st_as_sf(net_nodes, sf_column_name = "geometry.x")
   # Set outlet length to 0
   net_nodes[net_nodes$type == "outlet",]$riv_length <- 0
@@ -529,7 +529,7 @@ calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, w
 #' @return A data frame which holds raw and relative DCI scores for each segment.
 #'
 #' @keywords internal
-calculate_dci_pot_inv <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, n.cores){
+calculate_dci_inv_thresh <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, n.cores){
 
   # Determine segment pairs
   from_segment <- #
