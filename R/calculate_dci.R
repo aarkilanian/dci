@@ -648,8 +648,8 @@ gather_dci <- function(net, form, from, to, distance, pass, nodes, seg_weights, 
     # Extract sinks and barriers
     sinks_bars <- subset(nodes, nodes$type %in% c("outlet", "barrier"))
 
-    # Get from segment local outlet
-    from_sink <- sinks_bars[sinks_bars$member.label == from,]$node.label
+    # Get from segment local outlet (always outlet of network)
+    from_sink <- sinks_bars[sinks_bars$type == "outlet",]$node.label
 
     # Get to segment local outlet
     to_sink <- sinks_bars[sinks_bars$member.label == to,]$node.label
@@ -661,20 +661,11 @@ gather_dci <- function(net, form, from, to, distance, pass, nodes, seg_weights, 
     full_path <- nodes[nodes$node.label %in% path,]
 
     # Determine final entrance and exit nodes for pair of segments
-    # If from segment is upstream of to segment
-    if(length(unlist(from_sink)) > length(unlist(to_sink))){
 
-      # Set exit to one node upstream of from outlet, extract row index
-      exit_label <- list(append(unlist(from_sink), FALSE))
-      exit_label <- as.integer(rownames(nodes[nodes$node.label %in% exit_label,]))
-
-      # If from segment is downstream of to segment
-    } else {
-
-      # Select most downstream barrier as exit, extract row index
-      barriers <- full_path[full_path$type == "barrier",]
-      barriers$depth <- unlist(lapply(barriers$node.label, length))
-      exit_label <- as.integer(rownames(barriers[which.min(barriers$depth),]))
+    # Select most downstream barrier as exit, extract row index
+    barriers <- full_path[full_path$type == "barrier",]
+    barriers$depth <- unlist(lapply(barriers$node.label, length))
+    exit_label <- as.integer(rownames(barriers[which.min(barriers$depth),]))
     }
 
     # Calculate length remaining after segment-segment distance
@@ -693,8 +684,6 @@ gather_dci <- function(net, form, from, to, distance, pass, nodes, seg_weights, 
     neighb_length <- sum(neighb_nodes$riv_length, na.rm = T)
 
     if(weighted){
-      # Calculate full length of from neighbourhood
-      from_length <- sum(nodes[nodes$member.label == from,]$riv_length * nodes[nodes$member.label == from,]$riv_weight, na.rm = TRUE)
       # Calculate full length of to neighbourhood
       to_length <- sum(nodes[nodes$member.label == to,]$riv_length * nodes[nodes$member.label == to,]$riv_weight, na.rm = TRUE)
 
