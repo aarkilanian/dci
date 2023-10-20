@@ -535,8 +535,8 @@ calculate_dci_inv_thresh <- function(net, all_members, net_nodes, seg_weights, w
   inv_sources <- unique(net_nodes$member.label[which(net_nodes$invaded)])
 
   # Potamodromous: Determine segment pairs for potamodromous measure
-  from_segment <- inv_sources
-  to_segment <- rep(all_members, times = length(from_segment))
+  from_segment <- rep(inv_sources, each = length(all_members))
+  to_segment <- rep(all_members, times = length(inv_sources))
 
   # Potamodromous: Calculate segment-segment distance between each pair
   if(n.cores > 1){
@@ -566,20 +566,26 @@ calculate_dci_inv_thresh <- function(net, all_members, net_nodes, seg_weights, w
   } else{
     DCIs_pot <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted, form = "potamodromous"))
   }
-  DCI_glob_pot <- sum(DCIs, na.rm = TRUE)
+  DCI_glob_pot <- sum(DCIs_pot, na.rm = TRUE)
+
+  # Potamodromous: summarize results by from segment
+  DCIs_pot <- data.frame(from = from_segment,
+                         to = to_segment,
+                         DCI_pot = DCIs_pot)
+
 
   # Diadromous: Determine segment pairs for potamodromous measure
   to_segment <- all_members[all_members != 0]
   from_segment <- rep(outlet_seg, times = length(to_segment))
 
-  # Potamodromous: Calculate segment-segment distance between each pair
+  # Diadromous: Calculate segment-segment distance between each pair
   if(n.cores > 1){
     distances <- parallel::mcmapply(gather_dist, from_segment, to_segment, MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
   } else{
     distances <- mapply(gather_dist, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
   }
 
-  # Potamodromous: Remove pairs with distances larger than the threshold
+  # Diadromouss: Remove pairs with distances larger than the threshold
   discard_pairs <- which(distances > threshold)
   if(length(discard_pairs) != 0){
     from_segment <- from_segment[-discard_pairs]
@@ -587,20 +593,20 @@ calculate_dci_inv_thresh <- function(net, all_members, net_nodes, seg_weights, w
     distances <- distances[-discard_pairs]
   }
 
-  # Potamodromous: Calculate passability between remaining pairs
+  # Diadromous: Calculate passability between remaining pairs
   if(n.cores > 1){
     perms <- parallel::mcmapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
   } else{
     perms <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
   }
 
-  # Potamodromous: Calculate DCI
+  # Diadromous: Calculate DCI
   if(n.cores > 1){
     DCIs_dia <- parallel::mcmapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted, form = "diadromous"), mc.cores = n.cores)
   } else{
     DCIs_dia <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted, form = "diadromous"))
   }
-  DCI_glob_dia <- sum(DCIs, na.rm = TRUE)
+  DCI_glob_dia <- sum(DCIs_dia, na.rm = TRUE)
 
   # Print global dci
   message(paste0("invasion spread DCI with distance limit of ", threshold, ": ", DCI_glob_pot))
