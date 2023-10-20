@@ -662,11 +662,10 @@ gather_dci <- function(net, form, from, to, distance, pass, nodes, seg_weights, 
 
     # Determine final entrance and exit nodes for pair of segments
 
-    # Select most downstream barrier as exit, extract row index
+    # Select most downstream barrier as entrance, extract row index
     barriers <- full_path[full_path$type == "barrier",]
     barriers$depth <- unlist(lapply(barriers$node.label, length))
-    exit_label <- as.integer(rownames(barriers[which.min(barriers$depth),]))
-    }
+    ent_label <- as.integer(rownames(barriers[which.min(barriers$depth),]))
 
     # Calculate length remaining after segment-segment distance
     rem_length <- threshold - distance
@@ -675,12 +674,12 @@ gather_dci <- function(net, form, from, to, distance, pass, nodes, seg_weights, 
     weights <- as.data.frame(activate(net, edges))
     weights <- weights$riv_length
     target <- seq_len(igraph::gorder(net))
-    source <- exit_label
+    source <- ent_label
     dist <- igraph::distances(graph = net, v = source, to = target,
                               mode = "all", weights = weights, algorithm = "automatic")
     neighb_nodes <- which(dist <= rem_length)
     neighb_nodes <- nodes[nodes$nodeID %in% neighb_nodes,]
-    neighb_nodes <- neighb_nodes[neighb_nodes$member.label == from,]
+    neighb_nodes <- neighb_nodes[neighb_nodes$member.label == to,]
     neighb_length <- sum(neighb_nodes$riv_length, na.rm = T)
 
     if(weighted){
@@ -693,7 +692,7 @@ gather_dci <- function(net, form, from, to, distance, pass, nodes, seg_weights, 
     }
 
     # Calculate relative neighbourhood length for segment
-    neighb_rel <- neighb_length / from_length
+    neighb_rel <- neighb_length / to_length
 
     # Calculate sub-segmental DCI for pair of segments
     DCI <- to_length/totweight * neighb_rel * pass * 100
