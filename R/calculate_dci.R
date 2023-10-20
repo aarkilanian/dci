@@ -277,8 +277,8 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights, n.cores){
 calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg, n.cores){
 
   # Determine segment pairs
-  from_segment <- rep(outlet_seg, times = length(all_members))
-  to_segment <- all_members
+  to_segment <- all_members[all_members != 0]
+  from_segment <- rep(outlet_seg, times = length(to_segment))
 
   # Calculate passability between each pair of segments
   if(n.cores > 1){
@@ -362,8 +362,8 @@ calculate_dci_inv <- function(all_members, net_nodes, seg_weights, outlet_seg, n
   DCIs_pot <- as.data.frame(DCIs_pot)
 
   # Diadromous: Determine segment pairs
-  from_segment <- rep(outlet_seg, times = length(all_members))
-  to_segment <- all_members
+  to_segment <- all_members[all_members != 0]
+  from_segment <- rep(outlet_seg, times = length(to_segment))
 
   # Diadromous: Calculate passability between each pair of segments
   if(n.cores > 1){
@@ -473,8 +473,8 @@ calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights, w
 calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, n.cores){
 
   # Determine segment pairs
-  from_segment <- rep(outlet_seg, times = length(all_members))
-  to_segment <- all_members
+  to_segment <- all_members[all_members != 0]
+  from_segment <- rep(outlet_seg, times = length(to_segment))
 
   # Remove pairs of segments further than threshold
   if(n.cores > 1){
@@ -569,8 +569,8 @@ calculate_dci_inv_thresh <- function(net, all_members, net_nodes, seg_weights, w
   DCI_glob_pot <- sum(DCIs, na.rm = TRUE)
 
   # Diadromous: Determine segment pairs for potamodromous measure
-  from_segment <- outlet_seg
-  to_segment <- rep(all_members, times = length(from_segment))
+  to_segment <- all_members[all_members != 0]
+  from_segment <- rep(outlet_seg, times = length(to_segment))
 
   # Potamodromous: Calculate segment-segment distance between each pair
   if(n.cores > 1){
