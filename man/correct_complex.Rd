@@ -4,7 +4,7 @@
 \alias{correct_complex}
 \title{Correct complex confluences}
 \usage{
-correct_complex(net, correct = TRUE)
+correct_complex(net, correct = TRUE, quiet = FALSE)
 }
 \arguments{
 \item{net}{A \code{\link{river_net}} object.}

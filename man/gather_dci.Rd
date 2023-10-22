@@ -6,6 +6,7 @@
 \usage{
 gather_dci(
   net,
+  form,
   from,
   to,
   distance,

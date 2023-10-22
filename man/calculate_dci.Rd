@@ -10,7 +10,8 @@ calculate_dci(
   pass = NULL,
   weight = NULL,
   threshold = NULL,
-  n.cores = 1
+  n.cores = 1,
+  quiet = FALSE
 )
 }
 \arguments{

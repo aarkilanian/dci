@@ -4,7 +4,14 @@
 \alias{calculate_dci_inv}
 \title{Calculate non-thresholded invasive DCI}
 \usage{
-calculate_dci_inv(all_members, net_nodes, seg_weights, n.cores)
+calculate_dci_inv(
+  all_members,
+  net_nodes,
+  seg_weights,
+  outlet_seg,
+  n.cores,
+  quiet
+)
 }
 \arguments{
 \item{all_members}{An integer vector holding all assigned membership labels

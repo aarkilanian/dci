@@ -12,7 +12,8 @@ calculate_dci_pot_thresh(
   weighted,
   threshold,
   totweight,
-  n.cores
+  n.cores,
+  quiet
 )
 }
 \arguments{

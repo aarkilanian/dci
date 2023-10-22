@@ -4,7 +4,14 @@
 \alias{calculate_dci_dia}
 \title{Calculate non-thresholded diadromous DCI}
 \usage{
-calculate_dci_dia(all_members, net_nodes, seg_weights, outlet_seg, n.cores)
+calculate_dci_dia(
+  all_members,
+  net_nodes,
+  seg_weights,
+  outlet_seg,
+  n.cores,
+  quiet
+)
 }
 \arguments{
 \item{all_members}{An integer vector holding all assigned membership labels

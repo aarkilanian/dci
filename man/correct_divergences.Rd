@@ -4,7 +4,7 @@
 \alias{correct_divergences}
 \title{Correct river divergences}
 \usage{
-correct_divergences(net, correct = TRUE)
+correct_divergences(net, correct = TRUE, quiet = FALSE)
 }
 \arguments{
 \item{net}{A \code{\link{river_net}} object.}

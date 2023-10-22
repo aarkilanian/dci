@@ -13,7 +13,8 @@ calculate_dci_dia_thresh(
   threshold,
   totweight,
   outlet_seg,
-  n.cores
+  n.cores,
+  quiet
 )
 }
 \arguments{
