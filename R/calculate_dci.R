@@ -574,7 +574,12 @@ calculate_dci_inv_thresh <- function(net, all_members, net_nodes, seg_weights, w
   DCIs_pot <- data.frame(from = from_segment,
                          to = to_segment,
                          DCI_pot = DCIs_pot)
-
+  DCIs_pot <- DCIs_pot %>%
+    dplyr::group_by(.data$to) %>%
+    dplyr::summarise(DCI_pot = sum(.data$DCI_pot, na.rm = TRUE))
+  DCIs_pot$DCI_rel_pot <- DCIs_pot$DCI_pot / DCI_glob_pot * 100
+  names(DCIs_pot)[names(DCIs_pot) == "to"] <- "segment"
+  DCIs_pot <- as.data.frame(DCIs_pot)
 
   # Diadromous: Determine segment pairs for potamodromous measure
   to_segment <- all_members[all_members != 0]
@@ -610,19 +615,25 @@ calculate_dci_inv_thresh <- function(net, all_members, net_nodes, seg_weights, w
   }
   DCI_glob_dia <- sum(DCIs_dia, na.rm = TRUE)
 
+  # Diadromous: summarize results by segment
+  DCIs_dia <- data.frame(from = from_segment,
+                         to = to_segment,
+                         DCI_dia = DCIs_dia)
+  DCIs_dia <- DCIs_dia %>%
+    dplyr::group_by(.data$to) %>%
+    dplyr::summarise(DCI_dia = sum(.data$DCI_dia))
+  names(DCIs_dia)[names(DCIs_dia) == "to"] <- "segment"
+  DCIs_dia$DCI_rel_dia <- DCIs_dia$DCI_dia / DCI_glob_dia * 100
+  DCIs_dia <- as.data.frame(DCIs_dia)
+  # Add segment 0 row
+  DCIs_dia <- rbind(c(0, 0, 0), DCIs_dia)
+
   # Print global dci
   message(paste0("invasion spread DCI with distance limit of ", threshold, ": ", DCI_glob_pot))
   message(paste0("new invasion DCI with distance limit of ", threshold, ": ", DCI_glob_dia))
 
   # Return result
-  DCI_res <- data.frame(from_segment, to_segment, DCIs_dia, DCIs_pot)
-  DCI_res <- DCI_res %>%
-    dplyr::group_by(.data$from_segment) %>%
-    dplyr::summarise(DCI_dia = sum(.data$DCIs_dia), DCI_pot = sum(.data$DCIs_pot), na.rm = TRUE)
-  DCI_res$DCI_rel_dia <- DCI_res$DCI_dia / DCI_glob_dia * 100
-  DCI_res$DCI_rel_pot <- DCI_res$DCI_pot / DCI_glob_pot * 100
-  names(DCI_res)[names(DCI_res) == "from_segment"] <- "segment"
-  DCI_res <- as.data.frame(DCI_res)
+  DCI_res <- cbind(DCIs_pot, DCIs_dia[,2:3])
   return(DCI_res)
 
 }
