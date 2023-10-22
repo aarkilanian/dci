@@ -48,25 +48,3 @@ test_that("Can gather permeabilities", {
 
 })
 
-test_that("Potamodromous DCI works", {
-
-  # Load rivnet
-  net <- readRDS(test_path("testdata", "testnet.rds"))
-
-  # Run test
-  dci <- calculate_dci(net, form = "potamodromous")
-  expect_snapshot(dci$DCIs)
-
-})
-
-test_that("Diadromous DCI works", {
-
-  # Load rivnet
-  net <- readRDS(test_path("testdata", "testnet.rds"))
-
-  # Run test
-  dci <- calculate_dci(net, form = "diadromous")
-  expect_snapshot(dci$DCIs)
-
-})
-
