@@ -332,8 +332,8 @@ calculate_dci_inv <- function(all_members, net_nodes, seg_weights, outlet_seg, n
   inv_sources <- unique(net_nodes$member.label[which(net_nodes$invaded)])
 
   # Potamodromous: Determine segment pairs for potamodromous measure
-  from_segment <- inv_sources
-  to_segment <- rep(all_members, times = length(from_segment))
+  from_segment <- rep(inv_sources, each = length(all_members))
+  to_segment <- rep(all_members, times = length(inv_sources))
 
   # Potamodromous: Calculate passability between each pair of segments
   if(n.cores > 1){
@@ -388,6 +388,8 @@ calculate_dci_inv <- function(all_members, net_nodes, seg_weights, outlet_seg, n
   DCI_glob_dia <- sum(DCIs_dia$DCI_dia)
   DCIs_dia$DCI_rel_dia <- DCIs_dia$DCI_dia / DCI_glob_dia * 100
   DCIs_dia <- as.data.frame(DCIs_dia)
+  # Add segment 0 row
+  DCIs_dia <- rbind(c(0, 0, 0), DCIs_dia)
 
   # Join potamodromous and diadromous results
   DCIs_inv <- cbind(DCIs_pot, DCIs_dia[,2:3])
