@@ -24,6 +24,8 @@
 #'   map units. If NULL, the default, no limit is considered.
 #' @param n.cores An optional integer value indicating the number of cores to
 #'   use. Defaults to 1. Currently only works on MacOS and Linux.
+#' @param quiet A logical value indicating whether the global DCI and a map of
+#'   segments should be printed to the console. Defaults to TRUE.
 #'
 #' @return A \code{\link{sf}} object of the rivers from the provided
 #'   \code{\link{river_net}} object with new columns specifying the segmental
@@ -212,6 +214,7 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
 
 #' Calculate non-thresholded potamodromous DCI
 #'
+#' @inheritParams calculate_dci
 #' @param all_members An integer vector holding all assigned membership labels
 #'   in the \code{\link{river_net}} object.
 #' @param net_nodes An \code{\link{sf}} object of the nodes of the \code{\link{river_net}}
@@ -270,6 +273,7 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights, n.cores, quie
 
 #' Calculate non-thresholded diadromous DCI
 #'
+#' @inheritParams calculate_dci
 #' @inheritParams calculate_dci_pot
 #' @param outlet_seg An integer indicating the membership label of the outlet segment
 #'
@@ -318,6 +322,7 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg, n
 
 #' Calculate non-thresholded invasive DCI
 #'
+#' @inheritParams calculate_dci
 #' @param all_members An integer vector holding all assigned membership labels
 #'   in the \code{\link{river_net}} object.
 #' @param net_nodes An \code{\link{sf}} object of the nodes of the \code{\link{river_net}}
@@ -476,6 +481,7 @@ calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights, w
 
 #' Calculate thresholded diadromous DCI
 #'
+#' @inheritParams calculate_dci
 #' @inheritParams calculate_dci_pot_thresh
 #' @param outlet_seg An integer indicating the membership label of the outlet segment
 #'
