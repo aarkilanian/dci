@@ -517,6 +517,15 @@ calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, w
   names(DCI_res)[names(DCI_res) == "to_segment"] <- "segment"
   names(DCI_res)[names(DCI_res) == "DCIs"] <- "DCI"
   DCI_res$DCI_rel <- DCI_res$DCI / DCI_glob * 100
+
+  # Add missing segments
+  missing_segs <- all_members[!(all_members %in% DCI_res$segment)]
+  if(length(missing_segs != 0)){
+    missing_rows <- list(missing_segs, rep(0, times = length(missing_segs)), rep(0, times = length(missing_segs)))
+    DCI_res <- rbind(missing_rows, DCI_res)
+    DCI_res <- dplyr::arrange(DCI_res, segment)
+  }
+
   return(DCI_res)
 }
 
@@ -625,8 +634,14 @@ calculate_dci_inv_thresh <- function(net, all_members, net_nodes, seg_weights, w
   names(DCIs_dia)[names(DCIs_dia) == "to"] <- "segment"
   DCIs_dia$DCI_rel_dia <- DCIs_dia$DCI_dia / DCI_glob_dia * 100
   DCIs_dia <- as.data.frame(DCIs_dia)
-  # Add segment 0 row
-  DCIs_dia <- rbind(c(0, 0, 0), DCIs_dia)
+
+  # Add missing segments
+  missing_segs <- all_members[!(all_members %in% DCIs_dia$segment)]
+  if(length(missing_segs != 0)){
+    missing_rows <- list(missing_segs, rep(0, times = length(missing_segs)), rep(0, times = length(missing_segs)))
+    DCIs_dia <- rbind(missing_rows, DCIs_dia)
+    DCIs_dia <- dplyr::arrange(DCIs_dia, segment)
+  }
 
   # Print global dci
   message(paste0("invasion spread DCI with distance limit of ", threshold, ": ", DCI_glob_pot))
