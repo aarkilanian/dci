@@ -147,10 +147,10 @@ join_attributes <- function(net, nodes, tolerance = NULL){
   # Join special nodes' attributes to network nodes
   net <- activate(net, nodes) %>%
     dplyr::mutate(rowID = dplyr::row_number()) %>%
-    dplyr::left_join(as.data.frame(nodes) %>% dplyr::select(-geometry), by = c("rowID" = "key")) %>%
-    dplyr::select(-rowID) %>%
+    dplyr::left_join(as.data.frame(nodes) %>% dplyr::select(-"geometry"), by = c("rowID" = "key")) %>%
+    dplyr::select(-"rowID") %>%
     # Set node type of topological nodes
-    dplyr::mutate(type = dplyr::if_else(is.na(type), "topo", type))
+    dplyr::mutate(type = dplyr::if_else(is.na(.data$type), "topo", .data$type))
 
   # Return joined network
   invisible(net)
@@ -176,7 +176,7 @@ join_invasions <- function(net, invasions){
 
   # Add invaded attribute to nodes with same membership
   net <- activate(net, nodes) %>%
-    dplyr::mutate(invaded = dplyr::if_else(member.label %in% nrst_member, TRUE, FALSE))
+    dplyr::mutate(invaded = dplyr::if_else(.data$member.label %in% nrst_member, TRUE, FALSE))
 
   # Return network
   invisible(net)
@@ -197,11 +197,11 @@ join_invasions <- function(net, invasions){
 #' @keywords internal
 rename_geometry <- function(x, name){
   # Get current geometry column
-  current = attr(x, "sf_column")
+  current <- attr(x, "sf_column")
   # Rename appropriate column
-  names(x)[names(x)==current] = name
+  names(x)[names(x)==current] <- name
   # Reset geometry column name
-  st_geometry(x)=name
+  sf::st_geometry(x) <- name
   # Return corrected sf object
   invisible(x)
 }

@@ -539,7 +539,7 @@ calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, w
   if(length(missing_segs != 0)){
     missing_rows <- list(missing_segs, rep(0, times = length(missing_segs)), rep(0, times = length(missing_segs)))
     DCI_res <- rbind(missing_rows, DCI_res)
-    DCI_res <- dplyr::arrange(DCI_res, segment)
+    DCI_res <- dplyr::arrange(DCI_res, "segment")
   }
 
   return(DCI_res)
@@ -656,7 +656,7 @@ calculate_dci_inv_thresh <- function(net, all_members, net_nodes, seg_weights, w
   if(length(missing_segs != 0)){
     missing_rows <- list(missing_segs, rep(0, times = length(missing_segs)), rep(0, times = length(missing_segs)))
     DCIs_dia <- rbind(missing_rows, DCIs_dia)
-    DCIs_dia <- dplyr::arrange(DCIs_dia, segment)
+    DCIs_dia <- dplyr::arrange(DCIs_dia, "segment")
   }
 
   # Print global dci

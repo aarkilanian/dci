@@ -122,8 +122,8 @@ correct_complex <- function(net, correct = TRUE, quiet = FALSE){
     dplyr::mutate(nodeID = dplyr::n()) %>%
     dplyr::mutate(degree = tidygraph::centrality_degree())
   complex_nodes <- sf::st_as_sf(net_degree) %>%
-    dplyr::filter(degree >= 4) %>%
-    dplyr::select(degree)
+    dplyr::filter(.data$degree >= 4) %>%
+    dplyr::select("degree")
 
   # If confluences have over 4 inputs recommend manual correction
   if(any(complex_nodes$degree > 4)){
