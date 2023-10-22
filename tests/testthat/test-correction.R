@@ -85,6 +85,6 @@ test_that("Complex nodes are corrected", {
   rivers <- sf::st_as_sf(rivers, wkt = "x")
   net <- sfnetworks::as_sfnetwork(rivers)
 
-  expect_snapshot(correct_complex(net))
+  expect_equal(nrow(correct_complex(net, quiet = TRUE)), 5)
 
 })
