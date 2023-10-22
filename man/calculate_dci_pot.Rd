@@ -16,6 +16,12 @@ object with river attributes joined.}
 \item{seg_weights}{A data frame of each segments total length. Either
 weighted or unweighted depending on parameters.}
 
+\item{n.cores}{An optional integer value indicating the number of cores to
+use. Defaults to 1. Currently only works on MacOS and Linux.}
+
+\item{quiet}{A logical value indicating whether the global DCI and a map of
+segments should be printed to the console. Defaults to TRUE.}
+
 \item{n.nodes}{An optional integer value indicating the number of cores to
 use. Defaults to 1. Currently only works on MacOS and Linux.}
 }
