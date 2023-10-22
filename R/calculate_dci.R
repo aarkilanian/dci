@@ -439,16 +439,16 @@ calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights, w
 
   # Calculate passability between remaining pairs
   if(n.cores > 1){
-    perms <- parallel::mcmapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes, form = "potamodromous"), mc.cores = n.cores)
+    perms <- parallel::mcmapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
   } else{
-    perms <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes, form = "potamodromous"))
+    perms <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
   }
 
   # Calculate DCI
   if(n.cores > 1){
-    DCIs <- parallel::mcmapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted), mc.cores = n.cores)
+    DCIs <- parallel::mcmapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted, form = "potamodromous"), mc.cores = n.cores)
   } else{
-    DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted))
+    DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted, form = "potamodromous"))
   }
   DCI_glob <- sum(DCIs, na.rm = TRUE)
 
@@ -696,7 +696,7 @@ gather_dci <- function(net, form, from, to, distance, pass, nodes, seg_weights, 
 
     } else{
       # Calculate full length of to neighbourhood
-      to_length <- sum(nodes[nodes$member.label == to,]$riv_length)
+      to_length <- sum(nodes[nodes$member.label == to,]$riv_length, na.rm = TRUE)
     }
 
     # Calculate relative neighbourhood length for segment
@@ -775,9 +775,9 @@ gather_dci <- function(net, form, from, to, distance, pass, nodes, seg_weights, 
 
     } else{
       # Calculate full length of from neighbourhood
-      from_length <- sum(nodes[nodes$member.label == from,]$riv_length)
+      from_length <- sum(nodes[nodes$member.label == from,]$riv_length, na.rm = TRUE)
       # Calculate full length of to neighbourhood
-      to_length <- sum(nodes[nodes$member.label == to,]$riv_length)
+      to_length <- sum(nodes[nodes$member.label == to,]$riv_length, na.rm = TRUE)
     }
 
     # Calculate relative neighbourhood length for segment
