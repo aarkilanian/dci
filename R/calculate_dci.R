@@ -39,7 +39,7 @@
 #' calculate_dci(net = net_name, form = "potamodromous")
 #' calculate_dci(net = net_name, form = "diadromous", threshold = 2100)
 #' }
-calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NULL, n.cores = 1){
+calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NULL, n.cores = 1, quiet = FALSE){
 
   # Check that network is valid
   if(!("river_net" %in% class(net))){
@@ -137,7 +137,7 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
     seg_weights$segweight <- seg_weights$segweight / totweight
 
     # Potamodromous case
-    if(form == "potamodromous") DCIs <- calculate_dci_pot(all_members, net_nodes, seg_weights, n.cores)
+    if(form == "potamodromous") DCIs <- calculate_dci_pot(all_members, net_nodes, seg_weights, n.cores, quiet)
 
     # Diadromous case
     if(form == "diadromous"){
@@ -148,7 +148,7 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
         dplyr::pull(.data$member.label)
 
       # Calculate DCI
-      DCIs <- calculate_dci_dia(all_members, net_nodes, seg_weights, outlet_seg, n.cores)
+      DCIs <- calculate_dci_dia(all_members, net_nodes, seg_weights, outlet_seg, n.cores, quiet)
     }
 
     # Invasive case
@@ -160,7 +160,7 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
         dplyr::pull(.data$member.label)
 
       # Calculate DCI
-      DCIs <- calculate_dci_inv(all_members, net_nodes, seg_weights, outlet_seg, n.cores)
+      DCIs <- calculate_dci_inv(all_members, net_nodes, seg_weights, outlet_seg, n.cores, quiet)
 
     }
 
@@ -176,7 +176,7 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
     if(!is.null(weight)) weighted <- TRUE
 
     # Potamodromous case
-    if(form == "potamodromous") DCIs <- calculate_dci_pot_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, n.cores)
+    if(form == "potamodromous") DCIs <- calculate_dci_pot_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, n.cores, quiet)
 
     # Diadromous case
     if(form == "diadromous"){
@@ -187,7 +187,7 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
         dplyr::pull(.data$member.label)
 
       # Calculate DCI
-      DCIs <- calculate_dci_dia_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, n.cores)
+      DCIs <- calculate_dci_dia_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, n.cores, quiet)
     }
 
     # Invasive case
@@ -199,7 +199,7 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
         dplyr::pull(.data$member.label)
 
       # Calculate DCI
-      DCIs <- calculate_dci_inv_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, n.cores)
+      DCIs <- calculate_dci_inv_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, n.cores, quiet)
 
     }
 
@@ -224,7 +224,7 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
 #' @return A data frame which holds raw and relative DCI scores for each segment.
 #'
 #' @keywords internal
-calculate_dci_pot <- function(all_members, net_nodes, seg_weights, n.cores){
+calculate_dci_pot <- function(all_members, net_nodes, seg_weights, n.cores, quiet){
 
   # Determine segment pairs
   from_segment <- rep(all_members,
@@ -259,7 +259,9 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights, n.cores){
   DCIs <- as.data.frame(DCIs)
 
   # Print global dci
-  message(paste0("potamodromous DCI: ", DCI_glob))
+  if(!quiet){
+    message(paste0("potamodromous DCI: ", DCI_glob))
+  }
 
   # Return DCIs summary
   return(DCIs)
@@ -274,7 +276,7 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights, n.cores){
 #' @return A data frame which holds raw and relative DCI scores for each segment.
 #'
 #' @keywords internal
-calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg, n.cores){
+calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg, n.cores, quiet){
 
   # Determine segment pairs
   to_segment <- all_members[all_members != 0]
@@ -305,7 +307,9 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg, n
   DCIs <- as.data.frame(DCIs)
 
   # Print global dci
-  message(paste0("diadromous DCI: ", DCI_glob))
+  if(!quiet){
+    message(paste0("diadromous DCI: ", DCI_glob))
+  }
 
   # Return DCIs summary
   return(DCIs)
@@ -326,7 +330,7 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg, n
 #' @return A data frame which holds raw and relative DCI scores for each segment.
 #'
 #' @keywords internal
-calculate_dci_inv <- function(all_members, net_nodes, seg_weights, outlet_seg, n.cores){
+calculate_dci_inv <- function(all_members, net_nodes, seg_weights, outlet_seg, n.cores, quiet){
 
   # Potamodromous: Determine invasive sources
   inv_sources <- unique(net_nodes$member.label[which(net_nodes$invaded)])
@@ -395,8 +399,10 @@ calculate_dci_inv <- function(all_members, net_nodes, seg_weights, outlet_seg, n
   DCIs_inv <- cbind(DCIs_pot, DCIs_dia[,2:3])
 
   # Print global dci
-  message(paste0("invasion spread DCI: ", DCI_glob_pot))
-  message(paste0("new invasion DCI: ", DCI_glob_dia))
+  if(!quiet){
+    message(paste0("invasion spread DCI: ", DCI_glob_pot))
+    message(paste0("new invasion DCI: ", DCI_glob_dia))
+  }
 
   # Return DCIs summary
   return(DCIs_inv)
@@ -414,7 +420,7 @@ calculate_dci_inv <- function(all_members, net_nodes, seg_weights, outlet_seg, n
 #' @return A data frame which holds raw and relative DCI scores for each segment.
 #'
 #' @keywords internal
-calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, n.cores){
+calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, n.cores, quiet){
 
   # Determine segment pairs
   from_segment <- rep(all_members,
@@ -453,7 +459,9 @@ calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights, w
   DCI_glob <- sum(DCIs, na.rm = TRUE)
 
   # Print global dci
-  message(paste0("potamodromous DCI with distance limit of ", threshold, ": ", DCI_glob))
+  if(!quiet){
+    message(paste0("potamodromous DCI with distance limit of ", threshold, ": ", DCI_glob))
+  }
 
   # Return result
   DCI_res <- data.frame(from_segment, to_segment, DCIs)
@@ -472,7 +480,7 @@ calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights, w
 #' @param outlet_seg An integer indicating the membership label of the outlet segment
 #'
 #' @keywords internal
-calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, n.cores){
+calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, n.cores, quiet){
 
   # Determine segment pairs
   to_segment <- all_members[all_members != 0]
@@ -509,7 +517,9 @@ calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, w
   DCI_glob <- sum(DCIs)
 
   # Print global dci
-  message(paste0("diadromous DCI with distance limit of ", threshold, ": ", DCI_glob))
+  if(!quiet){
+    message(paste0("diadromous DCI with distance limit of ", threshold, ": ", DCI_glob))
+  }
 
   # Return result
   DCI_res <- data.frame(from_segment, to_segment, DCIs)
@@ -540,7 +550,7 @@ calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, w
 #' @return A data frame which holds raw and relative DCI scores for each segment.
 #'
 #' @keywords internal
-calculate_dci_inv_thresh <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, n.cores){
+calculate_dci_inv_thresh <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, n.cores, quiet){
 
   # Potamodromous: Determine invasive sources
   inv_sources <- unique(net_nodes$member.label[which(net_nodes$invaded)])
@@ -644,8 +654,10 @@ calculate_dci_inv_thresh <- function(net, all_members, net_nodes, seg_weights, w
   }
 
   # Print global dci
-  message(paste0("invasion spread DCI with distance limit of ", threshold, ": ", DCI_glob_pot))
-  message(paste0("new invasion DCI with distance limit of ", threshold, ": ", DCI_glob_dia))
+  if(!quiet){
+    message(paste0("invasion spread DCI with distance limit of ", threshold, ": ", DCI_glob_pot))
+    message(paste0("new invasion DCI with distance limit of ", threshold, ": ", DCI_glob_dia))
+  }
 
   # Return result
   DCI_res <- cbind(DCIs_pot, DCIs_dia[,2:3])
