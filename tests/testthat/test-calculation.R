@@ -93,7 +93,7 @@ test_that("Invasive DCI", {
 
   # Run test
   dci <- calculate_dci(net, form = "invasive", pass = "pass_1", quiet = TRUE)
-  expect_equal(round(sum(dci$DCI_pot) + sum(dci$DCI_dia), 2), 104.39)
+  expect_equal(round(sum(dci$DCI_spread) + sum(dci$DCI_newinv), 2), 104.39)
 
 })
 
@@ -104,7 +104,7 @@ test_that("Invasive DCI with weight", {
 
   # Run test
   dci <- calculate_dci(net, form = "invasive", weight = "riv_weight", pass = "pass_1", quiet = TRUE)
-  expect_equal(round(sum(dci$DCI_pot) + sum(dci$DCI_dia), 2), 98.63)
+  expect_equal(round(sum(dci$DCI_spread) + sum(dci$DCI_newinv), 2), 98.63)
 
 })
 
@@ -115,7 +115,7 @@ test_that("Invasive DCI with threshold", {
 
   # Run test
   dci <- calculate_dci(net, form = "invasive", threshold = 3, pass = "pass_1", quiet = TRUE)
-  expect_equal(round(sum(dci$DCI_pot) + sum(dci$DCI_dia), 2), 28.1)
+  expect_equal(round(sum(dci$DCI_spread) + sum(dci$DCI_newinv), 2), 28.1)
 
 })
 
@@ -126,6 +126,6 @@ test_that("Invasive DCI with threshold and weight", {
 
   # Run test
   dci <- calculate_dci(net, form = "invasive", weight = "riv_weight", threshold = 3, pass = "pass_1", quiet = TRUE)
-  expect_equal(round(sum(dci$DCI_pot) + sum(dci$DCI_dia), 2), 50.46)
+  expect_equal(round(sum(dci$DCI_spread) + sum(dci$DCI_newinv), 2), 50.46)
 
 })

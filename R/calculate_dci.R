@@ -409,6 +409,13 @@ calculate_dci_inv <- function(all_members, net_nodes, seg_weights, outlet_seg, n
     message(paste0("new invasion DCI: ", DCI_glob_dia))
   }
 
+  # Rename DCI results columns
+  DCIs_inv <- DCIs_inv %>%
+    dplyr::rename(DCI_spread = DCI_pot) %>%
+    dplyr::rename(DCI_rel_spread = DCI_rel_pot) %>%
+    dplyr::rename(DCI_newinv = DCI_dia) %>%
+    dplyr::rename(DCI_rel_newinv = DCI_rel_dia)
+
   # Return DCIs summary
   return(DCIs_inv)
 
@@ -664,6 +671,15 @@ calculate_dci_inv_thresh <- function(net, all_members, net_nodes, seg_weights, w
     message(paste0("invasion spread DCI with distance limit of ", threshold, ": ", DCI_glob_pot))
     message(paste0("new invasion DCI with distance limit of ", threshold, ": ", DCI_glob_dia))
   }
+
+  # Rename DCI results columns
+  DCIs_pot <- DCIs_pot %>%
+    dplyr::rename(DCI_spread = DCI_pot) %>%
+    dplyr::rename(DCI_rel_spread = DCI_rel_pot)
+
+  DCIs_dia <- DCIs_dia %>%
+    dplyr::rename(DCI_newinv = DCI_dia) %>%
+    dplyr::rename(DCI_rel_newinv = DCI_rel_dia)
 
   # Return result
   DCI_res <- cbind(DCIs_pot, DCIs_dia[,2:3])
