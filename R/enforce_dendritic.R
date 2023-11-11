@@ -21,7 +21,7 @@
 #' enforce_dendritic(rivers = sf_line_object)
 #' enforce_dendritic(rivers = sf_line_object, correct = TRUE)
 #' }
-enforce_dendritic <- function(rivers, correct = FALSE){
+enforce_dendritic <- function(rivers, correct = FALSE, quiet = FALSE){
 
   # Create river network
   net <- sfnetworks::as_sfnetwork(rivers, length_as_weight = TRUE)
@@ -29,8 +29,8 @@ enforce_dendritic <- function(rivers, correct = FALSE){
   # Correct complex confluences
   # If automatically correcting topology, use network with divergences corrected
   if(correct){
-    net <- correct_divergences(net)
-    net <- correct_complex(net)
+    net <- correct_divergences(net, quiet)
+    net <- correct_complex(net, quiet)
     # Recalculate river lengths
     net$riv_length <- as.double(sf::st_length(net))
     # Return corrected rivers
@@ -38,8 +38,8 @@ enforce_dendritic <- function(rivers, correct = FALSE){
 
   # If errors are set to be manually edited, use full network
   } else {
-    net_div <- correct_divergences(net, correct)
-    net_comp <- correct_complex(net_div, correct)
+    net_div <- correct_divergences(net, correct, quiet)
+    net_comp <- correct_complex(net_div, correct, quiet)
     invisible(net_comp)
   }
 

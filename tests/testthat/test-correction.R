@@ -52,7 +52,7 @@ test_that("Error when complex confluence has more than 3 inputs", {
   net <- sfnetworks::as_sfnetwork(rivers)
 
   # Run test
-  expect_error(correct_complex(net), "Complex confluences with over 3 input tributaries have been detected. Use the standalone `enforce_dendritic()` and correct returned errors manually.", fixed = TRUE)
+  expect_error(correct_complex(net, quiet = TRUE), "Complex confluences with over 3 input tributaries have been detected. Use the standalone `enforce_dendritic()` and correct returned errors manually.", fixed = TRUE)
 
 })
 
@@ -95,7 +95,7 @@ test_that("Global correction test", {
   rivers_uncor <-  readRDS(test_path("testdata", "riv_uncor.rds"))
   rivers_cor <-  readRDS(test_path("testdata", "riv_cor.rds"))
 
-  rivers_enforced <- enforce_dendritic(rivers_uncor, correct = TRUE)
+  rivers_enforced <- suppressWarnings(enforce_dendritic(rivers_uncor, correct = TRUE, quiet = TRUE))
 
   expect_equal(sf::st_geometry(rivers_enforced), sf::st_geometry(rivers_cor))
 
