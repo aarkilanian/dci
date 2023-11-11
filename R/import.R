@@ -32,12 +32,17 @@ import_rivers <- function(rivers, quiet = FALSE){
     stop("Provided data contains geometries other than LINESTRING and MULTILINESTRING")
   }
 
+  # Check projected
+  if(sf::st_is_longlat(rivers) == TRUE){
+    stop("Provided spatial data is not projected")
+  }
+
   # Store original rivers for later plotting
   rivers.old <- sf::st_zm(rivers)
 
-  # Prepare rivers
   # Remove Z/M dimensions
   rivers <- sf::st_zm(rivers)
+
   # Cast all features to linestring geometries
   rivers <- sf::st_cast(rivers, "LINESTRING")
 
@@ -45,6 +50,8 @@ import_rivers <- function(rivers, quiet = FALSE){
   if(any(!(sf::st_is_valid(rivers))) | any(sf::st_is_empty(rivers))){
     stop("Invalid geometries detected in rivers")
   }
+
+  # Check for overlap
 
   # Identify components
   net <- sfnetworks::as_sfnetwork(rivers) %>%
@@ -100,6 +107,7 @@ import_points <- function(pts, type){
   # Check for path type
   if(is.character(pts)) sf <- FALSE
   else sf <- TRUE
+
   # Read shapefile from path if not sf object
   if(!sf){
     # Read in points with sf
@@ -109,6 +117,12 @@ import_points <- function(pts, type){
   } else{
     pts <- pts
   }
+
+  # Check if projected
+  if(sf::st_is_longlat(pts) == TRUE){
+    stop("Provided spatial data is not projected")
+  }
+
   # Check for valid and empty geometries
   if(any(!(sf::st_is_valid(pts))) | any(sf::st_is_empty(pts))){
     stop("Invalid geometries detected in points")
@@ -116,9 +130,12 @@ import_points <- function(pts, type){
 
   # Barriers
   if(type == "barriers"){
-    # Prepare barriers
+
     # Remove Z/M dimension
     barriers <- sf::st_zm(pts)
+
+    # Check overlap
+
     # Assign barrier type
     barriers$type <- "barrier"
 
@@ -133,9 +150,9 @@ import_points <- function(pts, type){
     # Check that there is only 1 point
     if(nrow(pts) != 1) stop("Multiple points found. The outlet must be a single point.")
 
-    # Prepare sinks
     # Remove Z/M dimensions
     outlet <- sf::st_zm(pts)
+
     # Assign outlet type
     outlet$type <- "outlet"
 
@@ -146,9 +163,12 @@ import_points <- function(pts, type){
   }
   # Points of interest
   if(type == "poi"){
-    # Prepare poi points
+
     # Remove Z/M dimensions
     poi <- sf::st_zm(pts)
+
+    # Check overlap
+
     # Assign poi type
     poi$type <- "poi"
 
@@ -159,9 +179,11 @@ import_points <- function(pts, type){
 
   # Invasions
   if(type == "invasions"){
-    # Prepare poi points
+
     # Remove Z/M dimensions
     invasions <- sf::st_zm(pts)
+
+    # Check overlap
 
     # Return others
     invasions <- structure(invasions, class = c("invasions", class(invasions)))
