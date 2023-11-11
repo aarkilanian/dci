@@ -88,3 +88,15 @@ test_that("Complex nodes are corrected", {
   expect_equal(nrow(correct_complex(net, quiet = TRUE)), 5)
 
 })
+
+test_that("Global correction test", {
+
+  # Import test rivers
+  rivers_uncor <-  readRDS(test_path("testdata", "riv_uncor.rds"))
+  rivers_cor <-  readRDS(test_path("testdata", "riv_cor.rds"))
+
+  rivers_enforced <- enforce_dendritic(rivers_uncor, correct = TRUE)
+
+  expect_equal(sf::st_geometry(rivers_enforced), sf::st_geometry(rivers_cor))
+
+})
