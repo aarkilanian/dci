@@ -31,6 +31,7 @@ test_that("Points are imported correctly", {
   bars <- sf::st_as_sf(sf::st_sfc(sf::st_point(c(1,1)),
                                   sf::st_point(c(2,2)),
                                   sf::st_point(c(3,3))))
+  bars <- sf::st_set_crs(bars, 3347)
   expect_equal(nrow(import_points(bars, type = "barriers")), 3)
 
 
