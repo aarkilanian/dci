@@ -1,5 +1,5 @@
 ---
-title: "user_guide"
+title: "dci User Guide"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{user_guide}
@@ -23,7 +23,7 @@ The dci package provides an R interface for the measurement of connectivity in r
 
 This vignette illustrates the `dci` package using river and barrier data from the Yamaska watershed in Southern Quebec.
 
-## Requried data
+## Required data
 
 DCI analysis with the `dci` package requires three pieces of required spatial data:
 
@@ -142,7 +142,7 @@ yamaska_res_w
 
 ### Invasive connectivity
 
-Apart from calculating the DCI for potamodromous and diadromous species, `calculate_dci` can also be used to calculate an invasive form of the DCI. This invasive form uses known or predicted invaded sites within the river network (specified during the call to `river_net`) to calculate a measure of invasive connectivity. This calculation results in a global invasive DCI score from 0 to 100 indicating the risk of invasive expansion in the river network. Additionally, each segment receives a segment-level DCI indicating the risk of that specific segment being invaded by existing invasive populations.
+Apart from calculating the DCI for potamodromous and diadromous species, `calculate_dci` can also be used to calculate an invasive form of the DCI. This invasive form uses known or predicted invaded sites within the river network (specified during the call to `river_net`) to calculate a measure of invasive connectivity. This calculation results in two DCI metrics: The `DCI_spread` and `DCI_newinv`. The `DCI_spread` is calculated as a potamodromous measure of connectivity indicating how well connected existing invasive species populations are in the river network. The `DCI_newinv` is calculated as a diadromous measure indicating the risk of new invasions becoming established in the river network. This measure can equally be combined with river weights and dispersal thresholds to return more biologically relevant measures of connectivity.
 
 ```{r}
 yamaska_res_inv <- calculate_dci(net = net,
