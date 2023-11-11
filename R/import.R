@@ -51,8 +51,6 @@ import_rivers <- function(rivers, quiet = FALSE){
     stop("Invalid geometries detected in rivers")
   }
 
-  # Check for overlap
-
   # Identify components
   net <- sfnetworks::as_sfnetwork(rivers) %>%
     dplyr::mutate(component = tidygraph::group_components()) %>%
@@ -126,6 +124,11 @@ import_points <- function(pts, type){
   # Check for valid and empty geometries
   if(any(!(sf::st_is_valid(pts))) | any(sf::st_is_empty(pts))){
     stop("Invalid geometries detected in points")
+  }
+
+  # Check for overlap
+  if(any(sf::st_intersection(pts)$n.overlaps > 1)){
+    stop("There are overlapping geometries in the data provided")
   }
 
   # Barriers

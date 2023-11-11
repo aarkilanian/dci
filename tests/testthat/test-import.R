@@ -41,3 +41,17 @@ test_that("Points are imported correctly", {
   # Test other
   expect_equal(nrow(import_points(bars, type = "poi")), 3)
 })
+
+test_that("Points that intersect throw error", {
+
+  # Test barrier
+  bars <- sf::st_as_sf(sf::st_sfc(sf::st_point(c(1,1)),
+                                  sf::st_point(c(1,1)),
+                                  sf::st_point(c(2,2)),
+                                  sf::st_point(c(3,3))))
+  bars <- sf::st_set_crs(bars, 3347)
+
+  # Run test
+  expect_error(import_points(bars, type = "barriers"), "There are overlapping geometries in the data provided")
+
+})
