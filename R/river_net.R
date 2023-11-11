@@ -35,18 +35,25 @@ river_net <- function(rivers,
   if(!("barriers" %in% class(barriers))){
     stop("Barriers must first be imported with `import_points`")
   }
+  if(sf::st_crs(barriers) != sf::st_crs(rivers)){
+    stop("CRS of barriers does not match rivers")
+  }
 
   # Check sinks
-  if(!is.null(outlet)){
-    if(!("outlet" %in% class(outlet))){
-      stop("outlet must first be imported with `import_points`")
-    }
+  if(!("outlet" %in% class(outlet))){
+    stop("outlet must first be imported with `import_points`")
+  }
+  if(sf::st_crs(outlet) != sf::st_crs(rivers)){
+    stop("CRS of outlet does not match rivers")
   }
 
   # Check points of interest
   if(!(is.null(poi))){
     if(!("poi" %in% class(poi))){
       stop("Points of interest must first be imported with `import_points`")
+    }
+    if(sf::st_crs(poi) != sf::st_crs(rivers)){
+      stop("CRS of points of interest does not match rivers")
     }
   }
 
@@ -55,14 +62,13 @@ river_net <- function(rivers,
     if(!("invasions" %in% class(invasions))){
       stop("Invasions must first be imported with `import_points`")
     }
+    if(sf::st_crs(invasions) != sf::st_crs(rivers)){
+      stop("CRS of invasions does not match rivers")
+    }
   }
 
-  # Match river projection
-  barriers <- sf::st_transform(barriers, sf::st_crs(rivers))
-  outlet <- sf::st_transform(outlet, sf::st_crs(rivers))
+  # Combine nodes
   if(!is.null(poi)){
-    poi <- sf::st_transform(poi, sf::st_crs(rivers))
-    # Combine nodes
     user_nodes <- dplyr::bind_rows(barriers, outlet, poi)
   } else{
     user_nodes <- dplyr::bind_rows(barriers, outlet)
