@@ -64,6 +64,9 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
       as.double(net_nodes[[pass]]),
       error = function(e) {
         stop("Supplied passability field cannot be assigned:", e, call. = FALSE)
+      },
+      warning = function(w) {
+        stop("Supplied passability field cannot be assigned:", w, call. = FALSE)
       }
     )
     # Set non-barrier node permeabilities to 1
