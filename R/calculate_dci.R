@@ -90,6 +90,9 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
       as.double(net_edges[[weight]]),
       error = function(e) {
         stop("Supplied weight field cannot be assigned:", e, call. = FALSE)
+      },
+      warning = function(w) {
+        stop("Supplied weight field cannot be assigned:", w, call. = FALSE)
       }
     )
     # Replace NA values with 0
@@ -129,11 +132,11 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
       dplyr::filter(.data$segweight != 0)
   }
 
-  # Gather member IDs
-  all_members <- seg_weights$member.label
-
   # Calculate total weight of network
   totweight <- sum(seg_weights$segweight)
+
+  # Gather member IDs
+  all_members <- seg_weights$member.label
 
   # If no distance threshold is supplied
   if(is.null(threshold)){
