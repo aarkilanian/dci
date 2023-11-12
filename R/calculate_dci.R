@@ -138,6 +138,13 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
   # Gather member IDs
   all_members <- seg_weights$member.label
 
+  # Identify outlet segment for diadromous or invasive
+  if(form %in% c("diadromous", "invasive")){
+  outlet_seg <- activate(net, nodes) %>%
+    dplyr::filter(.data$type == "outlet") %>%
+    dplyr::pull(.data$member.label)
+  }
+
   # If no distance threshold is supplied
   if(is.null(threshold)){
 
@@ -148,29 +155,10 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
     if(form == "potamodromous") DCIs <- calculate_dci_pot(all_members, net_nodes, seg_weights, n.cores, quiet)
 
     # Diadromous case
-    if(form == "diadromous"){
-
-      # Identify outlet segment
-      outlet_seg <- activate(net, nodes) %>%
-        dplyr::filter(.data$type == "outlet") %>%
-        dplyr::pull(.data$member.label)
-
-      # Calculate DCI
-      DCIs <- calculate_dci_dia(all_members, net_nodes, seg_weights, outlet_seg, n.cores, quiet)
-    }
+    if(form == "diadromous") DCIs <- calculate_dci_dia(all_members, net_nodes, seg_weights, outlet_seg, n.cores, quiet)
 
     # Invasive case
-    if(form == "invasive"){
-
-      # Identify outlet segment
-      outlet_seg <- activate(net, nodes) %>%
-        dplyr::filter(.data$type == "outlet") %>%
-        dplyr::pull(.data$member.label)
-
-      # Calculate DCI
-      DCIs <- calculate_dci_inv(all_members, net_nodes, seg_weights, outlet_seg, n.cores, quiet)
-
-    }
+    if(form == "invasive") DCIs <- calculate_dci_inv(all_members, net_nodes, seg_weights, outlet_seg, n.cores, quiet)
 
     # Return calculated DCI values
     DCIs <- structure(DCIs, class = c("dci.results", class(DCIs)))
@@ -187,29 +175,10 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
     if(form == "potamodromous") DCIs <- calculate_dci_pot_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, n.cores, quiet)
 
     # Diadromous case
-    if(form == "diadromous"){
-
-      # Identify outlet segment
-      outlet_seg <- activate(net, nodes) %>%
-        dplyr::filter(.data$type == "outlet") %>%
-        dplyr::pull(.data$member.label)
-
-      # Calculate DCI
-      DCIs <- calculate_dci_dia_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, n.cores, quiet)
-    }
+    if(form == "diadromous") DCIs <- calculate_dci_dia_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, n.cores, quiet)
 
     # Invasive case
-    if(form == "invasive"){
-
-      # Identify outlet segment
-      outlet_seg <- activate(net, nodes) %>%
-        dplyr::filter(.data$type == "outlet") %>%
-        dplyr::pull(.data$member.label)
-
-      # Calculate DCI
-      DCIs <- calculate_dci_inv_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, n.cores, quiet)
-
-    }
+    if(form == "invasive") DCIs <- calculate_dci_inv_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, n.cores, quiet)
 
     # Return calculated DCI values
     DCIs <- structure(DCIs, class = c("dci.results", class(DCIs)))
