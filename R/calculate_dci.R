@@ -159,7 +159,7 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
     if(form == "invasive") DCIs <- calculate_dci_inv(all_members, net_nodes, seg_weights, outlet_seg, n.cores, quiet)
 
     # Return calculated DCI values
-    DCIs <- structure(DCIs, class = c("dci.results", class(DCIs)))
+    DCIs <- structure(DCIs, class = c("dci_results", class(DCIs)))
     return(DCIs)
 
   # If distance threshold is supplied
@@ -177,7 +177,7 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
     if(form == "invasive") DCIs <- calculate_dci_inv_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, n.cores, quiet)
 
     # Return calculated DCI values
-    DCIs <- structure(DCIs, class = c("dci.results", class(DCIs)))
+    DCIs <- structure(DCIs, class = c("dci_results", class(DCIs)))
     return(DCIs)
   }
 
