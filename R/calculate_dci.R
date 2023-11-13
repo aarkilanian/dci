@@ -153,10 +153,8 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
 
     # Potamodromous case
     if(form == "potamodromous") DCIs <- calculate_dci_pot(all_members, net_nodes, seg_weights, n.cores, quiet)
-
     # Diadromous case
     if(form == "diadromous") DCIs <- calculate_dci_dia(all_members, net_nodes, seg_weights, outlet_seg, n.cores, quiet)
-
     # Invasive case
     if(form == "invasive") DCIs <- calculate_dci_inv(all_members, net_nodes, seg_weights, outlet_seg, n.cores, quiet)
 
@@ -173,10 +171,8 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
 
     # Potamodromous case
     if(form == "potamodromous") DCIs <- calculate_dci_pot_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, n.cores, quiet)
-
     # Diadromous case
     if(form == "diadromous") DCIs <- calculate_dci_dia_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, n.cores, quiet)
-
     # Invasive case
     if(form == "invasive") DCIs <- calculate_dci_inv_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, n.cores, quiet)
 
@@ -509,7 +505,7 @@ calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, w
     message(paste0("diadromous DCI with distance limit of ", threshold, ": ", DCI_glob))
   }
 
-  # Return result
+  # Gather results
   DCI_res <- data.frame(from_segment, to_segment, DCIs)
   DCI_res <- DCI_res[c("to_segment","DCIs")]
   names(DCI_res)[names(DCI_res) == "to_segment"] <- "segment"
@@ -906,7 +902,6 @@ gather_perm <- function(from, to, nodes){
   return(path_perm)
 
 }
-
 
 #' Find the path between two nodes
 #'
