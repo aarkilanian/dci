@@ -5,6 +5,7 @@
 
 <!-- badges: start -->
 
+[![DOI](https://zenodo.org/badge/30344596.svg)](https://zenodo.org/badge/latestdoi/30344596)
 [![R-CMD-check](https://github.com/aarkilanian/dci/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/aarkilanian/dci/actions/workflows/R-CMD-check.yaml)
 [![Project Status: Active – The project has reached a stable, usable
 state and is being actively
