@@ -333,6 +333,9 @@ calculate_dci_inv <- function(all_members, net_nodes, seg_weights, outlet_seg, n
   DCIs_sub_pot$DCIs <- DCIs_sub_pot$from_len * DCIs_sub_pot$to_len * DCIs_sub_pot$pass * 100
 
   # Potamodromous: Group DCI results by from segment to obtain segmental DCI
+
+  #### Maybe change grouping to from here to fix the issue? Test that
+
   DCIs_pot <- DCIs_sub_pot %>%
     dplyr::group_by(.data$to) %>%
     dplyr::summarise(DCI_pot = sum(.data$DCIs))
@@ -341,33 +344,37 @@ calculate_dci_inv <- function(all_members, net_nodes, seg_weights, outlet_seg, n
   DCIs_pot$DCI_rel_pot <- DCIs_pot$DCI_pot / DCI_glob_pot * 100
   DCIs_pot <- as.data.frame(DCIs_pot)
 
-  # Diadromous: Determine segment pairs
-  to_segment <- all_members[all_members != 0]
-  from_segment <- rep(outlet_seg, times = length(to_segment))
+  # Diadromous
+  DCIs_dia <- calculate_dci_dia(all_members, net_nodes, seg_weights, outlet_seg, n.cores, quiet)
 
-  # Diadromous: Calculate passability between each pair of segments
-  if(n.cores > 1){
-    pass <- parallel::mcmapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
-  } else{
-    pass <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
-  }
+  # # Diadromous: Determine segment pairs
+  # to_segment <- all_members[all_members != 0]
+  # from_segment <- rep(outlet_seg, times = length(to_segment))
+  #
+  # # Diadromous: Calculate passability between each pair of segments
+  # if(n.cores > 1){
+  #   pass <- parallel::mcmapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
+  # } else{
+  #   pass <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
+  # }
+  #
+  # # Diadromous: Gather DCI inputs and calculate sub-segmental DCI
+  # DCIs_sub_dia <- data.frame(from = from_segment,
+  #                            to = to_segment,
+  #                            pass)
+  # DCIs_sub_dia <- dplyr::left_join(DCIs_sub_dia, seg_weights, by = c("to" = "member.label"))
+  # names(DCIs_sub_dia)[names(DCIs_sub_dia) == "segweight"] <- "to_len"
+  # DCIs_sub_dia$DCIs <- DCIs_sub_dia$to_len * DCIs_sub_dia$pass * 100
+  #
+  # # Diadromous: Group DCI results by from segment to obtain segmental DCI
+  # DCIs_dia <- DCIs_sub_dia %>%
+  #   dplyr::group_by(.data$to) %>%
+  #   dplyr::summarise(DCI_dia = sum(.data$DCIs))
+  # names(DCIs_dia)[names(DCIs_dia) == "to"] <- "segment"
+  # DCI_glob_dia <- sum(DCIs_dia$DCI_dia)
+  # DCIs_dia$DCI_rel_dia <- DCIs_dia$DCI_dia / DCI_glob_dia * 100
+  # DCIs_dia <- as.data.frame(DCIs_dia)
 
-  # Diadromous: Gather DCI inputs and calculate sub-segmental DCI
-  DCIs_sub_dia <- data.frame(from = from_segment,
-                             to = to_segment,
-                             pass)
-  DCIs_sub_dia <- dplyr::left_join(DCIs_sub_dia, seg_weights, by = c("to" = "member.label"))
-  names(DCIs_sub_dia)[names(DCIs_sub_dia) == "segweight"] <- "to_len"
-  DCIs_sub_dia$DCIs <- DCIs_sub_dia$to_len * DCIs_sub_dia$pass * 100
-
-  # Diadromous: Group DCI results by from segment to obtain segmental DCI
-  DCIs_dia <- DCIs_sub_dia %>%
-    dplyr::group_by(.data$to) %>%
-    dplyr::summarise(DCI_dia = sum(.data$DCIs))
-  names(DCIs_dia)[names(DCIs_dia) == "to"] <- "segment"
-  DCI_glob_dia <- sum(DCIs_dia$DCI_dia)
-  DCIs_dia$DCI_rel_dia <- DCIs_dia$DCI_dia / DCI_glob_dia * 100
-  DCIs_dia <- as.data.frame(DCIs_dia)
   # Add segment 0 row
   DCIs_dia <- rbind(c(0, 0, 0), DCIs_dia)
 
