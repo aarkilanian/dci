@@ -17,7 +17,7 @@ test_that("Divergence correction removes one river per divergence", {
   net <- sfnetworks::as_sfnetwork(rivers, length_as_weight = TRUE)
 
   # Run test
-  new_net <- suppressWarnings(correct_divergences(net))
+  new_net <- suppressWarnings(correct_divergences(net, quiet = TRUE))
   new_riv <- sfnetworks::activate(new_net, edges)
   new_riv <- as.data.frame(new_riv)
   expect_equal(nrow(new_riv), 10)
@@ -52,7 +52,7 @@ test_that("Error when complex confluence has more than 3 inputs", {
   net <- sfnetworks::as_sfnetwork(rivers)
 
   # Run test
-  expect_error(correct_complex(net), "Complex confluences with over 3 input tributaries have been detected. Use the standalone `enforce_dendritic()` and correct returned errors manually.", fixed = TRUE)
+  expect_error(correct_complex(net, quiet = TRUE), "Complex confluences with over 3 input tributaries have been detected. Use the standalone `enforce_dendritic()` and correct returned errors manually.", fixed = TRUE)
 
 })
 
@@ -85,6 +85,18 @@ test_that("Complex nodes are corrected", {
   rivers <- sf::st_as_sf(rivers, wkt = "x")
   net <- sfnetworks::as_sfnetwork(rivers)
 
-  expect_snapshot(correct_complex(net))
+  expect_equal(nrow(correct_complex(net, quiet = TRUE)), 5)
+
+})
+
+test_that("Global correction test", {
+
+  # Import test rivers
+  rivers_uncor <-  readRDS(test_path("testdata", "riv_uncor.rds"))
+  rivers_cor <-  readRDS(test_path("testdata", "riv_cor.rds"))
+
+  rivers_enforced <- suppressWarnings(enforce_dendritic(rivers_uncor, correct = TRUE, quiet = TRUE))
+
+  expect_equal(sf::st_geometry(rivers_enforced), sf::st_geometry(rivers_cor))
 
 })

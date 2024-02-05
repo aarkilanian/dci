@@ -4,7 +4,14 @@
 \alias{calculate_dci_dia}
 \title{Calculate non-thresholded diadromous DCI}
 \usage{
-calculate_dci_dia(all_members, net_nodes, seg_weights, outlet_seg, n.cores)
+calculate_dci_dia(
+  all_members,
+  net_nodes,
+  seg_weights,
+  outlet_seg,
+  n.cores,
+  quiet
+)
 }
 \arguments{
 \item{all_members}{An integer vector holding all assigned membership labels
@@ -17,6 +24,12 @@ object with river attributes joined.}
 weighted or unweighted depending on parameters.}
 
 \item{outlet_seg}{An integer indicating the membership label of the outlet segment}
+
+\item{n.cores}{An optional integer value indicating the number of cores to
+use. Defaults to 1. Currently only works on MacOS and Linux.}
+
+\item{quiet}{A logical value indicating whether the global DCI and a map of
+segments should be printed to the console. Defaults to TRUE.}
 }
 \value{
 A data frame which holds raw and relative DCI scores for each segment.

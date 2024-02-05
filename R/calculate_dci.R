@@ -24,6 +24,8 @@
 #'   map units. If NULL, the default, no limit is considered.
 #' @param n.cores An optional integer value indicating the number of cores to
 #'   use. Defaults to 1. Currently only works on MacOS and Linux.
+#' @param quiet A logical value indicating whether the global DCI and a map of
+#'   segments should be printed to the console. Defaults to TRUE.
 #'
 #' @return A \code{\link{sf}} object of the rivers from the provided
 #'   \code{\link{river_net}} object with new columns specifying the segmental
@@ -39,7 +41,7 @@
 #' calculate_dci(net = net_name, form = "potamodromous")
 #' calculate_dci(net = net_name, form = "diadromous", threshold = 2100)
 #' }
-calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NULL, n.cores = 1){
+calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NULL, n.cores = 1, quiet = FALSE){
 
   # Check that network is valid
   if(!("river_net" %in% class(net))){
@@ -62,6 +64,9 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
       as.double(net_nodes[[pass]]),
       error = function(e) {
         stop("Supplied passability field cannot be assigned:", e, call. = FALSE)
+      },
+      warning = function(w) {
+        stop("Supplied passability field cannot be assigned:", w, call. = FALSE)
       }
     )
     # Set non-barrier node permeabilities to 1
@@ -85,6 +90,9 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
       as.double(net_edges[[weight]]),
       error = function(e) {
         stop("Supplied weight field cannot be assigned:", e, call. = FALSE)
+      },
+      warning = function(w) {
+        stop("Supplied weight field cannot be assigned:", w, call. = FALSE)
       }
     )
     # Replace NA values with 0
@@ -103,7 +111,7 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
   # Weights from edges associated w/ upstream nodes
   net_nodes <- net_nodes %>%
     dplyr::mutate(nodeID = dplyr::row_number()) %>%
-    dplyr::left_join(net_edges, by = c("nodeID" = "from"))
+    dplyr::left_join(net_edges, by = c("nodeID" = "from"), multiple = "any")
   net_nodes <- sf::st_as_sf(net_nodes, sf_column_name = "geometry.x")
   # Set outlet length to 0
   net_nodes[net_nodes$type == "outlet",]$riv_length <- 0
@@ -124,11 +132,18 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
       dplyr::filter(.data$segweight != 0)
   }
 
+  # Calculate total weight of network
+  totweight <- sum(seg_weights$segweight)
+
   # Gather member IDs
   all_members <- seg_weights$member.label
 
-  # Calculate total weight of network
-  totweight <- sum(seg_weights$segweight)
+  # Identify outlet segment for diadromous or invasive
+  if(form %in% c("diadromous", "invasive")){
+  outlet_seg <- activate(net, nodes) %>%
+    dplyr::filter(.data$type == "outlet") %>%
+    dplyr::pull(.data$member.label)
+  }
 
   # If no distance threshold is supplied
   if(is.null(threshold)){
@@ -137,32 +152,14 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
     seg_weights$segweight <- seg_weights$segweight / totweight
 
     # Potamodromous case
-    if(form == "potamodromous"){
-      DCIs <- calculate_dci_pot(all_members, net_nodes, seg_weights, n.cores)
-    }
-
+    if(form == "potamodromous") DCIs <- calculate_dci_pot(all_members, net_nodes, seg_weights, n.cores, quiet)
     # Diadromous case
-    if(form == "diadromous"){
-
-      # Identify outlet segment
-      outlet_seg <- activate(net, nodes) %>%
-        dplyr::filter(.data$type == "outlet") %>%
-        dplyr::pull(.data$member.label)
-
-      # Calculate DCI
-      DCIs <- calculate_dci_dia(all_members, net_nodes, seg_weights, outlet_seg, n.cores)
-    }
-
+    if(form == "diadromous") DCIs <- calculate_dci_dia(all_members, net_nodes, seg_weights, outlet_seg, n.cores, quiet)
     # Invasive case
-    if(form == "invasive"){
-
-      # Calculate DCI
-      DCIs <- calculate_dci_inv(all_members, net_nodes, seg_weights, n.cores)
-
-    }
+    if(form == "invasive") DCIs <- calculate_dci_inv(all_members, net_nodes, seg_weights, outlet_seg, n.cores, quiet)
 
     # Return calculated DCI values
-    DCIs <- structure(DCIs, class = c("dci.results", class(DCIs)))
+    DCIs <- structure(DCIs, class = c("dci_results", class(DCIs)))
     return(DCIs)
 
   # If distance threshold is supplied
@@ -173,32 +170,14 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
     if(!is.null(weight)) weighted <- TRUE
 
     # Potamodromous case
-    if(form == "potamodromous"){
-      DCIs <- calculate_dci_pot_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, n.cores)
-    }
-
+    if(form == "potamodromous") DCIs <- calculate_dci_pot_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, n.cores, quiet)
     # Diadromous case
-    if(form == "diadromous"){
-
-      # Identify outlet segment
-      outlet_seg <- activate(net, nodes) %>%
-        dplyr::filter(.data$type == "outlet") %>%
-        dplyr::pull(.data$member.label)
-
-      # Calculate DCI
-      DCIs <- calculate_dci_dia_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, n.cores)
-    }
-
+    if(form == "diadromous") DCIs <- calculate_dci_dia_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, n.cores, quiet)
     # Invasive case
-    if(form == "invasive"){
-
-      # Calculate DCI
-      DCIs <- calculate_dci_inv_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, n.cores)
-
-    }
+    if(form == "invasive") DCIs <- calculate_dci_inv_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, n.cores, quiet)
 
     # Return calculated DCI values
-    DCIs <- structure(DCIs, class = c("dci.results", class(DCIs)))
+    DCIs <- structure(DCIs, class = c("dci_results", class(DCIs)))
     return(DCIs)
   }
 
@@ -206,6 +185,7 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
 
 #' Calculate non-thresholded potamodromous DCI
 #'
+#' @inheritParams calculate_dci
 #' @param all_members An integer vector holding all assigned membership labels
 #'   in the \code{\link{river_net}} object.
 #' @param net_nodes An \code{\link{sf}} object of the nodes of the \code{\link{river_net}}
@@ -218,7 +198,7 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
 #' @return A data frame which holds raw and relative DCI scores for each segment.
 #'
 #' @keywords internal
-calculate_dci_pot <- function(all_members, net_nodes, seg_weights, n.cores){
+calculate_dci_pot <- function(all_members, net_nodes, seg_weights, n.cores, quiet){
 
   # Determine segment pairs
   from_segment <- rep(all_members,
@@ -253,7 +233,9 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights, n.cores){
   DCIs <- as.data.frame(DCIs)
 
   # Print global dci
-  message(paste0("potamodromous DCI: ", DCI_glob))
+  if(!quiet){
+    message(paste0("potamodromous DCI: ", DCI_glob))
+  }
 
   # Return DCIs summary
   return(DCIs)
@@ -262,17 +244,18 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights, n.cores){
 
 #' Calculate non-thresholded diadromous DCI
 #'
+#' @inheritParams calculate_dci
 #' @inheritParams calculate_dci_pot
 #' @param outlet_seg An integer indicating the membership label of the outlet segment
 #'
 #' @return A data frame which holds raw and relative DCI scores for each segment.
 #'
 #' @keywords internal
-calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg, n.cores){
+calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg, n.cores, quiet){
 
   # Determine segment pairs
-  from_segment <- rep(outlet_seg, times = length(all_members))
-  to_segment <- all_members
+  to_segment <- all_members[all_members != 0]
+  from_segment <- rep(outlet_seg, times = length(to_segment))
 
   # Calculate passability between each pair of segments
   if(n.cores > 1){
@@ -285,11 +268,9 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg, n
   DCIs_sub <- data.frame(from = from_segment,
                          to = to_segment,
                          pass)
-  DCIs_sub <- dplyr::left_join(DCIs_sub, seg_weights, by = c("from" = "member.label"))
-  names(DCIs_sub)[names(DCIs_sub) == "segweight"] <- "from_len"
   DCIs_sub <- dplyr::left_join(DCIs_sub, seg_weights, by = c("to" = "member.label"))
   names(DCIs_sub)[names(DCIs_sub) == "segweight"] <- "to_len"
-  DCIs_sub$DCIs <- DCIs_sub$from_len * DCIs_sub$to_len * DCIs_sub$pass * 100
+  DCIs_sub$DCIs <- DCIs_sub$to_len * DCIs_sub$pass * 100
 
   # Group DCI results by from segment to obtain segmental DCI
   DCIs <- DCIs_sub %>%
@@ -301,7 +282,9 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg, n
   DCIs <- as.data.frame(DCIs)
 
   # Print global dci
-  message(paste0("diadromous DCI: ", DCI_glob))
+  if(!quiet){
+    message(paste0("diadromous DCI: ", DCI_glob))
+  }
 
   # Return DCIs summary
   return(DCIs)
@@ -310,6 +293,7 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg, n
 
 #' Calculate non-thresholded invasive DCI
 #'
+#' @inheritParams calculate_dci
 #' @param all_members An integer vector holding all assigned membership labels
 #'   in the \code{\link{river_net}} object.
 #' @param net_nodes An \code{\link{sf}} object of the nodes of the \code{\link{river_net}}
@@ -322,43 +306,96 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg, n
 #' @return A data frame which holds raw and relative DCI scores for each segment.
 #'
 #' @keywords internal
-calculate_dci_inv <- function(all_members, net_nodes, seg_weights, n.cores){
+calculate_dci_inv <- function(all_members, net_nodes, seg_weights, outlet_seg, n.cores, quiet){
 
-  # Determine segment pairs
-  from_segment <- #
-  to_segment <- #
+  # Potamodromous: Determine invasive sources
+  inv_sources <- unique(net_nodes$member.label[which(net_nodes$invaded)])
 
-  # Calculate passability between each pair of segments
+  # Potamodromous: Determine segment pairs for potamodromous measure
+  from_segment <- rep(inv_sources, each = length(all_members))
+  to_segment <- rep(all_members, times = length(inv_sources))
+
+  # Potamodromous: Calculate passability between each pair of segments
   if(n.cores > 1){
     pass <- parallel::mcmapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
   } else{
     pass <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
   }
 
-  # Gather DCI inputs and calculate sub-segmental DCI
-  DCIs_sub <- data.frame(from = from_segment,
+  # Potamodromous: Gather DCI inputs and calculate sub-segmental DCI
+  DCIs_sub_pot <- data.frame(from = from_segment,
                          to = to_segment,
                          pass)
-  DCIs_sub <- dplyr::left_join(DCIs_sub, seg_weights, by = c("from" = "member.label"))
-  names(DCIs_sub)[names(DCIs_sub) == "segweight"] <- "from_len"
-  DCIs_sub <- dplyr::left_join(DCIs_sub, seg_weights, by = c("to" = "member.label"))
-  names(DCIs_sub)[names(DCIs_sub) == "segweight"] <- "to_len"
-  DCIs_sub$DCIs <- DCIs_sub$from_len * DCIs_sub$to_len * DCIs_sub$pass * 100
+  DCIs_sub_pot <- dplyr::left_join(DCIs_sub_pot, seg_weights, by = c("from" = "member.label"))
+  names(DCIs_sub_pot)[names(DCIs_sub_pot) == "segweight"] <- "from_len"
+  DCIs_sub_pot <- dplyr::left_join(DCIs_sub_pot, seg_weights, by = c("to" = "member.label"))
+  names(DCIs_sub_pot)[names(DCIs_sub_pot) == "segweight"] <- "to_len"
+  DCIs_sub_pot$DCIs <- DCIs_sub_pot$from_len * DCIs_sub_pot$to_len * DCIs_sub_pot$pass * 100
 
-  # Group DCI results by from segment to obtain segmental DCI
-  DCIs <- DCIs_sub %>%
-    dplyr::group_by(.data$from) %>%
-    dplyr::summarise(DCI = sum(.data$DCIs))
-  names(DCIs)[names(DCIs) == "from"] <- "segment"
-  DCI_glob <- sum(DCIs$DCI)
-  DCIs$DCI_rel <- DCIs$DCI / DCI_glob * 100
-  DCIs <- as.data.frame(DCIs)
+  # Potamodromous: Group DCI results by from segment to obtain segmental DCI
+
+  #### Maybe change grouping to from here to fix the issue? Test that
+
+  DCIs_pot <- DCIs_sub_pot %>%
+    dplyr::group_by(.data$to) %>%
+    dplyr::summarise(DCI_pot = sum(.data$DCIs))
+  names(DCIs_pot)[names(DCIs_pot) == "to"] <- "segment"
+  DCI_glob_pot <- sum(DCIs_pot$DCI_pot)
+  DCIs_pot$DCI_rel_pot <- DCIs_pot$DCI_pot / DCI_glob_pot * 100
+  DCIs_pot <- as.data.frame(DCIs_pot)
+
+  # Diadromous
+  DCIs_dia <- calculate_dci_dia(all_members, net_nodes, seg_weights, outlet_seg, n.cores, quiet)
+
+  # # Diadromous: Determine segment pairs
+  # to_segment <- all_members[all_members != 0]
+  # from_segment <- rep(outlet_seg, times = length(to_segment))
+  #
+  # # Diadromous: Calculate passability between each pair of segments
+  # if(n.cores > 1){
+  #   pass <- parallel::mcmapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
+  # } else{
+  #   pass <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
+  # }
+  #
+  # # Diadromous: Gather DCI inputs and calculate sub-segmental DCI
+  # DCIs_sub_dia <- data.frame(from = from_segment,
+  #                            to = to_segment,
+  #                            pass)
+  # DCIs_sub_dia <- dplyr::left_join(DCIs_sub_dia, seg_weights, by = c("to" = "member.label"))
+  # names(DCIs_sub_dia)[names(DCIs_sub_dia) == "segweight"] <- "to_len"
+  # DCIs_sub_dia$DCIs <- DCIs_sub_dia$to_len * DCIs_sub_dia$pass * 100
+  #
+  # # Diadromous: Group DCI results by from segment to obtain segmental DCI
+  # DCIs_dia <- DCIs_sub_dia %>%
+  #   dplyr::group_by(.data$to) %>%
+  #   dplyr::summarise(DCI_dia = sum(.data$DCIs))
+  # names(DCIs_dia)[names(DCIs_dia) == "to"] <- "segment"
+  # DCI_glob_dia <- sum(DCIs_dia$DCI_dia)
+  # DCIs_dia$DCI_rel_dia <- DCIs_dia$DCI_dia / DCI_glob_dia * 100
+  # DCIs_dia <- as.data.frame(DCIs_dia)
+
+  # Add segment 0 row
+  DCIs_dia <- rbind(c(0, 0, 0), DCIs_dia)
+
+  # Join potamodromous and diadromous results
+  DCIs_inv <- cbind(DCIs_pot, DCIs_dia[,2:3])
 
   # Print global dci
-  message(paste0("invasive DCI: ", DCI_glob))
+  if(!quiet){
+    message(paste0("invasion spread DCI: ", DCI_glob_pot))
+    message(paste0("new invasion DCI: ", DCI_glob_dia))
+  }
+
+  # Rename DCI results columns
+  DCIs_inv <- DCIs_inv %>%
+    dplyr::rename(DCI_spread = DCI_pot) %>%
+    dplyr::rename(DCI_rel_spread = DCI_rel_pot) %>%
+    dplyr::rename(DCI_newinv = DCI_dia) %>%
+    dplyr::rename(DCI_rel_newinv = DCI_rel_dia)
 
   # Return DCIs summary
-  return(DCIs)
+  return(DCIs_inv)
 
 }
 
@@ -373,7 +410,7 @@ calculate_dci_inv <- function(all_members, net_nodes, seg_weights, n.cores){
 #' @return A data frame which holds raw and relative DCI scores for each segment.
 #'
 #' @keywords internal
-calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, n.cores){
+calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, n.cores, quiet){
 
   # Determine segment pairs
   from_segment <- rep(all_members,
@@ -405,14 +442,16 @@ calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights, w
 
   # Calculate DCI
   if(n.cores > 1){
-    DCIs <- parallel::mcmapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted), mc.cores = n.cores)
+    DCIs <- parallel::mcmapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted, form = "potamodromous"), mc.cores = n.cores)
   } else{
-    DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted))
+    DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted, form = "potamodromous"))
   }
   DCI_glob <- sum(DCIs, na.rm = TRUE)
 
   # Print global dci
-  message(paste0("potamodromous DCI with distance limit of ", threshold, ": ", DCI_glob))
+  if(!quiet){
+    message(paste0("potamodromous DCI with distance limit of ", threshold, ": ", DCI_glob))
+  }
 
   # Return result
   DCI_res <- data.frame(from_segment, to_segment, DCIs)
@@ -427,15 +466,16 @@ calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights, w
 
 #' Calculate thresholded diadromous DCI
 #'
+#' @inheritParams calculate_dci
 #' @inheritParams calculate_dci_pot_thresh
 #' @param outlet_seg An integer indicating the membership label of the outlet segment
 #'
 #' @keywords internal
-calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, n.cores){
+calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, n.cores, quiet){
 
   # Determine segment pairs
-  from_segment <- rep(outlet_seg, times = length(all_members))
-  to_segment <- all_members
+  to_segment <- all_members[all_members != 0]
+  from_segment <- rep(outlet_seg, times = length(to_segment))
 
   # Remove pairs of segments further than threshold
   if(n.cores > 1){
@@ -461,21 +501,32 @@ calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, w
 
   # Calculate DCI
   if(n.cores > 1){
-    DCIs <- parallel::mcmapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted), mc.cores = n.cores)
+    DCIs <- parallel::mcmapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted, form = "diadromous"), mc.cores = n.cores)
   } else{
-    DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted))
+    DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted, form = "diadromous"))
   }
   DCI_glob <- sum(DCIs)
 
   # Print global dci
-  message(paste0("diadromous DCI with distance limit of ", threshold, ": ", DCI_glob))
+  if(!quiet){
+    message(paste0("diadromous DCI with distance limit of ", threshold, ": ", DCI_glob))
+  }
 
-  # Return result
+  # Gather results
   DCI_res <- data.frame(from_segment, to_segment, DCIs)
   DCI_res <- DCI_res[c("to_segment","DCIs")]
   names(DCI_res)[names(DCI_res) == "to_segment"] <- "segment"
   names(DCI_res)[names(DCI_res) == "DCIs"] <- "DCI"
   DCI_res$DCI_rel <- DCI_res$DCI / DCI_glob * 100
+
+  # Add missing segments
+  missing_segs <- all_members[!(all_members %in% DCI_res$segment)]
+  if(length(missing_segs != 0)){
+    missing_rows <- list(missing_segs, rep(0, times = length(missing_segs)), rep(0, times = length(missing_segs)))
+    DCI_res <- rbind(missing_rows, DCI_res)
+    DCI_res <- dplyr::arrange(DCI_res, "segment")
+  }
+
   return(DCI_res)
 }
 
@@ -490,20 +541,23 @@ calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, w
 #' @return A data frame which holds raw and relative DCI scores for each segment.
 #'
 #' @keywords internal
-calculate_dci_pot_inv <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, n.cores){
+calculate_dci_inv_thresh <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, n.cores, quiet){
 
-  # Determine segment pairs
-  from_segment <- #
-  to_segment <- #
+  # Potamodromous: Determine invasive sources
+  inv_sources <- unique(net_nodes$member.label[which(net_nodes$invaded)])
 
-  # Calculate segment-segment distance between each pair
+  # Potamodromous: Determine segment pairs for potamodromous measure
+  from_segment <- rep(inv_sources, each = length(all_members))
+  to_segment <- rep(all_members, times = length(inv_sources))
+
+  # Potamodromous: Calculate segment-segment distance between each pair
   if(n.cores > 1){
     distances <- parallel::mcmapply(gather_dist, from_segment, to_segment, MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
   } else{
     distances <- mapply(gather_dist, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
   }
 
-  # Remove pairs with distances larger than the threshold
+  # Potamodromous: Remove pairs with distances larger than the threshold
   discard_pairs <- which(distances > threshold)
   if(length(discard_pairs) != 0){
     from_segment <- from_segment[-discard_pairs]
@@ -511,32 +565,102 @@ calculate_dci_pot_inv <- function(net, all_members, net_nodes, seg_weights, weig
     distances <- distances[-discard_pairs]
   }
 
-  # Calculate passability between remaining pairs
+  # Potamodromous: Calculate passability between remaining pairs
   if(n.cores > 1){
     perms <- parallel::mcmapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
   } else{
     perms <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
   }
 
-  # Calculate DCI
+  # Potamodromous: Calculate DCI
   if(n.cores > 1){
-    DCIs <- parallel::mcmapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted), mc.cores = n.cores)
+    DCIs_pot <- parallel::mcmapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted, form = "potamodromous"), mc.cores = n.cores)
   } else{
-    DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted))
+    DCIs_pot <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted, form = "potamodromous"))
   }
-  DCI_glob <- sum(DCIs, na.rm = TRUE)
+  DCI_glob_pot <- sum(DCIs_pot, na.rm = TRUE)
+
+  # Potamodromous: summarize results by from segment
+  DCIs_pot <- data.frame(from = from_segment,
+                         to = to_segment,
+                         DCI_pot = DCIs_pot)
+  DCIs_pot <- DCIs_pot %>%
+    dplyr::group_by(.data$to) %>%
+    dplyr::summarise(DCI_pot = sum(.data$DCI_pot, na.rm = TRUE))
+  DCIs_pot$DCI_rel_pot <- DCIs_pot$DCI_pot / DCI_glob_pot * 100
+  names(DCIs_pot)[names(DCIs_pot) == "to"] <- "segment"
+  DCIs_pot <- as.data.frame(DCIs_pot)
+
+  # Diadromous: Determine segment pairs for potamodromous measure
+  to_segment <- all_members[all_members != 0]
+  from_segment <- rep(outlet_seg, times = length(to_segment))
+
+  # Diadromous: Calculate segment-segment distance between each pair
+  if(n.cores > 1){
+    distances <- parallel::mcmapply(gather_dist, from_segment, to_segment, MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
+  } else{
+    distances <- mapply(gather_dist, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
+  }
+
+  # Diadromouss: Remove pairs with distances larger than the threshold
+  discard_pairs <- which(distances > threshold)
+  if(length(discard_pairs) != 0){
+    from_segment <- from_segment[-discard_pairs]
+    to_segment <- to_segment[-discard_pairs]
+    distances <- distances[-discard_pairs]
+  }
+
+  # Diadromous: Calculate passability between remaining pairs
+  if(n.cores > 1){
+    perms <- parallel::mcmapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
+  } else{
+    perms <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
+  }
+
+  # Diadromous: Calculate DCI
+  if(n.cores > 1){
+    DCIs_dia <- parallel::mcmapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted, form = "diadromous"), mc.cores = n.cores)
+  } else{
+    DCIs_dia <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted, form = "diadromous"))
+  }
+  DCI_glob_dia <- sum(DCIs_dia, na.rm = TRUE)
+
+  # Diadromous: summarize results by segment
+  DCIs_dia <- data.frame(from = from_segment,
+                         to = to_segment,
+                         DCI_dia = DCIs_dia)
+  DCIs_dia <- DCIs_dia %>%
+    dplyr::group_by(.data$to) %>%
+    dplyr::summarise(DCI_dia = sum(.data$DCI_dia))
+  names(DCIs_dia)[names(DCIs_dia) == "to"] <- "segment"
+  DCIs_dia$DCI_rel_dia <- DCIs_dia$DCI_dia / DCI_glob_dia * 100
+  DCIs_dia <- as.data.frame(DCIs_dia)
+
+  # Add missing segments
+  missing_segs <- all_members[!(all_members %in% DCIs_dia$segment)]
+  if(length(missing_segs != 0)){
+    missing_rows <- list(missing_segs, rep(0, times = length(missing_segs)), rep(0, times = length(missing_segs)))
+    DCIs_dia <- rbind(missing_rows, DCIs_dia)
+    DCIs_dia <- dplyr::arrange(DCIs_dia, "segment")
+  }
 
   # Print global dci
-  message(paste0("invasive DCI with distance limit of ", threshold, ": ", DCI_glob))
+  if(!quiet){
+    message(paste0("invasion spread DCI with distance limit of ", threshold, ": ", DCI_glob_pot))
+    message(paste0("new invasion DCI with distance limit of ", threshold, ": ", DCI_glob_dia))
+  }
+
+  # Rename DCI results columns
+  DCIs_pot <- DCIs_pot %>%
+    dplyr::rename(DCI_spread = DCI_pot) %>%
+    dplyr::rename(DCI_rel_spread = DCI_rel_pot)
+
+  DCIs_dia <- DCIs_dia %>%
+    dplyr::rename(DCI_newinv = DCI_dia) %>%
+    dplyr::rename(DCI_rel_newinv = DCI_rel_dia)
 
   # Return result
-  DCI_res <- data.frame(from_segment, to_segment, DCIs)
-  DCI_res <- DCI_res %>%
-    dplyr::group_by(.data$from_segment) %>%
-    dplyr::summarise(DCI = sum(.data$DCIs, na.rm = TRUE))
-  DCI_res$DCI_rel <- DCI_res$DCI / DCI_glob * 100
-  names(DCI_res)[names(DCI_res) == "from_segment"] <- "segment"
-  DCI_res <- as.data.frame(DCI_res)
+  DCI_res <- cbind(DCIs_pot, DCIs_dia[,2:3])
   return(DCI_res)
 
 }
@@ -553,83 +677,155 @@ calculate_dci_pot_inv <- function(net, all_members, net_nodes, seg_weights, weig
 #' @return The sub-segmental DCI component between given pair of segments.
 #'
 #' @keywords internal
-gather_dci <- function(net, from, to, distance, pass, nodes, seg_weights, threshold, totweight, weighted){
+gather_dci <- function(net, form, from, to, distance, pass, nodes, seg_weights, threshold, totweight, weighted){
 
-  # Case when from and to segment are the same
-  if(from == to){
+  # Diadromous case
+  if(form == "diadromous"){
 
-    seg_length <- seg_weights[seg_weights$member.label == from,]$segweight
-    DCI <- seg_length/totweight * seg_length/totweight * 1 * 100
+    # Case when from and to segment are the same
+    if(from == to){
+
+      seg_length <- seg_weights[seg_weights$member.label == from,]$segweight
+      DCI <- seg_length/totweight * 1 * 100
+      return(DCI)
+
+    }
+
+    # Extract sinks and barriers
+    sinks_bars <- subset(nodes, nodes$type %in% c("outlet", "barrier"))
+
+    # Get from segment local outlet (always outlet of network)
+    from_sink <- sinks_bars[sinks_bars$type == "outlet",]$node.label
+
+    # Get to segment local outlet
+    to_sink <- sinks_bars[sinks_bars$member.label == to,]$node.label
+
+    # Get path between sinks
+    path <- path_between(from_sink, to_sink)
+
+    # Join node attributes to nodes on path
+    full_path <- nodes[nodes$node.label %in% path,]
+
+    # Determine final entrance and exit nodes for pair of segments
+
+    # Select most downstream barrier as entrance, extract row index
+    barriers <- full_path[full_path$type == "barrier",]
+    barriers$depth <- unlist(lapply(barriers$node.label, length))
+    ent_label <- as.integer(rownames(barriers[which.min(barriers$depth),]))
+
+    # Calculate length remaining after segment-segment distance
+    rem_length <- threshold - distance
+
+    # Gather neighbourhood around exit (from segment)
+    weights <- as.data.frame(activate(net, edges))
+    weights <- weights$riv_length
+    target <- seq_len(igraph::gorder(net))
+    source <- ent_label
+    dist <- igraph::distances(graph = net, v = source, to = target,
+                              mode = "all", weights = weights, algorithm = "automatic")
+    neighb_nodes <- which(dist <= rem_length)
+    neighb_nodes <- nodes[nodes$nodeID %in% neighb_nodes,]
+    neighb_nodes <- neighb_nodes[neighb_nodes$member.label == to,]
+    neighb_length <- sum(neighb_nodes$riv_length, na.rm = T)
+
+    if(weighted){
+      # Calculate full length of to neighbourhood
+      to_length <- sum(nodes[nodes$member.label == to,]$riv_length * nodes[nodes$member.label == to,]$riv_weight, na.rm = TRUE)
+
+    } else{
+      # Calculate full length of to neighbourhood
+      to_length <- sum(nodes[nodes$member.label == to,]$riv_length, na.rm = TRUE)
+    }
+
+    # Calculate relative neighbourhood length for segment
+    neighb_rel <- neighb_length / to_length
+
+    # Calculate sub-segmental DCI for pair of segments
+    DCI <- to_length/totweight * neighb_rel * pass * 100
     return(DCI)
 
   }
 
-  # Extract sinks and barriers
-  sinks_bars <- subset(nodes, nodes$type %in% c("outlet", "barrier"))
+  # Potamodromous case
+  if(form == "potamodromous"){
 
-  # Get from segment local outlet
-  from_sink <- sinks_bars[sinks_bars$member.label == from,]$node.label
+    # Case when from and to segment are the same
+    if(from == to){
 
-  # Get to segment local outlet
-  to_sink <- sinks_bars[sinks_bars$member.label == to,]$node.label
+      seg_length <- seg_weights[seg_weights$member.label == from,]$segweight
+      DCI <- seg_length/totweight * seg_length/totweight * 1 * 100
+      return(DCI)
 
-  # Get path between sinks
-  path <- path_between(from_sink, to_sink)
+    }
 
-  # Join node attributes to nodes on path
-  full_path <- nodes[nodes$node.label %in% path,]
+    # Extract sinks and barriers
+    sinks_bars <- subset(nodes, nodes$type %in% c("outlet", "barrier"))
 
-  # Determine final entrance and exit nodes for pair of segments
-  # If from segment is upstream of to segment
-  if(length(unlist(from_sink)) > length(unlist(to_sink))){
+    # Get from segment local outlet
+    from_sink <- sinks_bars[sinks_bars$member.label == from,]$node.label
 
-    # Set exit to one node upstream of from outlet, extract row index
-    exit_label <- list(append(unlist(from_sink), FALSE))
-    exit_label <- as.integer(rownames(nodes[nodes$node.label %in% exit_label,]))
+    # Get to segment local outlet
+    to_sink <- sinks_bars[sinks_bars$member.label == to,]$node.label
 
-    # If from segment is downstream of to segment
-  } else {
+    # Get path between sinks
+    path <- path_between(from_sink, to_sink)
 
-    # Select most downstream barrier as exit, extract row index
-    barriers <- full_path[full_path$type == "barrier",]
-    barriers$depth <- unlist(lapply(barriers$node.label, length))
-    exit_label <- as.integer(rownames(barriers[which.min(barriers$depth),]))
+    # Join node attributes to nodes on path
+    full_path <- nodes[nodes$node.label %in% path,]
+
+    # Determine final entrance and exit nodes for pair of segments
+    # If from segment is upstream of to segment
+    if(length(unlist(from_sink)) > length(unlist(to_sink))){
+
+      # Set exit to one node upstream of from outlet, extract row index
+      exit_label <- list(append(unlist(from_sink), FALSE))
+      exit_label <- as.integer(rownames(nodes[nodes$node.label %in% exit_label,]))
+
+      # If from segment is downstream of to segment
+    } else {
+
+      # Select most downstream barrier as exit, extract row index
+      barriers <- full_path[full_path$type == "barrier",]
+      barriers$depth <- unlist(lapply(barriers$node.label, length))
+      exit_label <- as.integer(rownames(barriers[which.min(barriers$depth),]))
+    }
+
+    # Calculate length remaining after segment-segment distance
+    rem_length <- threshold - distance
+
+    # Gather neighbourhood around exit (from segment)
+    weights <- as.data.frame(activate(net, edges))
+    weights <- weights$riv_length
+    target <- seq_len(igraph::gorder(net))
+    source <- exit_label
+    dist <- igraph::distances(graph = net, v = source, to = target,
+                              mode = "all", weights = weights, algorithm = "automatic")
+    neighb_nodes <- which(dist <= rem_length)
+    neighb_nodes <- nodes[nodes$nodeID %in% neighb_nodes,]
+    neighb_nodes <- neighb_nodes[neighb_nodes$member.label == from,]
+    neighb_length <- sum(neighb_nodes$riv_length, na.rm = T)
+
+    if(weighted){
+      # Calculate full length of from neighbourhood
+      from_length <- sum(nodes[nodes$member.label == from,]$riv_length * nodes[nodes$member.label == from,]$riv_weight, na.rm = TRUE)
+      # Calculate full length of to neighbourhood
+      to_length <- sum(nodes[nodes$member.label == to,]$riv_length * nodes[nodes$member.label == to,]$riv_weight, na.rm = TRUE)
+
+    } else{
+      # Calculate full length of from neighbourhood
+      from_length <- sum(nodes[nodes$member.label == from,]$riv_length, na.rm = TRUE)
+      # Calculate full length of to neighbourhood
+      to_length <- sum(nodes[nodes$member.label == to,]$riv_length, na.rm = TRUE)
+    }
+
+    # Calculate relative neighbourhood length for segment
+    neighb_rel <- neighb_length / from_length
+
+    # Calculate sub-segmental DCI for pair of segments
+    DCI <- from_length/totweight * to_length/totweight * neighb_rel * pass * 100
+    return(DCI)
+
   }
-
-  # Calculate length remaining after segment-segment distance
-  rem_length <- threshold - distance
-
-  # Gather neighbourhood around exit (from segment)
-  weights <- as.data.frame(activate(net, edges))
-  weights <- weights$riv_length
-  target <- seq_len(igraph::gorder(net))
-  source <- exit_label
-  dist <- igraph::distances(graph = net, v = source, to = target,
-                             mode = "all", weights = weights, algorithm = "automatic")
-  neighb_nodes <- which(dist <= rem_length)
-  neighb_nodes <- nodes[nodes$nodeID %in% neighb_nodes,]
-  neighb_nodes <- neighb_nodes[neighb_nodes$member.label == from,]
-  neighb_length <- sum(neighb_nodes$riv_length, na.rm = T)
-
-  if(weighted){
-    # Calculate full length of from neighbourhood
-    from_length <- sum(nodes[nodes$member.label == from,]$riv_length * nodes[nodes$member.label == from,]$riv_weight, na.rm = TRUE)
-    # Calculate full length of to neighbourhood
-    to_length <- sum(nodes[nodes$member.label == to,]$riv_length * nodes[nodes$member.label == to,]$riv_weight, na.rm = TRUE)
-
-  } else{
-    # Calculate full length of from neighbourhood
-    from_length <- sum(nodes[nodes$member.label == from,]$riv_length)
-    # Calculate full length of to neighbourhood
-    to_length <- sum(nodes[nodes$member.label == to,]$riv_length)
-  }
-
-  # Calculate relative neighbourhood length for segment
-  neighb_rel <- neighb_length / from_length
-
-  # Calculate sub-segmental DCI for pair of segments
-  DCI <- from_length/totweight * to_length/totweight * neighb_rel * pass * 100
-  return(DCI)
 
 }
 
@@ -713,7 +909,6 @@ gather_perm <- function(from, to, nodes){
   return(path_perm)
 
 }
-
 
 #' Find the path between two nodes
 #'

@@ -21,7 +21,7 @@
 #' enforce_dendritic(rivers = sf_line_object)
 #' enforce_dendritic(rivers = sf_line_object, correct = TRUE)
 #' }
-enforce_dendritic <- function(rivers, correct = FALSE){
+enforce_dendritic <- function(rivers, correct = FALSE, quiet = FALSE){
 
   # Create river network
   net <- sfnetworks::as_sfnetwork(rivers, length_as_weight = TRUE)
@@ -29,8 +29,8 @@ enforce_dendritic <- function(rivers, correct = FALSE){
   # Correct complex confluences
   # If automatically correcting topology, use network with divergences corrected
   if(correct){
-    net <- correct_divergences(net)
-    net <- correct_complex(net)
+    net <- correct_divergences(net, quiet)
+    net <- correct_complex(net, quiet)
     # Recalculate river lengths
     net$riv_length <- as.double(sf::st_length(net))
     # Return corrected rivers
@@ -38,8 +38,8 @@ enforce_dendritic <- function(rivers, correct = FALSE){
 
   # If errors are set to be manually edited, use full network
   } else {
-    net_div <- correct_divergences(net, correct)
-    net_comp <- correct_complex(net_div, correct)
+    net_div <- correct_divergences(net, correct, quiet)
+    net_comp <- correct_complex(net_div, correct, quiet)
     invisible(net_comp)
   }
 
@@ -53,7 +53,7 @@ enforce_dendritic <- function(rivers, correct = FALSE){
 #' @return If correct is \code{TRUE} a \code{\link{river_net}} object with the shorter of each divergent pair removed. If correct is \code{FALSE} a \code{\link[sf]{sf}} object with divergent pairs identified with a shared number in the new "divergent" column.
 #'
 #' @keywords internal
-correct_divergences <- function(net, correct = TRUE){
+correct_divergences <- function(net, correct = TRUE, quiet = FALSE){
 
   # If no corrections desired, find and return divergences
   if(!correct){
@@ -65,7 +65,9 @@ correct_divergences <- function(net, correct = TRUE){
         dplyr::ungroup()
     # Print number of divergences
     num_div <- length(unique(as.data.frame(activate(riv_divergences, edges))$divergent)) - 1
-    message(paste0(num_div, " divergences have been found."))
+    if(!quiet){
+      message(paste0(num_div, " divergences have been found."))
+    }
     # Return non-corrected divergences
     return(riv_divergences)
   }
@@ -96,10 +98,10 @@ correct_divergences <- function(net, correct = TRUE){
 
   # Print number of corrected divergences
   if(num_div == 0){
-    message("No divergences detected.")
+    if(!quiet) message("No divergences detected.")
     invisible(net)
   } else {
-    message(paste0(num_div, " divergences corrected."))
+    if(!quiet) message(paste0(num_div, " divergences corrected."))
     invisible(net_corrected)
   }
 }
@@ -112,7 +114,7 @@ correct_divergences <- function(net, correct = TRUE){
 #' @return If correct is \code{TRUE} a \code{\link[sf]{sf}} object of rivers with complex confluences separated into two closely located valid confluences. If correct is \code{FALSE} a \code{\link[sf]{sf}} object with rivers participating in complex confluences labeled with the same number ina  new "complex" column.
 #'
 #' @keywords internal
-correct_complex <- function(net, correct = TRUE){
+correct_complex <- function(net, correct = TRUE, quiet = FALSE){
 
   # Identify complex confluences
   net_undirected <- activate(tidygraph::convert(net, tidygraph::to_undirected), nodes)
@@ -120,8 +122,8 @@ correct_complex <- function(net, correct = TRUE){
     dplyr::mutate(nodeID = dplyr::n()) %>%
     dplyr::mutate(degree = tidygraph::centrality_degree())
   complex_nodes <- sf::st_as_sf(net_degree) %>%
-    dplyr::filter(degree >= 4) %>%
-    dplyr::select(degree)
+    dplyr::filter(.data$degree >= 4) %>%
+    dplyr::select("degree")
 
   # If confluences have over 4 inputs recommend manual correction
   if(any(complex_nodes$degree > 4)){
@@ -129,7 +131,7 @@ correct_complex <- function(net, correct = TRUE){
   }
   # If no errors return unchanged rivers
   if(length(complex_nodes$degree) == 0){
-    message("No complex confluences found.")
+    if(!quiet) message("No complex confluences found.")
     invisible(sf::st_as_sf(activate(net, edges)))
 
   # Correct complex confluences detected
@@ -137,7 +139,7 @@ correct_complex <- function(net, correct = TRUE){
 
     # Print number of complex confluences found
     num_complex <- nrow(complex_nodes)
-    message(num_complex, " complex confluences found.")
+    if(!quiet) message(num_complex, " complex confluences found.")
 
     # Extract network rivers
     rivers <- sf::st_as_sf(activate(net, edges)) %>%

@@ -10,14 +10,15 @@ calculate_dci(
   pass = NULL,
   weight = NULL,
   threshold = NULL,
-  n.cores = 1
+  n.cores = 1,
+  quiet = FALSE
 )
 }
 \arguments{
 \item{net}{A \code{\link{river_net}} object.}
 
 \item{form}{A string specifying the form of the DCI to calculate: either
-"potamodromous", "diadromous", or "all".}
+"potamodromous", "diadromous", or "invasive".}
 
 \item{pass}{The name of a column in the nodes table of net which holds the
 numeric passability of nodes. If none is specified all barriers are
@@ -32,6 +33,9 @@ map units. If NULL, the default, no limit is considered.}
 
 \item{n.cores}{An optional integer value indicating the number of cores to
 use. Defaults to 1. Currently only works on MacOS and Linux.}
+
+\item{quiet}{A logical value indicating whether the global DCI and a map of
+segments should be printed to the console. Defaults to TRUE.}
 }
 \value{
 A \code{\link{sf}} object of the rivers from the provided

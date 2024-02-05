@@ -1,7 +1,7 @@
 #' Export DCI results to spatial format
 #'
 #' @inheritParams calculate_dci
-#' @param results \code{dci.results} object or a list of objects of DCI results returned by \code{\link{calculate_dci}}.
+#' @param results \code{dci_results} object or a list of objects of DCI results returned by \code{\link{calculate_dci}}.
 #' @param type The element of the river network for which results should be reported. Can be either "rivers" or any of the nodes included in the \code{\link{river_net}} object such as "barriers" or "poi".
 #'
 #' @return A \code{\link[sf]{sf}} object with the corresponding DCI results joined to each feature.

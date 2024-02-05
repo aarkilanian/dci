@@ -13,7 +13,8 @@ calculate_dci_dia_thresh(
   threshold,
   totweight,
   outlet_seg,
-  n.cores
+  n.cores,
+  quiet
 )
 }
 \arguments{
@@ -40,6 +41,9 @@ map units. If NULL, the default, no limit is considered.}
 
 \item{n.cores}{An optional integer value indicating the number of cores to
 use. Defaults to 1. Currently only works on MacOS and Linux.}
+
+\item{quiet}{A logical value indicating whether the global DCI and a map of
+segments should be printed to the console. Defaults to TRUE.}
 }
 \description{
 Calculate thresholded diadromous DCI

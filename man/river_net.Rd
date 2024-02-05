@@ -4,7 +4,15 @@
 \alias{river_net}
 \title{Create a \code{river_net} object}
 \usage{
-river_net(rivers, barriers, outlet, poi = NULL, check = TRUE, tolerance = NULL)
+river_net(
+  rivers,
+  barriers,
+  outlet,
+  poi = NULL,
+  invasions = NULL,
+  check = TRUE,
+  tolerance = NULL
+)
 }
 \arguments{
 \item{rivers}{A \code{rivers} object returned by \code{\link{import_rivers}}.}
@@ -14,6 +22,8 @@ river_net(rivers, barriers, outlet, poi = NULL, check = TRUE, tolerance = NULL)
 \item{outlet}{A \code{outlet} object returned by \code{\link{import_points}}.}
 
 \item{poi}{A \code{poi} object (points of interest) returned by \code{\link{import_points}}. This data is optional.}
+
+\item{invasions}{A \code{invasions} object returned by \code{\link{import_points}}. This data is optional}
 
 \item{check}{A logical value, if \code{TRUE}, the default, dendritic topology of the river network is enforced with \code{\link{enforce_dendritic}}.}
 
