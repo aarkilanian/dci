@@ -333,9 +333,6 @@ calculate_dci_inv <- function(all_members, net_nodes, seg_weights, outlet_seg, n
   DCIs_sub_pot$DCIs <- DCIs_sub_pot$from_len * DCIs_sub_pot$to_len * DCIs_sub_pot$pass * 100
 
   # Potamodromous: Group DCI results by from segment to obtain segmental DCI
-
-  #### Maybe change grouping to from here to fix the issue? Test that
-
   DCIs_pot <- DCIs_sub_pot %>%
     dplyr::group_by(.data$to) %>%
     dplyr::summarise(DCI_pot = sum(.data$DCIs))
@@ -345,7 +342,7 @@ calculate_dci_inv <- function(all_members, net_nodes, seg_weights, outlet_seg, n
   DCIs_pot <- as.data.frame(DCIs_pot)
 
   # Diadromous
-  DCIs_dia <- calculate_dci_dia(all_members, net_nodes, seg_weights, outlet_seg, n.cores, quiet)
+  DCIs_dia <- calculate_dci_dia(all_members, net_nodes, seg_weights, outlet_seg, n.cores, quiet = TRUE)
 
   # # Diadromous: Determine segment pairs
   # to_segment <- all_members[all_members != 0]
@@ -384,15 +381,15 @@ calculate_dci_inv <- function(all_members, net_nodes, seg_weights, outlet_seg, n
   # Print global dci
   if(!quiet){
     message(paste0("invasion spread DCI: ", DCI_glob_pot))
-    message(paste0("new invasion DCI: ", DCI_glob_dia))
+    message(paste0("new invasion DCI: ", sum(DCIs_dia[,2], na.rm = TRUE)))
   }
 
   # Rename DCI results columns
   DCIs_inv <- DCIs_inv %>%
     dplyr::rename(DCI_spread = DCI_pot) %>%
     dplyr::rename(DCI_rel_spread = DCI_rel_pot) %>%
-    dplyr::rename(DCI_newinv = DCI_dia) %>%
-    dplyr::rename(DCI_rel_newinv = DCI_rel_dia)
+    dplyr::rename(DCI_newinv = DCI) %>%
+    dplyr::rename(DCI_rel_newinv = DCI_rel)
 
   # Return DCIs summary
   return(DCIs_inv)
