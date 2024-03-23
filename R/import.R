@@ -88,7 +88,7 @@ import_rivers <- function(rivers, quiet = FALSE){
 #'Read and prepare geospatial point data for dci.
 #'
 #' @param pts A character string or \code{\link{sf}} object, the path to a shapefile of points or \code{\link{sf}} object of points.
-#' @param type A character string, either of “barrier”, “outlet”, or “poi” specifying the type of point.
+#' @param type A character string, either of “bars”, “out”, "poi", or “inv” specifying the type of point. Barriers are "bars", outlet is "out", points of interest are "poi", and invasive locations are "inv".
 #'
 #' @return Object of class barriers, outlet, or poi prepared for input to \code{\link{river_net}}
 #'
@@ -100,7 +100,7 @@ import_rivers <- function(rivers, quiet = FALSE){
 import_points <- function(pts, type){
 
   # Check that type is valid
-  if(!(type %in% c("barriers", "outlet", "poi", "invasions"))) stop("Points must be of 'barriers', 'outlet', 'poi', or 'invasions' type.")
+  if(!(type %in% c("bars", "out", "poi", "inv"))) stop("Points must be of 'bars', 'out', 'poi', or 'inv' type.")
 
   # Check for path type
   if(is.character(pts)) sf <- FALSE
@@ -132,7 +132,7 @@ import_points <- function(pts, type){
   }
 
   # Barriers
-  if(type == "barriers"){
+  if(type == "bars"){
 
     # Remove Z/M dimension
     barriers <- sf::st_zm(pts)
@@ -148,7 +148,7 @@ import_points <- function(pts, type){
   }
 
   # outlet
-  if(type == "outlet"){
+  if(type == "out"){
 
     # Check that there is only 1 point
     if(nrow(pts) != 1) stop("Multiple points found. The outlet must be a single point.")
@@ -181,7 +181,7 @@ import_points <- function(pts, type){
   }
 
   # Invasions
-  if(type == "invasions"){
+  if(type == "inv"){
 
     # Remove Z/M dimensions
     invasions <- sf::st_zm(pts)

@@ -9,7 +9,7 @@ import_points(pts, type)
 \arguments{
 \item{pts}{A character string or \code{\link{sf}} object, the path to a shapefile of points or \code{\link{sf}} object of points.}
 
-\item{type}{A character string, either of “barrier”, “outlet”, or “poi” specifying the type of point.}
+\item{type}{A character string, either of “bars”, “out”, "poi", or “inv” specifying the type of point. Barriers are "bars", outlet is "out", points of interest are "poi", and invasive locations are "inv".}
 }
 \value{
 Object of class barriers, outlet, or poi prepared for input to \code{\link{river_net}}

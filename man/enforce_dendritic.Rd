@@ -4,7 +4,7 @@
 \alias{enforce_dendritic}
 \title{Enforce dendritic river topology}
 \usage{
-enforce_dendritic(rivers, correct = FALSE)
+enforce_dendritic(rivers, correct = FALSE, quiet = FALSE)
 }
 \arguments{
 \item{rivers}{A \code{rivers} object returned by \code{\link{import_rivers}}.}
