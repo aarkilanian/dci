@@ -4,12 +4,15 @@
 \alias{enforce_dendritic}
 \title{Enforce dendritic river topology}
 \usage{
-enforce_dendritic(rivers, correct = FALSE)
+enforce_dendritic(rivers, correct = FALSE, quiet = FALSE)
 }
 \arguments{
 \item{rivers}{A \code{rivers} object returned by \code{\link{import_rivers}}.}
 
 \item{correct}{A logical value, when \code{FALSE}, the default, corrections are not automatically applied and a \code{\link[sf]{sf}} object of lines is returned with topological errors indicated. If \code{TRUE} errors are automatically corrected.}
+
+\item{quiet}{A logical value indicating whether the global DCI and a map of
+segments should be printed to the console. Defaults to TRUE.}
 }
 \value{
 If \code{correct} is \code{FALSE}, a \code{\link[sf]{sf}} object with non-dendritic topology indicated in columns "divergent" and "complex". These error columns indicate for each river line if that river is part of a divergent pair or complex confluence. The columns are populated by integers which indicate with which river they share a topological error. If \code{correct} is \code{TRUE}, a \code{rivers} object with automatic topological corrections applied is returned.
