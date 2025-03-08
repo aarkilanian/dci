@@ -1,10 +1,18 @@
-.Rproj.user
-.Rhistory
-.Rdata
 .httr-oauth
-.DS_Store
-.Rprofile
 local
 inst/doc
 /doc/
 /Meta/
+
+# Package
+.RBuildignore
+
+# Rstudio
+.Rproj
+.Rproj.user/
+.Rhistory
+.Rdata
+.Rprofile
+
+# System files
+.DS_Store
