@@ -153,7 +153,6 @@ correct_complex <- function(net, correct = TRUE, quiet = FALSE){
       dplyr::mutate(complexID = 1:dplyr::n())
     # Create small 1 unit buffer around complex nodes
     buffer <- sf::st_buffer(complex_nodes, dist = 1)
-    buffer <- sf::st_cast(buffer, "MULTILINESTRING", group_or_split = FALSE)
     sf::st_agr(buffer) <- "constant"
 
     # If manual editing desired, identify complex confluence rivers
