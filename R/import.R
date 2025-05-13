@@ -100,7 +100,7 @@ import_rivers <- function(rivers, quiet = FALSE){
 import_points <- function(pts, type){
 
   # Check that type is valid
-  if(!(type %in% c("bars", "out", "poi", "inv"))) stop("Points must be of 'bars', 'out', 'poi', or 'inv' type.")
+  if(!(type %in% c("bars", "out", "poi"))) stop("Points must be of 'bars', 'out', or 'poi' type.")
 
   # Check for path type
   if(is.character(pts)) sf <- FALSE
@@ -131,13 +131,11 @@ import_points <- function(pts, type){
     stop("There are overlapping geometries in the data provided")
   }
 
+  # Remove Z/M dimension
+  pts <- sf::st_zm(pts)
+
   # Barriers
   if(type == "bars"){
-
-    # Remove Z/M dimension
-    barriers <- sf::st_zm(pts)
-
-    # Check overlap
 
     # Assign barrier type
     barriers$type <- "barrier"
@@ -153,9 +151,6 @@ import_points <- function(pts, type){
     # Check that there is only 1 point
     if(nrow(pts) != 1) stop("Multiple points found. The outlet must be a single point.")
 
-    # Remove Z/M dimensions
-    outlet <- sf::st_zm(pts)
-
     # Assign outlet type
     outlet$type <- "outlet"
 
@@ -167,29 +162,11 @@ import_points <- function(pts, type){
   # Points of interest
   if(type == "poi"){
 
-    # Remove Z/M dimensions
-    poi <- sf::st_zm(pts)
-
-    # Check overlap
-
     # Assign poi type
     poi$type <- "poi"
 
     # Return others
     poi <- structure(poi, class = c("poi", class(poi)))
     return(poi)
-  }
-
-  # Invasions
-  if(type == "inv"){
-
-    # Remove Z/M dimensions
-    invasions <- sf::st_zm(pts)
-
-    # Check overlap
-
-    # Return others
-    invasions <- structure(invasions, class = c("invasions", class(invasions)))
-    return(invasions)
   }
 }
