@@ -1,11 +1,11 @@
-#' Prepare rivers for \code{\link{river_net}} connectivity analyses
+#' Prepare rivers for connectivity analyses
 #'
-#'Read and prepare geospatial river lines data for \code{\link{river_net}}. Only the largest fully connected component will be preserved, river lines taking part in secondary networks will be discarded.
+#' Read and prepare geospatial river lines data for \code{\link{river_net}}. Only the largest fully connected component will be preserved, river lines taking part in secondary networks will be discarded.
 #'
-#' @param rivers A character string or \code{\link{sf}} object, the path to a shapefile of river lines or \code{\link{sf}} object of rivers.
-#' @param quiet A logical value, if \code{FALSE} edited rivers are plotted with the original. Defaults to \code{FALSE}.
+#' @param rivers A character string representing the path to a shapefile of river lines or a \code{\link{sf}} object of rivers.
+#' @param quiet A logical value, if \code{FALSE}, the default, edited rivers are plotted against the original for visual checks.
 #'
-#' @return Object of class rivers prepared for input to \code{\link{river_net}}
+#' @return Object of class \code{rivers} prepared for further topological corrections with \code{\link{enforce_dendritic}} or input to \code{\link{river_net}}
 #'
 #' @export
 #'
@@ -83,12 +83,12 @@ import_rivers <- function(rivers, quiet = FALSE){
   invisible(rivers)
 }
 
-#' Prepare point data for \code{\link{river_net}} connectivity analyses
+#' Prepare point data for connectivity analyses
 #'
-#'Read and prepare geospatial point data for dci.
+#' Read and prepare geospatial point data for for \code{\link{river_net}}.
 #'
-#' @param pts A character string or \code{\link{sf}} object, the path to a shapefile of points or \code{\link{sf}} object of points.
-#' @param type A character string, either of “bars”, “out”, "poi", or “inv” specifying the type of point. Barriers are "bars", outlet is "out", points of interest are "poi", and invasive locations are "inv".
+#' @param pts A character string representing the path to a shapefile of points or a \code{\link{sf}} object of points.
+#' @param type A character string, either “bars”, “out”, or "poi" specifying the type of point. Barriers are "bars", outlet is "out", and points of interest are "poi".
 #'
 #' @return Object of class barriers, outlet, or poi prepared for input to \code{\link{river_net}}
 #'
