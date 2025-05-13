@@ -1,12 +1,13 @@
 #' Enforce dendritic river topology
 #'
-#' This function provides an interface to tools which can correct non-dendritic geometries in a river network. This tool can correct divergent rivers and complex confluences.
+#' This function provides an interface to tools which can correct or highlight
+#' features that violate a purely dendritic river network topology.
+#' In a dendritic topology, at confluences, two upstream rivers always combine into one downstream river.
 #'
-#' Divergent rivers are parts of a river network where a single tributary splits into two after a confluence. In a dendritic network small upstream rivers can only combine at confluences into a single river.
+#' This function identifies or corrects divergences where one upstream river splits into two which is commonly seen as loops and braided channels in river data.
+#' This function also identifies or corrects confluences with more than three participating river features (complex confluences).
 #'
-#' Complex confluences occur when confluences have over 2 input tributaries. In a dendritic network two tributaries only must combine into one at confluences.
-#'
-#' If errors are being corrected manually, all divergent pairs must be reduced to only one river and complex confluences modified such that only 2 rivers join together. When corrections are done automatically the shorted divergent stream is kept.
+#' If errors are being corrected manually, all divergent pairs must be reduced to only one river and complex confluences modified such that only 2 rivers join together. When corrections are done automatically the shorter divergent stream is kept.
 #'
 #' @inheritParams river_net
 #'
