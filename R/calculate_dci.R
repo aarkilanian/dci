@@ -192,7 +192,7 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
 #'   object with river attributes joined.
 #' @param seg_weights A data frame of each segments total length. Either
 #'   weighted or unweighted depending on parameters.
-#' @param n.nodes An optional integer value indicating the number of cores to
+#' @param n.cores An optional integer value indicating the number of cores to
 #'   use. Defaults to 1. Currently only works on MacOS and Linux.
 #'
 #' @return A data frame which holds raw and relative DCI scores for each segment.
@@ -300,7 +300,7 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg, n
 #'   object with river attributes joined.
 #' @param seg_weights A data frame of each segments total length. Either
 #'   weighted or unweighted depending on parameters.
-#' @param n.nodes An optional integer value indicating the number of cores to
+#' @param n.cores An optional integer value indicating the number of cores to
 #'   use. Defaults to 1. Currently only works on MacOS and Linux.
 #'
 #' @return A data frame which holds raw and relative DCI scores for each segment.
@@ -386,10 +386,10 @@ calculate_dci_inv <- function(all_members, net_nodes, seg_weights, outlet_seg, n
 
   # Rename DCI results columns
   DCIs_inv <- DCIs_inv %>%
-    dplyr::rename(DCI_spread = DCI_pot) %>%
-    dplyr::rename(DCI_rel_spread = DCI_rel_pot) %>%
-    dplyr::rename(DCI_newinv = DCI) %>%
-    dplyr::rename(DCI_rel_newinv = DCI_rel)
+    dplyr::rename(DCI_spread = .data$DCI_pot) %>%
+    dplyr::rename(DCI_rel_spread = .data$DCI_rel_pot) %>%
+    dplyr::rename(DCI_newinv = .data$DCI) %>%
+    dplyr::rename(DCI_rel_newinv = .data$DCI_rel)
 
   # Return DCIs summary
   return(DCIs_inv)
@@ -649,12 +649,12 @@ calculate_dci_inv_thresh <- function(net, all_members, net_nodes, seg_weights, w
 
   # Rename DCI results columns
   DCIs_pot <- DCIs_pot %>%
-    dplyr::rename(DCI_spread = DCI_pot) %>%
-    dplyr::rename(DCI_rel_spread = DCI_rel_pot)
+    dplyr::rename(DCI_spread = .data$DCI_pot) %>%
+    dplyr::rename(DCI_rel_spread = .data$DCI_rel_pot)
 
   DCIs_dia <- DCIs_dia %>%
-    dplyr::rename(DCI_newinv = DCI_dia) %>%
-    dplyr::rename(DCI_rel_newinv = DCI_rel_dia)
+    dplyr::rename(DCI_newinv = .data$DCI_dia) %>%
+    dplyr::rename(DCI_rel_newinv = .data$DCI_rel_dia)
 
   # Return result
   DCI_res <- cbind(DCIs_pot, DCIs_dia[,2:3])
