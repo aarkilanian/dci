@@ -1,39 +1,48 @@
-#' Prepare rivers for connectivity analyses
+#' Prepare Rivers for Connectivity Analyses
 #'
-#' Read and prepare geospatial river lines data for \code{\link{river_net}}. Only the largest fully connected component will be preserved, river lines taking part in secondary networks will be discarded.
+#' Reads and prepares geospatial river line data for use in [river_net()].
+#' Only the largest fully connected component of the network is retained;
+#' river lines that are part of disconnected secondary networks are discarded.
 #'
-#' @param rivers A character string representing the path to a shapefile of river lines or a \code{\link{sf}} object of rivers.
-#' @param quiet A logical value, if \code{FALSE}, the default, edited rivers are plotted against the original for visual checks.
+#' @param rivers A character string specifying the path to a shapefile of river lines,
+#'   or an [sf] object representing river geometries.
+#' @param quiet Logical. If `FALSE` (default), plots the original and processed
+#'   river lines side-by-side for visual inspection.
 #'
-#' @return Object of class \code{rivers} prepared for further topological corrections with \code{\link{enforce_dendritic}} or input to \code{\link{river_net}}
+#' @return An object of class `rivers`, suitable for use with [enforce_dendritic()]
+#'   or as input to [river_net()].
 #'
 #' @export
 #'
 #' @examples
-#' \dontrun{ import_rivers(rivers = path_to_shapefile)}
-#' \dontrun{ import_rivers{rivers = sf_line_object}}
-
-import_rivers <- function(rivers, quiet = FALSE){
+#' \dontrun{
+#' import_rivers(rivers = "path/to/shapefile.shp")
+#' import_rivers(rivers = sf_line_object)
+#' }
+import_rivers <- function(rivers, quiet = FALSE) {
   # Check for path type
-  if(is.character(rivers)) sf <- FALSE
-  else sf <- TRUE
+  if (is.character(rivers)) {
+    sf <- FALSE
+  } else {
+    sf <- TRUE
+  }
   # Read shapefile from path if not sf object
-  if(!sf){
+  if (!sf) {
     # Read in river with sf
     rivers <- tryCatch(sf::read_sf(rivers),
       error = function(e) rlang::abort("invalid spatial data provided")
     )
-  } else{
+  } else {
     rivers <- rivers
   }
 
   # Check that spatial data is lines
-  if(!any(sf::st_geometry_type(rivers) %in% c("LINESTRING", "MULTILINESTRING"))){
+  if (!any(sf::st_geometry_type(rivers) %in% c("LINESTRING", "MULTILINESTRING"))) {
     stop("Provided data contains geometries other than LINESTRING and MULTILINESTRING")
   }
 
   # Check projected
-  if(sf::st_is_longlat(rivers) == TRUE){
+  if (sf::st_is_longlat(rivers) == TRUE) {
     stop("Provided spatial data is not projected")
   }
 
@@ -47,7 +56,7 @@ import_rivers <- function(rivers, quiet = FALSE){
   rivers <- sf::st_cast(rivers, "LINESTRING")
 
   # Check for valid and empty geometries
-  if(any(!(sf::st_is_valid(rivers))) | any(sf::st_is_empty(rivers))){
+  if (any(!(sf::st_is_valid(rivers))) | any(sf::st_is_empty(rivers))) {
     stop("Invalid geometries detected in rivers")
   }
 
@@ -56,9 +65,9 @@ import_rivers <- function(rivers, quiet = FALSE){
     dplyr::mutate(component = tidygraph::group_components()) %>%
     dplyr::group_by(.data$component) %>%
     dplyr::ungroup()
- comps <- activate(net, nodes) %>%
-   as.data.frame(.data) %>%
-   dplyr::select(.data$component)
+  comps <- activate(net, nodes) %>%
+    as.data.frame(.data) %>%
+    dplyr::select(.data$component)
 
   # Determine largest component and extract
   big_comp <- sort(table(comps), decreasing = TRUE)[1]
@@ -73,7 +82,7 @@ import_rivers <- function(rivers, quiet = FALSE){
   rivers <- subset(rivers, select = -c(from, to))
 
   # Plot rivers if quiet is set to FALSE
-  if(quiet == FALSE){
+  if (quiet == FALSE) {
     plot(sf::st_geometry(rivers.old), col = "red")
     plot(sf::st_geometry(rivers), add = T, lwd = 2)
   }
@@ -83,51 +92,58 @@ import_rivers <- function(rivers, quiet = FALSE){
   invisible(rivers)
 }
 
-#' Prepare point data for connectivity analyses
+#' Prepare Point Data for Connectivity Analyses
 #'
-#' Read and prepare geospatial point data for for \code{\link{river_net}}.
+#' Reads and prepares geospatial point data for use with [river_net()].
 #'
-#' @param pts A character string representing the path to a shapefile of points or a \code{\link{sf}} object of points.
-#' @param type A character string, either “bars”, “out”, or "poi" specifying the type of point. Barriers are "bars", outlet is "out", and points of interest are "poi".
+#' @param pts A character string specifying the path to a shapefile of points,
+#'   or an [sf] object containing point features.
+#' @param type A character string indicating the type of points. Must be one of:
+#'   `"bars"` for barriers, `"out"` for the outlet, or `"poi"` for points of interest.
 #'
-#' @return Object of class barriers, outlet, or poi prepared for input to \code{\link{river_net}}
+#' @return An object of class `barriers`, `outlet`, or `poi`, depending on `type`,
+#'   prepared for use with [river_net()].
 #'
 #' @export
 #'
 #' @examples
-#' \dontrun{ import_points(pts = path_to_shapefile)}
-#' \dontrun{ import_points(pts = sf_point_object)}
-import_points <- function(pts, type){
-
+#' \dontrun{
+#' import_points(pts = "path/to/points.shp", type = "bars")
+#' import_points(pts = sf_point_object, type = "poi")
+#' }
+import_points <- function(pts, type) {
   # Check that type is valid
-  if(!(type %in% c("bars", "out", "poi"))) stop("Points must be of 'bars', 'out', or 'poi' type.")
+  if (!(type %in% c("bars", "out", "poi"))) stop("Points must be of 'bars', 'out', or 'poi' type.")
 
   # Check for path type
-  if(is.character(pts)) sf <- FALSE
-  else sf <- TRUE
+  if (is.character(pts)) {
+    sf <- FALSE
+  } else {
+    sf <- TRUE
+  }
 
   # Read shapefile from path if not sf object
-  if(!sf){
+  if (!sf) {
     # Read in points with sf
     pts <- tryCatch(sf::read_sf(pts),
-                       error = function(e) rlang::abort("invalid spatial data provided")
+      error = function(e) rlang::abort("invalid spatial data provided")
     )
-  } else{
+  } else {
     pts <- pts
   }
 
   # Check if projected
-  if(sf::st_is_longlat(pts) == TRUE){
+  if (sf::st_is_longlat(pts) == TRUE) {
     stop("Provided spatial data is not projected")
   }
 
   # Check for valid and empty geometries
-  if(any(!(sf::st_is_valid(pts))) | any(sf::st_is_empty(pts))){
+  if (any(!(sf::st_is_valid(pts))) | any(sf::st_is_empty(pts))) {
     stop("Invalid geometries detected in points")
   }
 
   # Check for overlap
-  if(any(sf::st_intersection(pts)$n.overlaps > 1)){
+  if (any(sf::st_intersection(pts)$n.overlaps > 1)) {
     stop("There are overlapping geometries in the data provided")
   }
 
@@ -135,38 +151,34 @@ import_points <- function(pts, type){
   pts <- sf::st_zm(pts)
 
   # Barriers
-  if(type == "bars"){
-
+  if (type == "bars") {
     # Assign barrier type
-    barriers$type <- "barrier"
+    pts$type <- "barrier"
 
     # Return barriers
-    barriers <- structure(barriers, class = c("barriers", class(barriers)))
+    barriers <- structure(pts, class = c("barriers", class(pts)))
     return(barriers)
   }
 
   # outlet
-  if(type == "out"){
-
+  if (type == "out") {
     # Check that there is only 1 point
-    if(nrow(pts) != 1) stop("Multiple points found. The outlet must be a single point.")
+    if (nrow(pts) != 1) stop("Multiple points found. The outlet must be a single point.")
 
     # Assign outlet type
-    outlet$type <- "outlet"
+    pts$type <- "outlet"
 
     # Return sinks
-    outlet <- structure(outlet, class = c("outlet", class(outlet)))
+    outlet <- structure(pts, class = c("outlet", class(pts)))
     return(outlet)
-
   }
   # Points of interest
-  if(type == "poi"){
-
+  if (type == "poi") {
     # Assign poi type
-    poi$type <- "poi"
+    pts$type <- "poi"
 
     # Return others
-    poi <- structure(poi, class = c("poi", class(poi)))
+    poi <- structure(pts, class = c("poi", class(pts)))
     return(poi)
   }
 }

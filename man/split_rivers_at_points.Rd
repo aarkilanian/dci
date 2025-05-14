@@ -7,11 +7,13 @@
 split_rivers_at_points(rivers, pts, tolerance = NULL)
 }
 \arguments{
-\item{rivers}{A \code{rivers} object returned by \code{\link{import_rivers}}.}
+\item{rivers}{A \code{rivers} object returned by \code{\link[=import_rivers]{import_rivers()}}.}
 
 \item{pts}{An \code{\link[sf]{sf}} object, points at which to split river lines.}
 
-\item{tolerance}{A numeric value specifying the distance in map units that points should be snapped to rivers. Set to NULL by default.}
+\item{tolerance}{A numeric value specifying the snapping distance
+(in map units) to align points to the river network. Defaults to \code{NULL},
+meaning no snapping.}
 }
 \value{
 A \code{\link{rivers}} object with non-split rivers replaced with two new features each at opposite sides of the node which splits it. All attributes assumed to be constant.

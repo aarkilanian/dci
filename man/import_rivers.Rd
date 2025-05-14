@@ -2,22 +2,29 @@
 % Please edit documentation in R/import.R
 \name{import_rivers}
 \alias{import_rivers}
-\title{Prepare rivers for \code{\link{river_net}} connectivity analyses}
+\title{Prepare Rivers for Connectivity Analyses}
 \usage{
 import_rivers(rivers, quiet = FALSE)
 }
 \arguments{
-\item{rivers}{A character string or \code{\link{sf}} object, the path to a shapefile of river lines or \code{\link{sf}} object of rivers.}
+\item{rivers}{A character string specifying the path to a shapefile of river lines,
+or an \link{sf} object representing river geometries.}
 
-\item{quiet}{A logical value, if \code{FALSE} edited rivers are plotted with the original. Defaults to \code{FALSE}.}
+\item{quiet}{Logical. If \code{FALSE} (default), plots the original and processed
+river lines side-by-side for visual inspection.}
 }
 \value{
-Object of class rivers prepared for input to \code{\link{river_net}}
+An object of class \code{rivers}, suitable for use with \code{\link[=enforce_dendritic]{enforce_dendritic()}}
+or as input to \code{\link[=river_net]{river_net()}}.
 }
 \description{
-Read and prepare geospatial river lines data for \code{\link{river_net}}. Only the largest fully connected component will be preserved, river lines taking part in secondary networks will be discarded.
+Reads and prepares geospatial river line data for use in \code{\link[=river_net]{river_net()}}.
+Only the largest fully connected component of the network is retained;
+river lines that are part of disconnected secondary networks are discarded.
 }
 \examples{
-\dontrun{ import_rivers(rivers = path_to_shapefile)}
-\dontrun{ import_rivers{rivers = sf_line_object}}
+\dontrun{
+import_rivers(rivers = "path/to/shapefile.shp")
+import_rivers(rivers = sf_line_object)
+}
 }

@@ -56,7 +56,7 @@ barriers_in
 Once all required and any additional data have been pre-processed with the import functions they can be joined together in the `river_net` function to generate an object of the `river_net` class. Messages are printed indicating the topological corrections that are being performed on the river network. These are explained in more detail in the next section.
 ```{r}
 # Combine rivers, barriers, and outlet
-net <- river_net(rivers = rivers_in, barriers = barriers_in, outlet = outlet_in, poi = poi_in, invasions = inv_in) 
+net <- river_net(rivers = rivers_in, barriers = barriers_in, outlet = outlet_in, poi = poi_in, invasions = inv_in)
 net
 ```
 
@@ -105,11 +105,13 @@ Once a valid `river_net` object is constructed all the elements are present to c
 
 In the example below the DCI is calculated for a potamodromous species. No weighting is used in this case.
 ```{r}
-yamaska_res <- calculate_dci(net = net,
-                             form = "potamodromous",
-                             pass = "pass_1",
-                             weight = NULL,
-                             threshold = NULL)
+yamaska_res <- calculate_dci(
+  net = net,
+  form = "potamodromous",
+  pass = "pass_1",
+  weight = NULL,
+  threshold = NULL
+)
 yamaska_res
 ```
 The `calculate_dci` function returns a table where each river segment is assigned a raw DCI score along with a standardized relative DCI score. The raw scores are useful when comparisons are desired between different watersheds. On the other hand, the relative scores allow for a clearer picture of differences within a watershed. An additional function, `export_dci`, is provided to rejoin these results to the original line or point data. This is explained in the next section.
@@ -120,11 +122,13 @@ The `threshold` parameter of the `calculate_dci` function allows for the inclusi
 
 The use of a distance threshold can be useful to derive a clearer picture of connectivity when a species` dispersal limit is known. Below is an example done with the same Yamaska watershed using a distance threshold of 1.5km. This distance is written in the default map units which are meters.
 ```{r}
-yamaska_res_thr <- calculate_dci(net = net,
-                            form = "potamodromous",
-                            pass = "pass_1",
-                            weight = NULL,
-                            threshold = 1500)
+yamaska_res_thr <- calculate_dci(
+  net = net,
+  form = "potamodromous",
+  pass = "pass_1",
+  weight = NULL,
+  threshold = 1500
+)
 yamaska_res_thr
 ```
 
@@ -132,11 +136,13 @@ yamaska_res_thr
 
 An additional option with the DCI calculation is to include a weighting term with the river data. By default the DCI only considers the length of rivers as a measure of amount of habitat. However, certain cases might benefit from a more specific definition of amount of habitat. The `weight` parameter of the `calculate_dci` function can use one of the variables included with the river data as a weighting term applied to the river lengths. These values are rescaled between 0 and 1 before applying the weighting. An example using a habitat suitability weighting is demonstrated below.
 ```{r}
-yamaska_res_w <- calculate_dci(net = net,
-                             form = "potamodromous",
-                             pass = "pass_1",
-                             weight = "qual",
-                             threshold = NULL)
+yamaska_res_w <- calculate_dci(
+  net = net,
+  form = "potamodromous",
+  pass = "pass_1",
+  weight = "qual",
+  threshold = NULL
+)
 yamaska_res_w
 ```
 
@@ -145,11 +151,13 @@ yamaska_res_w
 Apart from calculating the DCI for potamodromous and diadromous species, `calculate_dci` can also be used to calculate an invasive form of the DCI. This invasive form uses known or predicted invaded sites within the river network (specified during the call to `river_net`) to calculate a measure of invasive connectivity. This calculation results in two DCI metrics: The `DCI_spread` and `DCI_newinv`. The `DCI_spread` is calculated as a potamodromous measure of connectivity indicating how well connected existing invasive species populations are in the river network. The `DCI_newinv` is calculated as a diadromous measure indicating the risk of new invasions becoming established in the river network. This measure can equally be combined with river weights and dispersal thresholds to return more biologically relevant measures of connectivity.
 
 ```{r}
-yamaska_res_inv <- calculate_dci(net = net,
-                             form = "invasive",
-                             pass = "pass_1",
-                             weight = NULL,
-                             threshold = NULL)
+yamaska_res_inv <- calculate_dci(
+  net = net,
+  form = "invasive",
+  pass = "pass_1",
+  weight = NULL,
+  threshold = NULL
+)
 yamaska_res_inv
 ```
 

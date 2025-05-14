@@ -2,22 +2,27 @@
 % Please edit documentation in R/import.R
 \name{import_points}
 \alias{import_points}
-\title{Prepare point data for \code{\link{river_net}} connectivity analyses}
+\title{Prepare Point Data for Connectivity Analyses}
 \usage{
 import_points(pts, type)
 }
 \arguments{
-\item{pts}{A character string or \code{\link{sf}} object, the path to a shapefile of points or \code{\link{sf}} object of points.}
+\item{pts}{A character string specifying the path to a shapefile of points,
+or an \link{sf} object containing point features.}
 
-\item{type}{A character string, either of “bars”, “out”, "poi", or “inv” specifying the type of point. Barriers are "bars", outlet is "out", points of interest are "poi", and invasive locations are "inv".}
+\item{type}{A character string indicating the type of points. Must be one of:
+\code{"bars"} for barriers, \code{"out"} for the outlet, or \code{"poi"} for points of interest.}
 }
 \value{
-Object of class barriers, outlet, or poi prepared for input to \code{\link{river_net}}
+An object of class \code{barriers}, \code{outlet}, or \code{poi}, depending on \code{type},
+prepared for use with \code{\link[=river_net]{river_net()}}.
 }
 \description{
-Read and prepare geospatial point data for dci.
+Reads and prepares geospatial point data for use with \code{\link[=river_net]{river_net()}}.
 }
 \examples{
-\dontrun{ import_points(pts = path_to_shapefile)}
-\dontrun{ import_points(pts = sf_point_object)}
+\dontrun{
+import_points(pts = "path/to/points.shp", type = "bars")
+import_points(pts = sf_point_object, type = "poi")
+}
 }

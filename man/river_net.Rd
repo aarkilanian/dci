@@ -2,7 +2,7 @@
 % Please edit documentation in R/river_net.R
 \name{river_net}
 \alias{river_net}
-\title{Create a \code{river_net} object}
+\title{Create a \code{river_net} Object}
 \usage{
 river_net(
   rivers,
@@ -15,28 +15,37 @@ river_net(
 )
 }
 \arguments{
-\item{rivers}{A \code{rivers} object returned by \code{\link{import_rivers}}.}
+\item{rivers}{A \code{rivers} object returned by \code{\link[=import_rivers]{import_rivers()}}.}
 
-\item{barriers}{A \code{barriers} object returned by \code{\link{import_points}}.}
+\item{barriers}{A \code{barriers} object returned by \code{\link[=import_points]{import_points()}} with
+\code{type = "bars"}.}
 
-\item{outlet}{A \code{outlet} object returned by \code{\link{import_points}}.}
+\item{outlet}{An \code{outlet} object returned by \code{\link[=import_points]{import_points()}} with
+\code{type = "out"}.}
 
-\item{poi}{A \code{poi} object (points of interest) returned by \code{\link{import_points}}. This data is optional.}
+\item{poi}{An optional \code{poi} object returned by \code{\link[=import_points]{import_points()}} with \code{ type = "poi"}.}
 
-\item{invasions}{A \code{invasions} object returned by \code{\link{import_points}}. This data is optional}
+\item{check}{Logical. If \code{TRUE} (default), dendritic topology is enforced
+using \code{\link[=enforce_dendritic]{enforce_dendritic()}}.}
 
-\item{check}{A logical value, if \code{TRUE}, the default, dendritic topology of the river network is enforced with \code{\link{enforce_dendritic}}.}
-
-\item{tolerance}{A numeric value specifying the distance in map units that points should be snapped to rivers. Set to NULL by default.}
+\item{tolerance}{A numeric value specifying the snapping distance
+(in map units) to align points to the river network. Defaults to \code{NULL},
+meaning no snapping.}
 }
 \value{
-An object of class \code{\link{river_net}} representing the river network formed by the geospatial lines and points provided.
+An object of class \link{river_net} representing the river network formed
+from the provided spatial inputs.
 }
 \description{
-\code{river_net} is a geospatial network structure of river data. It extends the tidy representation of geospatial network data from the \code{\link[sfnetworks]{sfnetwork}} data structure.
+Constructs a \link{river_net} object, a geospatial network structure built on top
+of the \code{\link[sfnetworks:sfnetwork]{sfnetworks::sfnetwork()}} class. This object integrates river lines,
+barriers, outlets, and optionally points of interest (POIs), allowing for
+advanced connectivity analyses with \code{\link[=calculate_dci]{calculate_dci()}} or other network tools.
 }
 \examples{
-\dontrun{ river_net(rivers = river_data, barriers = barrier_data, outlet = outlet_data)}
-\dontrun{ river_net(river_data, barrier_data, outlet_data, poi = extra_data)}
-\dontrun{ river_net(river_data, barrier_data, outlet_data, tolerance = 15}
+\dontrun{
+river_net(rivers = river_data, barriers = barrier_data, outlet = outlet_data)
+river_net(river_data, barrier_data, outlet_data, poi = poi_data)
+river_net(river_data, barrier_data, outlet_data, tolerance = 15)
+}
 }

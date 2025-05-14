@@ -19,8 +19,8 @@ weighted or unweighted depending on parameters.}
 \item{n.cores}{An optional integer value indicating the number of cores to
 use. Defaults to 1. Currently only works on MacOS and Linux.}
 
-\item{quiet}{A logical value indicating whether the global DCI and a map of
-segments should be printed to the console. Defaults to TRUE.}
+\item{quiet}{Logical. If \code{FALSE}, prints the global DCI and a plot of river segments
+to the console. Defaults to \code{TRUE}.}
 }
 \value{
 A data frame which holds raw and relative DCI scores for each segment.

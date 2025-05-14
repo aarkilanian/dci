@@ -9,7 +9,9 @@ join_attributes(net, nodes, tolerance = NULL)
 \arguments{
 \item{nodes}{An \code{\link[sf]{sf}} object of "barrier", "outlet", and "poi" points.}
 
-\item{tolerance}{A numeric value specifying the distance in map units that points should be snapped to rivers. Set to NULL by default.}
+\item{tolerance}{A numeric value specifying the snapping distance
+(in map units) to align points to the river network. Defaults to \code{NULL},
+meaning no snapping.}
 }
 \value{
 A \code{\link{river_net}} object with the supplied nodes' attributes joined to its nodes.

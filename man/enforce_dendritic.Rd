@@ -7,25 +7,38 @@
 enforce_dendritic(rivers, correct = FALSE, quiet = FALSE)
 }
 \arguments{
-\item{rivers}{A \code{rivers} object returned by \code{\link{import_rivers}}.}
+\item{rivers}{A \code{rivers} object returned by \code{\link[=import_rivers]{import_rivers()}}.}
 
-\item{correct}{A logical value, when \code{FALSE}, the default, corrections are not automatically applied and a \code{\link[sf]{sf}} object of lines is returned with topological errors indicated. If \code{TRUE} errors are automatically corrected.}
+\item{correct}{Logical. If \code{FALSE} (default), no changes are made and
+topological issues are identified only. If \code{TRUE}, issues are
+automatically corrected.}
 
-\item{quiet}{A logical value indicating whether the global DCI and a map of
-segments should be printed to the console. Defaults to TRUE.}
+\item{quiet}{Logical. If \code{FALSE}, the function prints a summary including
+the global DCI and a map of segments. Defaults to \code{TRUE}.}
 }
 \value{
-If \code{correct} is \code{FALSE}, a \code{\link[sf]{sf}} object with non-dendritic topology indicated in columns "divergent" and "complex". These error columns indicate for each river line if that river is part of a divergent pair or complex confluence. The columns are populated by integers which indicate with which river they share a topological error. If \code{correct} is \code{TRUE}, a \code{rivers} object with automatic topological corrections applied is returned.
+If \code{correct = FALSE}, returns a \link{sf} object with the columns
+\code{"divergent"} and \code{"complex"} indicating topological errors. These columns
+contain integer identifiers indicating which features are part of the
+same divergent or complex structure. If \code{correct = TRUE}, returns a
+\code{rivers} object with the topological issues corrected.
 }
 \description{
-This function provides an interface to tools which can correct non-dendritic geometries in a river network. This tool can correct divergent rivers and complex confluences.
+Identifies and optionally corrects features in a river network that violate
+a strictly dendritic topology.
 }
 \details{
-Divergent rivers are parts of a river network where a single tributary splits into two after a confluence. In a dendritic network small upstream rivers can only combine at confluences into a single river.
+In a dendritic network, two upstream rivers converge into a single downstream
+river at each confluence. This function can enforce this dendritic topology
+in a river network by detecting (and optionally correcting) two types of
+topological errors: (1) divergences, where a single river splits into
+multiple downstream branches (commonly forming loops or braided channels),
+and (2) complex confluences, where more than two upstream rivers meet at a
+single point.
 
-Complex confluences occur when confluences have over 2 input tributaries. In a dendritic network two tributaries only must combine into one at confluences.
-
-If errors are being corrected manually, all divergent pairs must be reduced to only one river and complex confluences modified such that only 2 rivers join together. When corrections are done automatically the shorted divergent stream is kept.
+If errors are being corrected manually, rerun this function again until no
+errors remain as correcting divergences can lead to other topological errors
+that need to be corrected
 }
 \examples{
 \dontrun{

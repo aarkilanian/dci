@@ -7,12 +7,14 @@
 correct_divergences(net, correct = TRUE, quiet = FALSE)
 }
 \arguments{
-\item{net}{A \code{\link{river_net}} object.}
+\item{net}{A \link{river_net} object.}
 
-\item{correct}{A logical value, when \code{FALSE}, the default, corrections are not automatically applied and a \code{\link[sf]{sf}} object of lines is returned with topological errors indicated. If \code{TRUE} errors are automatically corrected.}
+\item{correct}{Logical. If \code{FALSE} (default), no changes are made and
+topological issues are identified only. If \code{TRUE}, issues are
+automatically corrected.}
 
-\item{quiet}{A logical value indicating whether the global DCI and a map of
-segments should be printed to the console. Defaults to TRUE.}
+\item{quiet}{Logical. If \code{FALSE}, prints the global DCI and a plot of river segments
+to the console. Defaults to \code{TRUE}.}
 }
 \value{
 If correct is \code{TRUE} a \code{\link{river_net}} object with the shorter of each divergent pair removed. If correct is \code{FALSE} a \code{\link[sf]{sf}} object with divergent pairs identified with a shared number in the new "divergent" column.

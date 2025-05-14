@@ -18,7 +18,7 @@ calculate_dci_dia_thresh(
 )
 }
 \arguments{
-\item{net}{A \code{\link{river_net}} object.}
+\item{net}{A \link{river_net} object.}
 
 \item{all_members}{An integer vector holding all assigned membership labels
 in the \code{\link{river_net}} object.}
@@ -32,18 +32,18 @@ weighted or unweighted depending on parameters.}
 \item{weighted}{A logical value indicating whether river lengths in
 seg_weights are weighted.}
 
-\item{threshold}{An optional numeric value specifying a dispersal limit in
-map units. If NULL, the default, no limit is considered.}
+\item{threshold}{Optional numeric value specifying a dispersal limit in map units.
+If \code{NULL} (default), no limit is applied.}
 
 \item{totweight}{The total length or weighted length of the whole network.}
 
 \item{outlet_seg}{An integer indicating the membership label of the outlet segment}
 
-\item{n.cores}{An optional integer value indicating the number of cores to
-use. Defaults to 1. Currently only works on MacOS and Linux.}
+\item{n.cores}{Optional integer specifying the number of cores to use for computation.
+Defaults to 1. Parallelization is currently supported only on macOS and Linux.}
 
-\item{quiet}{A logical value indicating whether the global DCI and a map of
-segments should be printed to the console. Defaults to TRUE.}
+\item{quiet}{Logical. If \code{FALSE}, prints the global DCI and a plot of river segments
+to the console. Defaults to \code{TRUE}.}
 }
 \description{
 Calculate thresholded diadromous DCI

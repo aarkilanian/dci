@@ -25,11 +25,11 @@ weighted or unweighted depending on parameters.}
 
 \item{outlet_seg}{An integer indicating the membership label of the outlet segment}
 
-\item{n.cores}{An optional integer value indicating the number of cores to
-use. Defaults to 1. Currently only works on MacOS and Linux.}
+\item{n.cores}{Optional integer specifying the number of cores to use for computation.
+Defaults to 1. Parallelization is currently supported only on macOS and Linux.}
 
-\item{quiet}{A logical value indicating whether the global DCI and a map of
-segments should be printed to the console. Defaults to TRUE.}
+\item{quiet}{Logical. If \code{FALSE}, prints the global DCI and a plot of river segments
+to the console. Defaults to \code{TRUE}.}
 }
 \value{
 A data frame which holds raw and relative DCI scores for each segment.

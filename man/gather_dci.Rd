@@ -19,7 +19,7 @@ gather_dci(
 )
 }
 \arguments{
-\item{net}{A \code{\link{river_net}} object.}
+\item{net}{A \link{river_net} object.}
 
 \item{from}{The origin segment's membership label.}
 
@@ -34,8 +34,8 @@ gather_dci(
 \item{seg_weights}{A data frame of each segments total length. Either
 weighted or unweighted depending on parameters.}
 
-\item{threshold}{An optional numeric value specifying a dispersal limit in
-map units. If NULL, the default, no limit is considered.}
+\item{threshold}{Optional numeric value specifying a dispersal limit in map units.
+If \code{NULL} (default), no limit is applied.}
 
 \item{totweight}{The total length or weighted length of the whole network.}
 

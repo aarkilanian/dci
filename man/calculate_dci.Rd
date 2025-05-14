@@ -2,7 +2,7 @@
 % Please edit documentation in R/calculate_dci.R
 \name{calculate_dci}
 \alias{calculate_dci}
-\title{Calculate different forms of the DCI for a \code{\link{river_net}} object}
+\title{Calculate DCI for a \code{river_net} Object}
 \usage{
 calculate_dci(
   net,
@@ -15,47 +15,45 @@ calculate_dci(
 )
 }
 \arguments{
-\item{net}{A \code{\link{river_net}} object.}
+\item{net}{A \link{river_net} object.}
 
-\item{form}{A string specifying the form of the DCI to calculate: either
-"potamodromous", "diadromous", or "invasive".}
+\item{form}{A string specifying the DCI form to calculate. Options are:
+\code{"potamodromous"} or \code{"diadromous"}.}
 
-\item{pass}{The name of a column in the nodes table of net which holds the
-numeric passability of nodes. If none is specified all barriers are
-automatically considered to have 0 passability.}
+\item{pass}{The name of a column in the nodes table of \code{net} containing numeric
+passability values. If \code{NULL}, all barriers are assumed to have 0 passability.}
 
-\item{weight}{The name of column in the edges tables of net which holds
-numeric weights to be applied to river lengths. If none is specified, the
-DCI is calculated only with river lengths.}
+\item{weight}{The name of a column in the edges table of \code{net} containing numeric
+weights for river lengths. If \code{NULL}, DCI is calculated using river length only.}
 
-\item{threshold}{An optional numeric value specifying a dispersal limit in
-map units. If NULL, the default, no limit is considered.}
+\item{threshold}{Optional numeric value specifying a dispersal limit in map units.
+If \code{NULL} (default), no limit is applied.}
 
-\item{n.cores}{An optional integer value indicating the number of cores to
-use. Defaults to 1. Currently only works on MacOS and Linux.}
+\item{n.cores}{Optional integer specifying the number of cores to use for computation.
+Defaults to 1. Parallelization is currently supported only on macOS and Linux.}
 
-\item{quiet}{A logical value indicating whether the global DCI and a map of
-segments should be printed to the console. Defaults to TRUE.}
+\item{quiet}{Logical. If \code{FALSE}, prints the global DCI and a plot of river segments
+to the console. Defaults to \code{TRUE}.}
 }
 \value{
-A \code{\link{sf}} object of the rivers from the provided
-\code{\link{river_net}} object with new columns specifying the segmental
-DCI values at each river location. If sites is not \code{NULL}, a \code{\link{sf}}
-object of the site points with their associated DCI scores.
+An \link{sf} object of the river network with new columns specifying
+segment-level DCI values. If site data was provided, an \link{sf} object of the
+site points with associated DCI scores is also returned.
 }
 \description{
-Calculate different forms of the DCI for a \code{\link{river_net}} object
+Calculates different forms of the Dendritic Connectivity Index (DCI) for a
+\link{river_net} object, including "potamodromous" and "diadromous".
 }
 \details{
-Passability values are probabilities from 0 to 1 where 0 indicates fully
-impassable and 1 indicates fully passable. If the values in the supplied
-passability column are not within this range they will be normalized.
+Passability values are probabilities between 0 and 1, where 0 indicates a fully
+impassable barrier and 1 indicates full passability. If values in the specified
+passability column fall outside this range, they will be normalized.
 
-Similarly weighting values are probability from 0 to 1. Rivers with weights
-of either 0 or NA will not be considered when calculating the DCI.
+Weighting values should also be probabilities between 0 and 1. River segments
+with weights of 0 or \code{NA} will be excluded from the DCI calculation.
 
-When DCI results are returned succesfully teh global DCI of the given river
-network will be printed to the console.
+Upon successful calculation, the global DCI value for the river network will
+be printed to the console unless \code{quiet = TRUE}.
 }
 \examples{
 \dontrun{

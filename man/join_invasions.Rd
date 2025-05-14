@@ -6,9 +6,6 @@
 \usage{
 join_invasions(net, invasions)
 }
-\arguments{
-\item{invasions}{A \code{invasions} object returned by \code{\link{import_points}}. This data is optional}
-}
 \value{
 A \code{\link{river_net}} object with the supplied invasions integrated to edges
 }

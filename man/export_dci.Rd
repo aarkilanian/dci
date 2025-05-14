@@ -2,28 +2,34 @@
 % Please edit documentation in R/export.R
 \name{export_dci}
 \alias{export_dci}
-\title{Export DCI results to spatial format}
+\title{Export DCI Results to Spatial Format}
 \usage{
 export_dci(net, results, type = "rivers")
 }
 \arguments{
-\item{net}{A \code{\link{river_net}} object.}
+\item{net}{A \link{river_net} object.}
 
-\item{results}{\code{dci_results} object or a list of objects of DCI results returned by \code{\link{calculate_dci}}.}
+\item{results}{A \code{dci_results} object, or a list of such objects, as returned by
+\code{\link[=calculate_dci]{calculate_dci()}}.}
 
-\item{type}{The element of the river network for which results should be reported. Can be either "rivers" or any of the nodes included in the \code{\link{river_net}} object such as "barriers" or "poi".}
+\item{type}{A character string specifying which component of the river network
+the results should be exported for. Valid options are \code{"rivers"} (default),
+or any of the node layers included in the \link{river_net} object, such as
+\code{"barriers"} or \code{"poi"}.}
 }
 \value{
-A \code{\link[sf]{sf}} object with the corresponding DCI results joined to each feature.
+An \link{sf} object containing the corresponding DCI results joined
+to the selected network component.
 }
 \description{
-Export DCI results to spatial format
+Exports the output of \code{calculate_dci()} as a spatial object with DCI values joined
+to the relevant features in the river network.
 }
 \examples{
 \dontrun{
 export_dci(net = net_name, results = dci_results, type = "rivers")
 export_dci(net = net_name, results = dci_results, type = "poi")
 export_dci(net = net_name, results = dci_results, type = "barriers")
-export_dci(net = net_name, results = list(a, b, c), type = "rivers")
+export_dci(net = net_name, results = list(result_a, result_b), type = "rivers")
 }
 }

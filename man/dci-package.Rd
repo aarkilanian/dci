@@ -4,7 +4,7 @@
 \name{dci-package}
 \alias{dci}
 \alias{dci-package}
-\title{dci: Calculate the Dendritic Connectivity in River Networks}
+\title{dci: Calculate the Dendritic Connectivity Index in River Networks}
 \description{
 Calculate and analyze ecological connectivity across the watercourse of river networks using the Dendritic Connectivity Index.
 }
