@@ -1,3 +1,27 @@
+test_that("River is imported correctly", {
+
+  # Load river
+  rivers <- readRDS(test_path("testdata", "riv_uncor.rds"))
+
+  # Test importing
+  imported <- import_rivers(rivers = rivers, quiet = TRUE)
+  expect_equal(ncol(imported), 7)
+
+})
+
+test_that("Non-projected river data throws error", {
+
+  # Load river
+  rivers <- readRDS(test_path("testdata", "riv_uncor.rds"))
+
+  # Remove CRS
+  sf::st_crs(rivers) <- NA
+
+  # Test error
+  expect_error(import_rivers(rivers), "Provided spatial data is not projected")
+
+})
+
 test_that("non-valid import path returns error", {
   expect_error(import_rivers("invalid_path"), "invalid spatial data provided")
   expect_error(import_points("invalid_path", type = "bars"), "invalid spatial data provided")

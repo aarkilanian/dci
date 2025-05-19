@@ -42,7 +42,7 @@ import_rivers <- function(rivers, quiet = FALSE) {
   }
 
   # Check projected
-  if (sf::st_is_longlat(rivers) == TRUE) {
+  if (sf::st_is_longlat(rivers) == TRUE | is.na(sf::st_is_longlat(rivers))) {
     stop("Provided spatial data is not projected")
   }
 
