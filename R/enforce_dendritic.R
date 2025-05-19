@@ -63,7 +63,7 @@ enforce_dendritic <- function(rivers, correct = FALSE, quiet = FALSE) {
 #' @inheritParams calculate_dci
 #' @inheritParams enforce_dendritic
 #'
-#' @return If correct is \code{TRUE} a \code{\link{river_net}} object with the shorter of each divergent pair removed. If correct is \code{FALSE} a \code{\link[sf]{sf}} object with divergent pairs identified with a shared number in the new "divergent" column.
+#' @return If correct is [TRUE] a \code{\link{river_net}} object with the shorter of each divergent pair removed. If correct is \code{FALSE} a \code{\link[sf]{sf}} object with divergent pairs identified with a shared number in the new "divergent" column.
 #'
 #' @keywords internal
 correct_divergences <- function(net, correct = TRUE, quiet = FALSE) {
