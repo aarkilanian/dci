@@ -1,3 +1,4 @@
+# Divergences #####
 test_that("Divergence correction removes one river per divergence", {
   # Create test river network
   rivers <- sf::st_as_sf(sf::st_sfc(
@@ -22,6 +23,45 @@ test_that("Divergence correction removes one river per divergence", {
   expect_equal(nrow(new_riv), 10)
 })
 
+test_that("Divergence correction corrects loops (single divergence)", {
+  # Create test river network
+  rivers <- sf::st_as_sf(sf::st_sfc(
+    sf::st_linestring(matrix(c(1, 1, 4, 3), 2)),
+    sf::st_linestring(matrix(c(1, 2, 3, 2), 2)),
+    sf::st_linestring(matrix(c(1, 1, 3, 1), 2)),
+    sf::st_linestring(matrix(c(2, 1, 2, 1), 2)),
+    sf::st_linestring(matrix(c(1, 1, 1, 0), 2))
+  ))
+  net <- sfnetworks::as_sfnetwork(rivers, length_as_weight = TRUE)
+
+  # Run test
+  new_net <- suppressWarnings(correct_divergences(net, quiet = TRUE))
+  new_riv <- sfnetworks::activate(new_net, edges)
+  new_riv <- as.data.frame(new_riv)
+  expect_equal(nrow(new_riv), 4)
+})
+
+test_that("Divergence correction corrects braids (multiple divergence)", {
+  # Create test river network
+  rivers <- sf::st_as_sf(sf::st_sfc(
+    sf::st_linestring(matrix(c(1, 2, 3, 2), 2)),
+    sf::st_linestring(matrix(c(1, 1, 3, 1), 2)),
+    sf::st_linestring(matrix(c(2, 1, 2, 1), 2)),
+    sf::st_linestring(matrix(c(1, 1, 1, 0), 2)),
+    sf::st_linestring(matrix(c(0, 1, 4, 3), 2)),
+    sf::st_linestring(matrix(c(1, 1, 5, 3), 2)),
+    sf::st_linestring(matrix(c(1, 0, 5, 4), 2)),
+    sf::st_linestring(matrix(c(1, 1, 6, 5), 2))
+  ))
+  net <- sfnetworks::as_sfnetwork(rivers, length_as_weight = TRUE)
+
+  # Run test
+  new_net <- suppressWarnings(correct_divergences(net, quiet = TRUE))
+  new_riv <- sfnetworks::activate(new_net, edges)
+  new_riv <- as.data.frame(new_riv)
+  expect_equal(nrow(new_riv), 6)
+})
+
 test_that("Message is written when no divergences", {
   # Create test river network
   rivers <- sf::st_as_sf(sf::st_sfc(
@@ -33,6 +73,24 @@ test_that("Message is written when no divergences", {
 
   # Run test
   expect_message(suppressWarnings(correct_divergences(net)), "No divergences detected.")
+})
+
+# Complex confluences #####
+
+test_that("Complex nodes are corrected", {
+  # Create test river network
+  rivers <- sf::st_as_sf(sf::st_sfc(
+    sf::st_linestring(matrix(c(1, 2, 1, 3), 2)),
+    sf::st_linestring(matrix(c(3, 2, 1, 3), 2)),
+    sf::st_linestring(matrix(c(0, 2, 3, 3), 2)),
+    sf::st_linestring(matrix(c(2, 4, 3, 3), 2))
+  ), crs = 32198) %>%
+    dplyr::rename("geometry" = "x") %>%
+    sf::st_as_sf(wkt = "geometry")
+  rivers <- sf::st_as_sf(rivers, wkt = "x")
+  net <- sfnetworks::as_sfnetwork(rivers)
+
+  expect_equal(nrow(correct_complex(net, quiet = TRUE)), 5)
 })
 
 test_that("Error when complex confluence has more than 3 inputs", {
@@ -61,22 +119,6 @@ test_that("Message is written when no complex", {
 
   # Run test
   expect_message(correct_complex(net), "No complex confluences found.")
-})
-
-test_that("Complex nodes are corrected", {
-  # Create test river network
-  rivers <- sf::st_as_sf(sf::st_sfc(
-    sf::st_linestring(matrix(c(1, 2, 1, 3), 2)),
-    sf::st_linestring(matrix(c(3, 2, 1, 3), 2)),
-    sf::st_linestring(matrix(c(0, 2, 3, 3), 2)),
-    sf::st_linestring(matrix(c(2, 4, 3, 3), 2))
-  ), crs = 32198) %>%
-    dplyr::rename("geometry" = "x") %>%
-    sf::st_as_sf(wkt = "geometry")
-  rivers <- sf::st_as_sf(rivers, wkt = "x")
-  net <- sfnetworks::as_sfnetwork(rivers)
-
-  expect_equal(nrow(correct_complex(net, quiet = TRUE)), 5)
 })
 
 test_that("Global correction test", {
