@@ -36,24 +36,40 @@
 #' enforce_dendritic(rivers = sf_line_object)
 #' enforce_dendritic(rivers = sf_line_object, correct = TRUE)
 #' }
-enforce_dendritic <- function(rivers, correct = FALSE, quiet = FALSE) {
+enforce_dendritic <- function(rivers, correct = TRUE, quiet = FALSE) {
+
   # Create river network
   net <- sfnetworks::as_sfnetwork(rivers, length_as_weight = TRUE)
 
   # Correct complex confluences
   # If automatically correcting topology, use network with divergences corrected
   if (correct) {
+
+    # Correct errors
     net <- correct_divergences(net, quiet)
     net <- correct_complex(net, quiet)
+
     # Recalculate river lengths
     net$riv_length <- as.double(sf::st_length(net))
+
     # Return corrected rivers
     invisible(net)
 
     # If errors are set to be manually edited, use full network
   } else {
+
+    # Get original column names
+    orig_cols <- colnames(rivers)
+
+    # Find errors
     net_div <- correct_divergences(net, correct, quiet)
     net_comp <- correct_complex(net_div, correct, quiet)
+
+    # Clean up columns
+    net_comp <- net_comp %>%
+      dplyr::select(c(all_of(orig_cols), "complexID", "divergent"))
+
+    # Output rivers
     invisible(net_comp)
   }
 }
@@ -130,7 +146,7 @@ correct_complex <- function(net, correct = TRUE, quiet = FALSE) {
   # Identify complex confluences
   net_undirected <- activate(tidygraph::convert(net, tidygraph::to_undirected), nodes)
   net_degree <- net_undirected %>%
-    dplyr::mutate(nodeID = dplyr::n()) %>%
+    dplyr::mutate(nodeID = 1:dplyr::n()) %>%
     dplyr::mutate(degree = tidygraph::centrality_degree())
   complex_nodes <- sf::st_as_sf(net_degree) %>%
     dplyr::filter(.data$degree >= 4) %>%
@@ -200,27 +216,33 @@ correct_complex <- function(net, correct = TRUE, quiet = FALSE) {
     # Move endpoints of closest river lines
     # Split outlet rivers at new confluence locations
     for (i in 1:length(modify_rivers)) {
+
       # Move river to new confluence
+
       # Get river geometry
       old_river <- sf::st_geometry(rivers.old[which(rivers.old$rivID == modify_rivers[i]), ])
       # Get new endpoint geometry
-      new_point <- sf::st_geometry(new_nodes[i, ])
-      point_x <- new_point[[1]][1]
-      point_y <- new_point[[1]][2]
-      # Get number of coordinates on river line
-      num_coord <- length(old_river[[1]])
-      # Update end coordinates with new point
-      new_river <- old_river
-      new_river[[1]][num_coord / 2] <- point_x
-      new_river[[1]][num_coord] <- point_y
+      new_point <- sf::st_coordinates(new_nodes[i, ])
+      point_x <- new_point[,1]
+      point_y <- new_point[,2]
+      # Retrieve X and Y coordinates of the river
+      riv_coords <- sf::st_coordinates(old_river)[,1:2]
+      # Modify endpoint coordinates to match new point
+      riv_coords[nrow(riv_coords),] <- c(point_x, point_y)
+      # Create new LINESTRING geometry for river
+      new_river <- sf::st_sfc(sf::st_linestring(riv_coords), crs = sf::st_crs(rivers))
       # Replace old geometry in rivers
-      sf::st_geometry(rivers[which(rivers$rivID == modify_rivers[i]), ]) <- sf::st_sfc(new_river)
+      sf::st_geometry(rivers[which(rivers$rivID == modify_rivers[i]), ]) <- new_river
+
       # Split outlet river at confluence
+
       # Get river geometry
       old_river <- sf::st_geometry(rivers.old[rivers.old$rivID == new_nodes$rivID[i], ])
-      num_coord <- length(old_river[[1]])
-      start_x <- old_river[[1]][1]
-      start_y <- old_river[[1]][num_coord / 2 + 1]
+      # Retrieve old river X and Y coordinates
+      old_coords <- sf::st_coordinates(old_river)[ ,1:2]
+      # Get start point coordinates
+      start_x <- old_coords[1,1]
+      start_y <- old_coords[1,2]
       # Create first line segment from old confluence to new confluence
       new_river1 <- sf::st_sf(sf::st_sfc(sf::st_linestring(matrix(c(
         start_x,
@@ -229,22 +251,37 @@ correct_complex <- function(net, correct = TRUE, quiet = FALSE) {
         point_y
       ), 2)), crs = sf::st_crs(rivers))) %>%
         dplyr::mutate(rivID = new_nodes$rivID[i])
+      # Correct geometry column name
       names(new_river1) <- c("geometry", "rivID")
       sf::st_geometry(new_river1) <- "geometry"
+
       # Create second line segment from new confluence to the end of original
-      new_river2 <- sf::st_geometry(old_river)
-      new_river2[[1]][1] <- point_x
-      new_river2[[1]][num_coord / 2 + 1] <- point_y
-      new_river2 <- sf::st_sf(new_river2) %>%
+
+      # Retrieve old coordinates
+      new_coords2 <- old_coords
+      # Replace start point
+      new_coords2[1, ] <- c(point_x, point_y)
+      # Create river geometry
+      new_river2 <- sf::st_sf(sf::st_sfc(sf::st_linestring(new_coords2), crs = sf::st_crs(rivers))) %>%
         dplyr::mutate(rivID = nrow(rivers) + 1)
-      names(new_river2)[names(new_river2) == "new_river2"] <- "geometry"
-      sf::st_geometry(new_river2) <- "geometry"
       new_river2$rivID[1] <- nrow(rivers) + 1
+      # Correct geometry column name
+      names(new_river2) <- c("geometry", "rivID")
+      sf::st_geometry(new_river2) <- "geometry"
+
       # Remove old river
       rivers <- rivers[!(rivers$rivID == new_nodes$rivID[i]), ]
       # Add new rivers
       rivers <- dplyr::bind_rows(rivers, new_river1, new_river2)
     }
+
+    # Remove any duplicate geometries if created
+    rivers <- rivers %>%
+      dplyr::distinct(geometry)
+
+    # Remove any invalid geometries if present
+    rivers <- rivers[sf::st_is_valid(rivers),]
+
     # Return modified rivers
     invisible(rivers)
   }

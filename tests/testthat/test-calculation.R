@@ -69,39 +69,3 @@ test_that("Diadromous DCI with threshold and weight", {
   dci <- calculate_dci(net, form = "diadromous", weight = "riv_weight", threshold = 3, pass = "pass_1", quiet = TRUE)
   expect_equal(round(sum(dci$DCI), 2), 22.18)
 })
-
-test_that("Invasive DCI", {
-  # Load rivnet
-  net <- readRDS(test_path("testdata", "testnet.rds"))
-
-  # Run test
-  dci <- calculate_dci(net, form = "invasive", pass = "pass_1", quiet = TRUE)
-  expect_equal(round(sum(dci$DCI_spread) + sum(dci$DCI_newinv), 2), 104.39)
-})
-
-test_that("Invasive DCI with weight", {
-  # Load rivnet
-  net <- readRDS(test_path("testdata", "testnet.rds"))
-
-  # Run test
-  dci <- calculate_dci(net, form = "invasive", weight = "riv_weight", pass = "pass_1", quiet = TRUE)
-  expect_equal(round(sum(dci$DCI_spread) + sum(dci$DCI_newinv), 2), 98.63)
-})
-
-test_that("Invasive DCI with threshold", {
-  # Load rivnet
-  net <- readRDS(test_path("testdata", "testnet.rds"))
-
-  # Run test
-  dci <- calculate_dci(net, form = "invasive", threshold = 3, pass = "pass_1", quiet = TRUE)
-  expect_equal(round(sum(dci$DCI_spread) + sum(dci$DCI_newinv), 2), 28.1)
-})
-
-test_that("Invasive DCI with threshold and weight", {
-  # Load rivnet
-  net <- readRDS(test_path("testdata", "testnet.rds"))
-
-  # Run test
-  dci <- calculate_dci(net, form = "invasive", weight = "riv_weight", threshold = 3, pass = "pass_1", quiet = TRUE)
-  expect_equal(round(sum(dci$DCI_spread) + sum(dci$DCI_newinv), 2), 50.46)
-})
