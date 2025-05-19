@@ -92,3 +92,86 @@ test_that("Points outside tolerance do not participate in splitting", {
   split_riv <- split_rivers_at_points(riv, pnt, tolerance = 5)
   expect_equal(nrow(split_riv) - nrow(riv), 1)
 })
+
+test_that("Outlet excluded in points for splitting", {
+
+  # Make rivers
+  riv <- sf::st_as_sf(sf::st_sfc(sf::st_linestring(matrix(c(1, 16, 1, 1), 2)))) %>%
+    dplyr::rename("geometry" = "x") %>%
+    sf::st_as_sf(wkt = "geometry")
+  riv <- sf::st_as_sf(riv, wkt = "x")
+  riv$riv_length <- 10
+
+  # Make points
+  pnt <- sf::st_as_sf(sf::st_sfc(sf::st_point(c(5, 1)), sf::st_point(c(9, 10)))) %>%
+    dplyr::rename("geometry" = "x") %>%
+    sf::st_as_sf(wkt = "geometry") %>%
+    dplyr::mutate(type = c("barrier", "outlet"))
+
+  # Run test
+  expect_equal(nrow(split_rivers_at_points(riv, pnt)),2)
+})
+
+test_that("Skips short rivers", {
+
+  # Make rivers
+  riv <- sf::st_as_sf(sf::st_sfc(sf::st_linestring(matrix(c(1, 1, 1, 2), 2)))) %>%
+    dplyr::rename("geometry" = "x") %>%
+    sf::st_as_sf(wkt = "geometry")
+  riv <- sf::st_as_sf(riv, wkt = "x")
+  riv$riv_length <- 10
+
+  # Make points
+  pnt <- sf::st_as_sf(sf::st_sfc(sf::st_point(c(5, 1)), sf::st_point(c(9, 10)))) %>%
+    dplyr::rename("geometry" = "x") %>%
+    sf::st_as_sf(wkt = "geometry") %>%
+    dplyr::mutate(type = c("barrier", "outlet"))
+
+  expect_warning(split_rivers_at_points(riv, pnt), "River too short to perform splitting.")
+
+})
+
+test_that("Rivers split when points are at start or end", {
+
+  # Make rivers
+  riv <- sf::st_as_sf(sf::st_sfc(sf::st_linestring(matrix(c(1, 16, 1, 1), 2)))) %>%
+    dplyr::rename("geometry" = "x") %>%
+    sf::st_as_sf(wkt = "geometry")
+  riv <- sf::st_as_sf(riv, wkt = "x")
+  riv$riv_length <- 10
+
+  # Make points
+  pnt_start <- sf::st_as_sf(sf::st_sfc(sf::st_point(c(1,1)))) %>%
+    dplyr::rename("geometry" = "x") %>%
+    sf::st_as_sf(wkt = "geometry")
+  pnt_end <- sf::st_as_sf(sf::st_sfc(sf::st_point(c(16, 1)))) %>%
+    dplyr::rename("geometry" = "x") %>%
+    sf::st_as_sf(wkt = "geometry")
+
+  # Test start
+  splitted <- split_rivers_at_points(riv, pnt_start)
+  expect_equal(splitted[1,]$riv_length, 1.5)
+
+  # Test end
+  splitted <- split_rivers_at_points(riv, pnt_end)
+  expect_equal(splitted[2,]$riv_length, 1.5)
+})
+
+test_that("Nodes outside specified tolerance are skipped", {
+
+  # Make rivers
+  riv <- sf::st_as_sf(sf::st_sfc(sf::st_linestring(matrix(c(1, 16, 1, 1), 2)))) %>%
+    dplyr::rename("geometry" = "x") %>%
+    sf::st_as_sf(wkt = "geometry")
+  riv <- sf::st_as_sf(riv, wkt = "x")
+  riv$riv_length <- 10
+
+  # Make points
+  pnt <- sf::st_as_sf(sf::st_sfc(sf::st_point(c(5, 5)))) %>%
+    dplyr::rename("geometry" = "x") %>%
+    sf::st_as_sf(wkt = "geometry")
+
+  # Test
+  expect_equal(nrow(split_rivers_at_points(riv, pnt, tolerance = 3)), 1)
+
+})

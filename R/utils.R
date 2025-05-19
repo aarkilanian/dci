@@ -8,6 +8,7 @@
 #'
 #' @keywords internal
 split_rivers_at_points <- function(rivers, pts, tolerance = NULL) {
+
   # Remove sinks if present
   if ("outlet" %in% pts$type) {
     pts <- pts[pts$type != "outlet", ]
@@ -44,7 +45,7 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL) {
       }
     )
     # If river only has 2 points skip
-    if (nrow(riv_pts) == 2) {
+    if (nrow(riv_pts) <= 2) {
       warning("River too short to perform splitting.")
       next()
     }
@@ -75,18 +76,6 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL) {
     river1 <- sf::st_sf(river1, crs = sf::st_crs(rivers))
 
     # Create second segment
-    # If point is close to end of river line
-    if (nrow(riv_pts) == nrst_ind) {
-      line_start <- sf::st_geometry(riv_pts[nrst_ind, ])
-      line_end <- sf::st_geometry(rivers[riv_ind, ])
-      line_end <- sf::st_sfc(sf::st_point(c(line_end[[1]][riv_len / 2], line_end[[1]][riv_len])), crs = sf::st_crs(rivers))
-      river2_geom <- sf::st_sfc(sf::st_linestring(matrix(c(line_start[[1]][1], line_end[[1]][1], line_start[[1]][2], line_end[[1]][2]), ncol = 2)))
-      river2 <- rivers[riv_ind, ]
-      sf::st_crs(river2_geom) <- sf::st_crs(rivers)
-      sf::st_geometry(river2) <- river2_geom
-      river2$riv_length <- as.double(sf::st_length(river2))
-      # Otherwise
-    } else {
       riv_end <- sf::st_geometry(rivers[riv_ind, ])
       riv_end <- sf::st_sfc(sf::st_point(c(riv_end[[1]][riv_len / 2], riv_end[[1]][riv_len])), crs = sf::st_crs(rivers))
       sf::st_geometry(riv_pts[nrow(riv_pts), ]) <- sf::st_geometry(riv_end)
@@ -98,7 +87,6 @@ split_rivers_at_points <- function(rivers, pts, tolerance = NULL) {
       sf::st_crs(river2_geom) <- sf::st_crs(rivers)
       sf::st_geometry(river2) <- river2_geom
       river2$riv_length <- as.double(sf::st_length(river2))
-    }
     # Add new rivers
     rivers <- rbind(rivers, river1, river2)
     # Remove old river
@@ -155,31 +143,6 @@ join_attributes <- function(net, nodes, tolerance = NULL) {
     dplyr::mutate(type = dplyr::if_else(is.na(.data$type), "topo", .data$type))
 
   # Return joined network
-  invisible(net)
-}
-
-#' Join invasions to river segments
-#'
-#' @inheritParams river_net
-#'
-#' @return A \code{\link{river_net}} object with the supplied invasions integrated to edges
-#'
-#' @keywords internal
-join_invasions <- function(net, invasions) {
-  # Extract network nodes
-  net_nodes <- sf::st_as_sf(activate(net, nodes))
-
-  # Find nearest node for each invasion site
-  nrst <- sf::st_nearest_feature(invasions, net_nodes)
-
-  # Determine membership of near nodes
-  nrst_member <- net_nodes$member.label[nrst]
-
-  # Add invaded attribute to nodes with same membership
-  net <- activate(net, nodes) %>%
-    dplyr::mutate(invaded = dplyr::if_else(.data$member.label %in% nrst_member, TRUE, FALSE))
-
-  # Return network
   invisible(net)
 }
 
