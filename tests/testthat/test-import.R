@@ -1,7 +1,8 @@
 test_that("River is imported correctly", {
 
   # Load river
-  rivers <- readRDS(test_path("testdata", "riv_uncor.rds"))
+  rivers <- readRDS(test_path("testdata", "riv_uncor.rds")) %>%
+    dplyr::select(!c("from", "to"))
 
   # Test importing
   imported <- import_rivers(rivers = rivers, quiet = TRUE)

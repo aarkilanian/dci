@@ -142,6 +142,9 @@ test_that("Manual correction works", {
     sf::st_as_sf(wkt = "geometry")
   rivers <- sf::st_as_sf(rivers, wkt = "x")
 
+  # Perform check for dendritic violations
   rivers_out <- enforce_dendritic(rivers, correct = FALSE)
+
+  expect_equal(all(c("complexID", "divergent") %in% colnames(rivers_out)), TRUE)
 
 })
