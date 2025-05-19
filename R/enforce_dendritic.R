@@ -67,7 +67,7 @@ enforce_dendritic <- function(rivers, correct = TRUE, quiet = FALSE) {
 
     # Clean up columns
     net_comp <- net_comp %>%
-      dplyr::select(c(all_of(orig_cols), "complexID", "divergent"))
+      dplyr::select(c(dplyr::all_of(orig_cols), "complexID", "divergent"))
 
     # Output rivers
     invisible(net_comp)
@@ -277,7 +277,7 @@ correct_complex <- function(net, correct = TRUE, quiet = FALSE) {
 
     # Remove any duplicate geometries if created
     rivers <- rivers %>%
-      dplyr::distinct(geometry)
+      dplyr::distinct(.data$geometry)
 
     # Remove any invalid geometries if present
     rivers <- rivers[sf::st_is_valid(rivers),]

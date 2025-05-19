@@ -17,7 +17,7 @@ automatically corrected.}
 to the console. Defaults to \code{TRUE}.}
 }
 \value{
-If correct is \code{TRUE} a \code{\link{river_net}} object with the shorter of each divergent pair removed. If correct is \code{FALSE} a \code{\link[sf]{sf}} object with divergent pairs identified with a shared number in the new "divergent" column.
+If correct is \link{TRUE} a \code{\link{river_net}} object with the shorter of each divergent pair removed. If correct is \code{FALSE} a \code{\link[sf]{sf}} object with divergent pairs identified with a shared number in the new "divergent" column.
 }
 \description{
 Correct river divergences

@@ -57,8 +57,10 @@ be printed to the console unless \code{quiet = TRUE}.
 }
 \examples{
 \dontrun{
-calculate_dci(net = net_name, form = "all", pass = "pass",
-  weight = "river_weight", threshold = 1500)
+calculate_dci(
+  net = net_name, form = "all", pass = "pass",
+  weight = "river_weight", threshold = 1500
+)
 calculate_dci(net = net_name, form = "potamodromous")
 calculate_dci(net = net_name, form = "diadromous", threshold = 2100)
 }

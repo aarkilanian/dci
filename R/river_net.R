@@ -33,7 +33,6 @@ river_net <- function(rivers,
                       barriers,
                       outlet,
                       poi = NULL,
-                      invasions = NULL,
                       check = TRUE,
                       tolerance = NULL) {
   # Check rivers
@@ -64,16 +63,6 @@ river_net <- function(rivers,
     }
     if (sf::st_crs(poi) != sf::st_crs(rivers)) {
       stop("CRS of points of interest does not match rivers")
-    }
-  }
-
-  # Check invasions
-  if (!(is.null(invasions))) {
-    if (!("invasions" %in% class(invasions))) {
-      stop("Invasions must first be imported with `import_points`")
-    }
-    if (sf::st_crs(invasions) != sf::st_crs(rivers)) {
-      stop("CRS of invasions does not match rivers")
     }
   }
 
@@ -117,11 +106,6 @@ river_net <- function(rivers,
 
   # Apply membership labelling
   net <- membership_labeling(net)
-
-  # If provided, combine invasions to river attributes
-  if (!(is.null(invasions))) {
-    net <- join_invasions(net, invasions)
-  }
 
   # Define river_net class
   net <- structure(net, class = c("river_net", class(net)))

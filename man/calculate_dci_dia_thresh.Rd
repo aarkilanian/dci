@@ -29,13 +29,8 @@ object with river attributes joined.}
 \item{seg_weights}{A data frame of each segments total length. Either
 weighted or unweighted depending on parameters.}
 
-\item{weighted}{A logical value indicating whether river lengths in
-seg_weights are weighted.}
-
 \item{threshold}{Optional numeric value specifying a dispersal limit in map units.
 If \code{NULL} (default), no limit is applied.}
-
-\item{totweight}{The total length or weighted length of the whole network.}
 
 \item{outlet_seg}{An integer indicating the membership label of the outlet segment}
 

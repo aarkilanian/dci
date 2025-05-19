@@ -2,7 +2,7 @@
 % Please edit documentation in R/calculate_dci.R
 \name{gather_dci}
 \alias{gather_dci}
-\title{Calculate sub-segmental DCI component between a single pair of segments}
+\title{Calculate thresholded invasive DCI}
 \usage{
 gather_dci(
   net,
@@ -21,18 +21,11 @@ gather_dci(
 \arguments{
 \item{net}{A \link{river_net} object.}
 
-\item{from}{The origin segment's membership label.}
+\item{form}{A string specifying the DCI form to calculate. Options are:
+\code{"potamodromous"} or \code{"diadromous"}.}
 
-\item{to}{The destination segment's membership label.}
-
-\item{distance}{The distance, in map units, between the two segments as calculated by \code{\link{gather_dist}}.}
-
-\item{pass}{The passability between the two segments as calculated by \code{\link{gather_perm}}.}
-
-\item{nodes}{An \code{\link{sf}} object of the nodes of the \code{\link{river_net}} object with river attributes joined.}
-
-\item{seg_weights}{A data frame of each segments total length. Either
-weighted or unweighted depending on parameters.}
+\item{pass}{The name of a column in the nodes table of \code{net} containing numeric
+passability values. If \code{NULL}, all barriers are assumed to have 0 passability.}
 
 \item{threshold}{Optional numeric value specifying a dispersal limit in map units.
 If \code{NULL} (default), no limit is applied.}
@@ -43,9 +36,9 @@ If \code{NULL} (default), no limit is applied.}
 seg_weights are weighted.}
 }
 \value{
-The sub-segmental DCI component between given pair of segments.
+A data frame which holds raw and relative DCI scores for each segment.
 }
 \description{
-Calculate sub-segmental DCI component between a single pair of segments
+Calculate thresholded invasive DCI
 }
 \keyword{internal}

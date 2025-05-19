@@ -67,12 +67,12 @@ import_rivers <- function(rivers, quiet = FALSE) {
     dplyr::ungroup()
   comps <- activate(net, nodes) %>%
     as.data.frame(.data) %>%
-    dplyr::select(component)
+    dplyr::select(.data$component)
 
   # Determine largest component and extract
   big_comp <- sort(table(comps), decreasing = TRUE)[1]
   big_comp <- as.integer(names(big_comp))
-  net <- net %>% dplyr::filter(component == big_comp)
+  net <- net %>% dplyr::filter(.data$component == big_comp)
   rivers <- sf::st_as_sf(activate(net, edges))
 
   # Calculate river lengths

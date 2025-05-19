@@ -2,7 +2,7 @@
 % Please edit documentation in R/calculate_dci.R
 \name{calculate_dci_pot_thresh}
 \alias{calculate_dci_pot_thresh}
-\title{Calculate thresholded potamodromous DCI}
+\title{Calculate non-thresholded invasive DCI}
 \usage{
 calculate_dci_pot_thresh(
   net,
@@ -28,13 +28,8 @@ object with river attributes joined.}
 \item{seg_weights}{A data frame of each segments total length. Either
 weighted or unweighted depending on parameters.}
 
-\item{weighted}{A logical value indicating whether river lengths in
-seg_weights are weighted.}
-
 \item{threshold}{Optional numeric value specifying a dispersal limit in map units.
 If \code{NULL} (default), no limit is applied.}
-
-\item{totweight}{The total length or weighted length of the whole network.}
 
 \item{n.cores}{An optional integer value indicating the number of cores to
 use. Defaults to 1. Currently only works on MacOS and Linux.}
@@ -46,6 +41,6 @@ to the console. Defaults to \code{TRUE}.}
 A data frame which holds raw and relative DCI scores for each segment.
 }
 \description{
-Calculate thresholded potamodromous DCI
+Calculate non-thresholded invasive DCI
 }
 \keyword{internal}
