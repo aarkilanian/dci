@@ -66,8 +66,8 @@ import_rivers <- function(rivers, quiet = FALSE) {
     dplyr::group_by(.data$component) %>%
     dplyr::ungroup()
   comps <- activate(net, nodes) %>%
-    as.data.frame(.data) %>%
-    dplyr::select(.data$component)
+    as.data.frame(.data)
+  comps <- comps$component
 
   # Determine largest component and extract
   big_comp <- sort(table(comps), decreasing = TRUE)[1]
