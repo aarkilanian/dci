@@ -16,7 +16,7 @@
 #'
 #' @param net A [river_net] object.
 #' @param form A string specifying the DCI form to calculate. Options are:
-#'   `"potamodromous"` or `"diadromous"`.
+#'   `"pot"` for potamodromous or `"dia"` for diadromous.
 #' @param pass The name of a column in the nodes table of `net` containing numeric
 #'   passability values. If `NULL`, all barriers are assumed to have 0 passability.
 #' @param weight The name of a column in the edges table of `net` containing numeric
@@ -40,8 +40,8 @@
 #'   net = net_name, form = "all", pass = "pass",
 #'   weight = "river_weight", threshold = 1500
 #' )
-#' calculate_dci(net = net_name, form = "potamodromous")
-#' calculate_dci(net = net_name, form = "diadromous", threshold = 2100)
+#' calculate_dci(net = net_name, form = "pot")
+#' calculate_dci(net = net_name, form = "dia", threshold = 2100)
 #' }
 calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NULL, n.cores = 1, quiet = FALSE) {
   # Check that network is valid
@@ -49,8 +49,8 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
     stop("A valid river_net object is required.")
   }
   # Check that form is valid
-  if (!(form %in% c("potamodromous", "diadromous", "invasive"))) {
-    stop("A valid form of the DCI must be requested.")
+  if (!(form %in% c("pot", "dia"))) {
+    stop("A valid form of the DCI must be requested. Either `pot` or `dia`")
   }
 
   # Extract edges
@@ -139,8 +139,8 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
   # Gather member IDs
   all_members <- seg_weights$member.label
 
-  # Identify outlet segment for diadromous or invasive
-  if (form %in% c("diadromous", "invasive")) {
+  # Identify outlet segment for diadromous
+  if (form %in% c("dia")) {
     outlet_seg <- activate(net, nodes) %>%
       dplyr::filter(.data$type == "outlet") %>%
       dplyr::pull(.data$member.label)
@@ -152,9 +152,9 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
     seg_weights$segweight <- seg_weights$segweight / totweight
 
     # Potamodromous case
-    if (form == "potamodromous") DCIs <- calculate_dci_pot(all_members, net_nodes, seg_weights, n.cores, quiet)
+    if (form == "pot") DCIs <- calculate_dci_pot(all_members, net_nodes, seg_weights, n.cores, quiet)
     # Diadromous case
-    if (form == "diadromous") DCIs <- calculate_dci_dia(all_members, net_nodes, seg_weights, outlet_seg, n.cores, quiet)
+    if (form == "dia") DCIs <- calculate_dci_dia(all_members, net_nodes, seg_weights, outlet_seg, n.cores, quiet)
     # Return calculated DCI values
     DCIs <- structure(DCIs, class = c("dci_results", class(DCIs)))
     return(DCIs)
@@ -166,9 +166,9 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
     if (!is.null(weight)) weighted <- TRUE
 
     # Potamodromous case
-    if (form == "potamodromous") DCIs <- calculate_dci_pot_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, n.cores, quiet)
+    if (form == "pot") DCIs <- calculate_dci_pot_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, n.cores, quiet)
     # Diadromous case
-    if (form == "diadromous") DCIs <- calculate_dci_dia_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, n.cores, quiet)
+    if (form == "dia") DCIs <- calculate_dci_dia_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, n.cores, quiet)
     # Return calculated DCI values
     DCIs <- structure(DCIs, class = c("dci_results", class(DCIs)))
     return(DCIs)
