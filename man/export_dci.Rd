@@ -4,7 +4,7 @@
 \alias{export_dci}
 \title{Export DCI Results to Spatial Format}
 \usage{
-export_dci(net, results, type = "rivers")
+export_dci(net, results, type = "rivers", relative = FALSE, quiet = TRUE)
 }
 \arguments{
 \item{net}{A \link{river_net} object.}
@@ -16,10 +16,18 @@ export_dci(net, results, type = "rivers")
 the results should be exported for. Valid options are \code{"rivers"} (default),
 or any of the node layers included in the \link{river_net} object, such as
 \code{"barriers"} or \code{"poi"}.}
+
+\item{relative}{A logical value indicating whether relative DCI values should
+be returned in addition to raw values. Defaults to \code{FALSE}.}
+
+\item{quiet}{Logical. If \code{FALSE}, prints the global DCI and a plot of river segments
+to the console. Defaults to \code{TRUE}.}
 }
 \value{
 An \link{sf} object containing the corresponding DCI results joined
-to the selected network component.
+to the selected network component. If multiple results are supplied, result
+columns are appended by a number corresponding to the index of the
+associated results.
 }
 \description{
 Exports the output of \code{calculate_dci()} as a spatial object with DCI values joined

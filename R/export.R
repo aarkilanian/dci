@@ -10,9 +10,13 @@
 #'   the results should be exported for. Valid options are `"rivers"` (default),
 #'   or any of the node layers included in the [river_net] object, such as
 #'   `"barriers"` or `"poi"`.
+#' @param relative A logical value indicating whether relative DCI values should
+#'   be returned in addition to raw values. Defaults to `FALSE`.
 #'
 #' @return An [sf] object containing the corresponding DCI results joined
-#'   to the selected network component.
+#'   to the selected network component. If multiple results are supplied, result
+#'   columns are appended by a number corresponding to the index of the
+#'   associated results.
 #'
 #' @export
 #'
@@ -23,7 +27,8 @@
 #' export_dci(net = net_name, results = dci_results, type = "barriers")
 #' export_dci(net = net_name, results = list(result_a, result_b), type = "rivers")
 #' }
-export_dci <- function(net, results, type = "rivers") {
+export_dci <- function(net, results, type = "rivers", relative = FALSE,
+                       quiet = TRUE) {
   if (type == "rivers") {
     # Extract nodes
     nodes <- sf::st_as_sf(activate(net, nodes)) %>%
@@ -43,7 +48,7 @@ export_dci <- function(net, results, type = "rivers") {
       # Rename result columns
       if (length(results) > 1) {
         names(results[[i]])[names(results[[i]]) == "DCI"] <- paste0("DCI_", i)
-        names(results[[i]])[names(results[[i]]) == "DCI_rel"] <- paste0("DCI_rel_", i)
+        if(relative) names(results[[i]])[names(results[[i]]) == "DCI_rel"] <- paste0("DCI_rel_", i)
       }
 
       # Join results
@@ -76,7 +81,7 @@ export_dci <- function(net, results, type = "rivers") {
       # Rename result columns
       if (length(results) > 1) {
         names(results[[i]])[names(results[[i]]) == "DCI"] <- paste0("DCI_", i)
-        names(results[[i]])[names(results[[i]]) == "DCI_rel"] <- paste0("DCI_rel_", i)
+        if(relative) names(results[[i]])[names(results[[i]]) == "DCI_rel"] <- paste0("DCI_rel_", i)
       }
 
       # Join results
@@ -142,6 +147,6 @@ export_dci <- function(net, results, type = "rivers") {
     # Return result
     invisible(others)
   } else {
-    stop("type must be either 'rivers', 'barriers', or 'others' ")
+    stop("type must be either 'rivers' or 'barriers'.")
   }
 }

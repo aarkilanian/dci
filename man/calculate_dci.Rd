@@ -18,7 +18,7 @@ calculate_dci(
 \item{net}{A \link{river_net} object.}
 
 \item{form}{A string specifying the DCI form to calculate. Options are:
-\code{"potamodromous"} or \code{"diadromous"}.}
+\code{"pot"} for potamodromous or \code{"dia"} for diadromous.}
 
 \item{pass}{The name of a column in the nodes table of \code{net} containing numeric
 passability values. If \code{NULL}, all barriers are assumed to have 0 passability.}
@@ -61,7 +61,7 @@ calculate_dci(
   net = net_name, form = "all", pass = "pass",
   weight = "river_weight", threshold = 1500
 )
-calculate_dci(net = net_name, form = "potamodromous")
-calculate_dci(net = net_name, form = "diadromous", threshold = 2100)
+calculate_dci(net = net_name, form = "pot")
+calculate_dci(net = net_name, form = "dia", threshold = 2100)
 }
 }

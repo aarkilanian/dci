@@ -22,7 +22,7 @@ gather_dci(
 \item{net}{A \link{river_net} object.}
 
 \item{form}{A string specifying the DCI form to calculate. Options are:
-\code{"potamodromous"} or \code{"diadromous"}.}
+\code{"pot"} for potamodromous or \code{"dia"} for diadromous.}
 
 \item{pass}{The name of a column in the nodes table of \code{net} containing numeric
 passability values. If \code{NULL}, all barriers are assumed to have 0 passability.}

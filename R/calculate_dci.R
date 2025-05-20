@@ -422,7 +422,6 @@ calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, w
 
 #' Calculate thresholded invasive DCI
 #'
-#' @inheritParams calculate_dci_inv
 #' @inheritParams calculate_dci
 #' @param weighted A logical value indicating whether river lengths in
 #'   seg_weights are weighted.
