@@ -36,24 +36,77 @@
 #' enforce_dendritic(rivers = sf_line_object)
 #' enforce_dendritic(rivers = sf_line_object, correct = TRUE)
 #' }
-enforce_dendritic <- function(rivers, correct = TRUE, quiet = FALSE) {
+enforce_dendritic <- function(rivers, correct = TRUE, quiet = FALSE,
+                              max_iter = 10) {
 
   # Create river network
-  net <- sfnetworks::as_sfnetwork(rivers, length_as_weight = TRUE)
+  net <- suppressWarnings(
+    sfnetworks::as_sfnetwork(rivers, length_as_weight = TRUE)
+  )
 
   # Correct complex confluences
   # If automatically correcting topology, use network with divergences corrected
   if (correct) {
 
-    # Correct errors
-    net <- correct_divergences(net, quiet)
-    net <- correct_complex(net, quiet)
+    # Print iteration
+    i <- 1
+    if(!quiet) message(paste0("Iteration ", i, ":"))
+    rivers <- correct_divergences(net, correct, quiet)
+    divergences <- rivers[[2]]
+    rivers <- rivers[[1]]
+
+    # Create network from rivers
+    net <- suppressWarnings(
+      sfnetworks::as_sfnetwork(rivers, length_as_weight = TRUE)
+    )
+
+    rivers <- correct_complex(net, correct, quiet)
+    complexes <- rivers[[2]]
+    rivers <- rivers[[1]]
+
+    # Keep correcting until no more errors
+    i <- 2
+    while(divergences != 0 || complexes != 0){
+
+      # Print iteration
+      if(!quiet) message(paste0("Iteration ", i, ":"))
+
+      # Prepare new network
+      net <- suppressWarnings(
+        sfnetworks::as_sfnetwork(rivers, length_as_weight = TRUE)
+      )
+
+      # Correct divergences
+      rivers <- correct_divergences(net, correct, quiet)
+      divergences <- rivers[[2]]
+      rivers <- rivers[[1]]
+
+      # Create network from rivers
+      net <- suppressWarnings(
+        sfnetworks::as_sfnetwork(rivers, length_as_weight = TRUE)
+      )
+
+      # Correct complex
+      rivers <- correct_complex(net, correct, quiet)
+      complexes <- rivers[[2]]
+      rivers <- rivers[[1]]
+
+      # Increment counter
+      i <- i + 1
+
+      # Issue error if reached maximum iterations
+      if(i > max_iter) stop("Maximum number of topology correction iterations
+                             reached. Consider manual correction of some or all
+                             topological errors with the standalone
+                             `enforce_dendritic(correct = FALSE)` or increase
+                             `max_iter` parameter.")
+    }
 
     # Recalculate river lengths
-    net$riv_length <- as.double(sf::st_length(net))
+    rivers$riv_length <- as.double(sf::st_length(rivers))
 
     # Return corrected rivers
-    invisible(net)
+    invisible(rivers)
 
     # If errors are set to be manually edited, use full network
   } else {
@@ -127,10 +180,17 @@ correct_divergences <- function(net, correct = TRUE, quiet = FALSE) {
   # Print number of corrected divergences
   if (num_div == 0) {
     if (!quiet) message("No divergences detected.")
-    invisible(net)
+    # Extract rivers
+    rivers <- sf::st_as_sf(activate(net, edges))
+    # Return
+    invisible(list(rivers, num_div))
+
   } else {
     if (!quiet) message(paste0(num_div, " divergences corrected."))
-    invisible(net_corrected)
+    # Extract rivers
+    rivers <- sf::st_as_sf(activate(net_corrected, edges))
+    # Return
+    invisible(list(rivers, num_div))
   }
 }
 
@@ -143,6 +203,7 @@ correct_divergences <- function(net, correct = TRUE, quiet = FALSE) {
 #'
 #' @keywords internal
 correct_complex <- function(net, correct = TRUE, quiet = FALSE) {
+
   # Identify complex confluences
   net_undirected <- activate(tidygraph::convert(net, tidygraph::to_undirected), nodes)
   net_degree <- net_undirected %>%
@@ -159,7 +220,7 @@ correct_complex <- function(net, correct = TRUE, quiet = FALSE) {
   # If no errors return unchanged rivers
   if (length(complex_nodes$degree) == 0) {
     if (!quiet) message("No complex confluences found.")
-    invisible(sf::st_as_sf(activate(net, edges)))
+    invisible(list(sf::st_as_sf(activate(net, edges)), 0))
 
     # Correct complex confluences detected
   } else {
@@ -201,13 +262,15 @@ correct_complex <- function(net, correct = TRUE, quiet = FALSE) {
     new_nodes <- new_nodes[c("complexID", "rivID")]
     # Find closest rivers to new points
     modify_rivers <- integer(length = nrow(complex_nodes))
-    for (confluence in new_nodes$complexID) {
+    for (i in 1:nrow(new_nodes)) {
+      # Set conlfuence
+      confluence <- new_nodes$complexID[i]
       # Gather participating rivers
       candidates <- buff_intersect[buff_intersect$complexID == confluence, ]
       # Determine closest river to new confluence
-      distances <- sf::st_distance(new_nodes[confluence, ], candidates)
+      distances <- sf::st_distance(new_nodes[new_nodes$complexID == confluence,], candidates)
       ind <- which(distances == min(distances[distances > units::as_units(0, "m")]))
-      modify_rivers[confluence] <- candidates$rivID[ind]
+      modify_rivers[i] <- candidates$rivID[ind]
     }
 
     # Save old rivers
@@ -283,6 +346,6 @@ correct_complex <- function(net, correct = TRUE, quiet = FALSE) {
     rivers <- rivers[sf::st_is_valid(rivers),]
 
     # Return modified rivers
-    invisible(rivers)
+    invisible(list(rivers, num_complex))
   }
 }

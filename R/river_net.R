@@ -17,6 +17,8 @@
 #' @param tolerance A numeric value specifying the snapping distance
 #' (in map units) to align points to the river network. Defaults to `NULL`,
 #' meaning no snapping.
+#' @param max_iter Integer. Indicates the maximum number of topological correction
+#' iterations. Defaults to 10.
 #'
 #' @return An object of class [river_net] representing the river network formed
 #' from the provided spatial inputs.
@@ -34,7 +36,8 @@ river_net <- function(rivers,
                       outlet,
                       poi = NULL,
                       check = TRUE,
-                      tolerance = NULL) {
+                      tolerance = NULL,
+                      max_iter = 10) {
   # Check rivers
   if (!("rivers" %in% class(rivers))) {
     stop("Rivers must first be imported with `import_rivers`")
