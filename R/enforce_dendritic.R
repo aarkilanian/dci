@@ -39,7 +39,7 @@
 enforce_dendritic <- function(rivers, correct = TRUE, quiet = FALSE,
                               max_iter = 10) {
 
-  # Create river network
+  # Create river network with length as weight
   net <- suppressWarnings(
     sfnetworks::as_sfnetwork(rivers, length_as_weight = TRUE)
   )
@@ -57,7 +57,7 @@ enforce_dendritic <- function(rivers, correct = TRUE, quiet = FALSE,
 
     # Create network from rivers
     net <- suppressWarnings(
-      sfnetworks::as_sfnetwork(rivers, length_as_weight = TRUE)
+      sfnetworks::as_sfnetwork(rivers)
     )
 
     rivers <- correct_complex(net, correct, quiet)
@@ -83,7 +83,7 @@ enforce_dendritic <- function(rivers, correct = TRUE, quiet = FALSE,
 
       # Create network from rivers
       net <- suppressWarnings(
-        sfnetworks::as_sfnetwork(rivers, length_as_weight = TRUE)
+        sfnetworks::as_sfnetwork(rivers)
       )
 
       # Correct complex
@@ -157,7 +157,9 @@ correct_divergences <- function(net, correct = TRUE, quiet = FALSE) {
   net_corrected <- activate(net, edges) %>%
     dplyr::group_by(.data$from) %>%
     dplyr::filter(.data$weight == max(.data$weight)) %>%
-    tidygraph::ungroup(.data)
+    tidygraph::ungroup(.data) %>%
+    # Remove weight column
+    dplyr::select(!(.data$weight))
 
   # Identify components
   net_comp <- activate(net_corrected, nodes) %>%
@@ -181,14 +183,14 @@ correct_divergences <- function(net, correct = TRUE, quiet = FALSE) {
   if (num_div == 0) {
     if (!quiet) message("No divergences detected.")
     # Extract rivers
-    rivers <- sf::st_as_sf(activate(net, edges))
+    rivers <- sf::st_as_sf(activate(net, edges))[,-c(1:2)]
     # Return
     invisible(list(rivers, num_div))
 
   } else {
     if (!quiet) message(paste0(num_div, " divergences corrected."))
     # Extract rivers
-    rivers <- sf::st_as_sf(activate(net_corrected, edges))
+    rivers <- sf::st_as_sf(activate(net_corrected, edges))[,-c(1:2)]
     # Return
     invisible(list(rivers, num_div))
   }
@@ -340,7 +342,7 @@ correct_complex <- function(net, correct = TRUE, quiet = FALSE) {
 
     # Remove any duplicate geometries if created
     rivers <- rivers %>%
-      dplyr::distinct(.data$geometry)
+      dplyr::distinct(.data$geometry, .keep_all = TRUE)
 
     # Remove any invalid geometries if present
     rivers <- rivers[sf::st_is_valid(rivers),]

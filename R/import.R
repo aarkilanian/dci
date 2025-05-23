@@ -15,6 +15,9 @@
 #' @export
 #'
 #' @examples
+#' data(yamaska)
+#'
+#'
 #' \dontrun{
 #' import_rivers(rivers = "path/to/shapefile.shp")
 #' import_rivers(rivers = sf_line_object)

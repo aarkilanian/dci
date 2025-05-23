@@ -53,11 +53,11 @@ export_dci <- function(net, results, type = "rivers", relative = FALSE,
 
       # Join results
       rivers <- rivers %>%
-        dplyr::left_join(results[[i]], by = c("member.label" = "segment"))
+        dplyr::left_join(results[[i]], by = c("member_label" = "segment"))
     }
 
     # Remove node label column
-    rivers <- rivers[, !(names(rivers) == "node.label")]
+    rivers <- rivers[, !(names(rivers) == "node_label")]
 
     # Plot result if only one result joined
     if (length(results) == 1) {
@@ -86,11 +86,11 @@ export_dci <- function(net, results, type = "rivers", relative = FALSE,
 
       # Join results
       barriers <- barriers %>%
-        dplyr::left_join(results[[i]], by = c("member.label" = "segment"))
+        dplyr::left_join(results[[i]], by = c("member_label" = "segment"))
     }
 
     # Remove node label column
-    barriers <- barriers[, !(names(barriers) == "node.label")]
+    barriers <- barriers[, !(names(barriers) == "node_label")]
 
 
     # Plot results if only one result joined
@@ -120,11 +120,11 @@ export_dci <- function(net, results, type = "rivers", relative = FALSE,
 
       # Join results
       barriers <- barriers %>%
-        dplyr::left_join(results[[i]], by = c("member.label" = "segment"))
+        dplyr::left_join(results[[i]], by = c("member_label" = "segment"))
     }
 
     # Remove node label column
-    barriers <- barriers[, !(names(barriers) == "node.label")]
+    barriers <- barriers[, !(names(barriers) == "node_label")]
 
 
     # Plot results if only one result joined
@@ -138,8 +138,8 @@ export_dci <- function(net, results, type = "rivers", relative = FALSE,
     # Join results to others
     others <- sf::st_as_sf(activate(net, nodes)) %>%
       dplyr::filter(.data$type == "poi") %>%
-      dplyr::left_join(results, by = c("member.label" = "segment"))
-    others <- others[, !(names(others) == "node.label")]
+      dplyr::left_join(results, by = c("member_label" = "segment"))
+    others <- others[, !(names(others) == "node_label")]
 
     # Plot results
     plot(others["DCI"])

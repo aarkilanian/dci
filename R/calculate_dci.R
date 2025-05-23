@@ -121,14 +121,14 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
     # Calculate total weighted length of segments
     seg_weights <- as.data.frame(net_nodes) %>%
       dplyr::mutate(weighted_len = .data$riv_length * .data$riv_weight) %>%
-      dplyr::group_by(.data$member.label) %>%
+      dplyr::group_by(.data$member_label) %>%
       dplyr::summarise(segweight = sum(.data$weighted_len, na.rm = TRUE)) %>%
       # Remove members with 0 length
       dplyr::filter(.data$segweight != 0)
   } else {
     # Calculate segment total lengths
     seg_weights <- as.data.frame(net_nodes) %>%
-      dplyr::group_by(.data$member.label) %>%
+      dplyr::group_by(.data$member_label) %>%
       dplyr::summarise(segweight = sum(.data$riv_length, na.rm = TRUE)) %>%
       dplyr::filter(.data$segweight != 0)
   }
@@ -137,13 +137,13 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
   totweight <- sum(seg_weights$segweight)
 
   # Gather member IDs
-  all_members <- seg_weights$member.label
+  all_members <- seg_weights$member_label
 
   # Identify outlet segment for diadromous
   if (form %in% c("dia")) {
     outlet_seg <- activate(net, nodes) %>%
       dplyr::filter(.data$type == "outlet") %>%
-      dplyr::pull(.data$member.label)
+      dplyr::pull(.data$member_label)
   }
 
   # If no distance threshold is supplied
@@ -212,9 +212,9 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights, n.cores, quie
     to = to_segment,
     pass
   )
-  DCIs_sub <- dplyr::left_join(DCIs_sub, seg_weights, by = c("from" = "member.label"))
+  DCIs_sub <- dplyr::left_join(DCIs_sub, seg_weights, by = c("from" = "member_label"))
   names(DCIs_sub)[names(DCIs_sub) == "segweight"] <- "from_len"
-  DCIs_sub <- dplyr::left_join(DCIs_sub, seg_weights, by = c("to" = "member.label"))
+  DCIs_sub <- dplyr::left_join(DCIs_sub, seg_weights, by = c("to" = "member_label"))
   names(DCIs_sub)[names(DCIs_sub) == "segweight"] <- "to_len"
   DCIs_sub$DCIs <- DCIs_sub$from_len * DCIs_sub$to_len * DCIs_sub$pass * 100
 
@@ -263,7 +263,7 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg, n
     to = to_segment,
     pass
   )
-  DCIs_sub <- dplyr::left_join(DCIs_sub, seg_weights, by = c("to" = "member.label"))
+  DCIs_sub <- dplyr::left_join(DCIs_sub, seg_weights, by = c("to" = "member_label"))
   names(DCIs_sub)[names(DCIs_sub) == "segweight"] <- "to_len"
   DCIs_sub$DCIs <- DCIs_sub$to_len * DCIs_sub$pass * 100
 
@@ -435,7 +435,7 @@ gather_dci <- function(net, form, from, to, distance, pass, nodes, seg_weights, 
   if (form == "diadromous") {
     # Case when from and to segment are the same
     if (from == to) {
-      seg_length <- seg_weights[seg_weights$member.label == from, ]$segweight
+      seg_length <- seg_weights[seg_weights$member_label == from, ]$segweight
       DCI <- seg_length / totweight * 1 * 100
       return(DCI)
     }
@@ -444,22 +444,22 @@ gather_dci <- function(net, form, from, to, distance, pass, nodes, seg_weights, 
     sinks_bars <- subset(nodes, nodes$type %in% c("outlet", "barrier"))
 
     # Get from segment local outlet (always outlet of network)
-    from_sink <- sinks_bars[sinks_bars$type == "outlet", ]$node.label
+    from_sink <- sinks_bars[sinks_bars$type == "outlet", ]$node_label
 
     # Get to segment local outlet
-    to_sink <- sinks_bars[sinks_bars$member.label == to, ]$node.label
+    to_sink <- sinks_bars[sinks_bars$member_label == to, ]$node_label
 
     # Get path between sinks
     path <- path_between(from_sink, to_sink)
 
     # Join node attributes to nodes on path
-    full_path <- nodes[nodes$node.label %in% path, ]
+    full_path <- nodes[nodes$node_label %in% path, ]
 
     # Determine final entrance and exit nodes for pair of segments
 
     # Select most downstream barrier as entrance, extract row index
     barriers <- full_path[full_path$type == "barrier", ]
-    barriers$depth <- unlist(lapply(barriers$node.label, length))
+    barriers$depth <- unlist(lapply(barriers$node_label, length))
     ent_label <- as.integer(rownames(barriers[which.min(barriers$depth), ]))
 
     # Calculate length remaining after segment-segment distance
@@ -476,15 +476,15 @@ gather_dci <- function(net, form, from, to, distance, pass, nodes, seg_weights, 
     )
     neighb_nodes <- which(dist <= rem_length)
     neighb_nodes <- nodes[nodes$nodeID %in% neighb_nodes, ]
-    neighb_nodes <- neighb_nodes[neighb_nodes$member.label == to, ]
+    neighb_nodes <- neighb_nodes[neighb_nodes$member_label == to, ]
     neighb_length <- sum(neighb_nodes$riv_length, na.rm = T)
 
     if (weighted) {
       # Calculate full length of to neighbourhood
-      to_length <- sum(nodes[nodes$member.label == to, ]$riv_length * nodes[nodes$member.label == to, ]$riv_weight, na.rm = TRUE)
+      to_length <- sum(nodes[nodes$member_label == to, ]$riv_length * nodes[nodes$member_label == to, ]$riv_weight, na.rm = TRUE)
     } else {
       # Calculate full length of to neighbourhood
-      to_length <- sum(nodes[nodes$member.label == to, ]$riv_length, na.rm = TRUE)
+      to_length <- sum(nodes[nodes$member_label == to, ]$riv_length, na.rm = TRUE)
     }
 
     # Calculate relative neighbourhood length for segment
@@ -499,7 +499,7 @@ gather_dci <- function(net, form, from, to, distance, pass, nodes, seg_weights, 
   if (form == "potamodromous") {
     # Case when from and to segment are the same
     if (from == to) {
-      seg_length <- seg_weights[seg_weights$member.label == from, ]$segweight
+      seg_length <- seg_weights[seg_weights$member_label == from, ]$segweight
       DCI <- seg_length / totweight * seg_length / totweight * 1 * 100
       return(DCI)
     }
@@ -508,29 +508,29 @@ gather_dci <- function(net, form, from, to, distance, pass, nodes, seg_weights, 
     sinks_bars <- subset(nodes, nodes$type %in% c("outlet", "barrier"))
 
     # Get from segment local outlet
-    from_sink <- sinks_bars[sinks_bars$member.label == from, ]$node.label
+    from_sink <- sinks_bars[sinks_bars$member_label == from, ]$node_label
 
     # Get to segment local outlet
-    to_sink <- sinks_bars[sinks_bars$member.label == to, ]$node.label
+    to_sink <- sinks_bars[sinks_bars$member_label == to, ]$node_label
 
     # Get path between sinks
     path <- path_between(from_sink, to_sink)
 
     # Join node attributes to nodes on path
-    full_path <- nodes[nodes$node.label %in% path, ]
+    full_path <- nodes[nodes$node_label %in% path, ]
 
     # Determine final entrance and exit nodes for pair of segments
     # If from segment is upstream of to segment
     if (length(unlist(from_sink)) > length(unlist(to_sink))) {
       # Set exit to one node upstream of from outlet, extract row index
       exit_label <- list(append(unlist(from_sink), FALSE))
-      exit_label <- as.integer(rownames(nodes[nodes$node.label %in% exit_label, ]))
+      exit_label <- as.integer(rownames(nodes[nodes$node_label %in% exit_label, ]))
 
       # If from segment is downstream of to segment
     } else {
       # Select most downstream barrier as exit, extract row index
       barriers <- full_path[full_path$type == "barrier", ]
-      barriers$depth <- unlist(lapply(barriers$node.label, length))
+      barriers$depth <- unlist(lapply(barriers$node_label, length))
       exit_label <- as.integer(rownames(barriers[which.min(barriers$depth), ]))
     }
 
@@ -548,19 +548,19 @@ gather_dci <- function(net, form, from, to, distance, pass, nodes, seg_weights, 
     )
     neighb_nodes <- which(dist <= rem_length)
     neighb_nodes <- nodes[nodes$nodeID %in% neighb_nodes, ]
-    neighb_nodes <- neighb_nodes[neighb_nodes$member.label == from, ]
+    neighb_nodes <- neighb_nodes[neighb_nodes$member_label == from, ]
     neighb_length <- sum(neighb_nodes$riv_length, na.rm = T)
 
     if (weighted) {
       # Calculate full length of from neighbourhood
-      from_length <- sum(nodes[nodes$member.label == from, ]$riv_length * nodes[nodes$member.label == from, ]$riv_weight, na.rm = TRUE)
+      from_length <- sum(nodes[nodes$member_label == from, ]$riv_length * nodes[nodes$member_label == from, ]$riv_weight, na.rm = TRUE)
       # Calculate full length of to neighbourhood
-      to_length <- sum(nodes[nodes$member.label == to, ]$riv_length * nodes[nodes$member.label == to, ]$riv_weight, na.rm = TRUE)
+      to_length <- sum(nodes[nodes$member_label == to, ]$riv_length * nodes[nodes$member_label == to, ]$riv_weight, na.rm = TRUE)
     } else {
       # Calculate full length of from neighbourhood
-      from_length <- sum(nodes[nodes$member.label == from, ]$riv_length, na.rm = TRUE)
+      from_length <- sum(nodes[nodes$member_label == from, ]$riv_length, na.rm = TRUE)
       # Calculate full length of to neighbourhood
-      to_length <- sum(nodes[nodes$member.label == to, ]$riv_length, na.rm = TRUE)
+      to_length <- sum(nodes[nodes$member_label == to, ]$riv_length, na.rm = TRUE)
     }
 
     # Calculate relative neighbourhood length for segment
@@ -586,31 +586,31 @@ gather_dist <- function(from, to, nodes) {
   sinks_bars <- subset(nodes, nodes$type %in% c("outlet", "barrier"))
 
   # Get from segment local outlet
-  from_sink <- sinks_bars[sinks_bars$member.label == from, ]$node.label
+  from_sink <- sinks_bars[sinks_bars$member_label == from, ]$node_label
 
   # Get to segment local outlet
-  to_sink <- sinks_bars[sinks_bars$member.label == to, ]$node.label
+  to_sink <- sinks_bars[sinks_bars$member_label == to, ]$node_label
 
   # Get outlet-to-outlet path between segments
   path <- path_between(from_sink, to_sink)
 
   # Join member labels for nodes on path
   full_path <- nodes %>%
-    dplyr::filter(.data$node.label %in% path)
-  full_path <- full_path[c("node.label", "member.label")]
+    dplyr::filter(.data$node_label %in% path)
+  full_path <- full_path[c("node_label", "member_label")]
 
   # Case when segments are neighbours
-  if (length(unique(full_path$member.label)) == 2) {
+  if (length(unique(full_path$member_label)) == 2) {
     return(0)
   }
 
   # Trim path to only segment-segment distance
-  path_ss <- full_path[!(full_path$member.label %in% c(from, to)), ]$node.label
+  path_ss <- full_path[!(full_path$member_label %in% c(from, to)), ]$node_label
   #'
   #' @param from The from node's label
   # Get segment-segment path distance
   dist_ss <- sum(nodes %>%
-    dplyr::filter(.data$node.label %in% path_ss) %>%
+    dplyr::filter(.data$node_label %in% path_ss) %>%
     dplyr::pull(.data$riv_length), na.rm = TRUE)
 
   # Return segment-segment distance
@@ -634,16 +634,16 @@ gather_perm <- function(from, to, nodes) {
   sinks_bars <- subset(nodes, nodes$type %in% c("outlet", "barrier"))
 
   # Get from segment local outlet
-  from_sink <- sinks_bars[sinks_bars$member.label == from, ]$node.label
+  from_sink <- sinks_bars[sinks_bars$member_label == from, ]$node_label
 
   # Get to segment local outlet
-  to_sink <- sinks_bars[sinks_bars$member.label == to, ]$node.label
+  to_sink <- sinks_bars[sinks_bars$member_label == to, ]$node_label
 
   # Get path between segments
   path <- path_between(from_sink, to_sink)
 
   # Gather permeabilities across path
-  path_perm <- prod(nodes[nodes$node.label %in% path, ]$pass)
+  path_perm <- prod(nodes[nodes$node_label %in% path, ]$pass)
 
   # Return passability between segments
   return(path_perm)
