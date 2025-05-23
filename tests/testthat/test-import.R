@@ -64,8 +64,6 @@ test_that("Points are imported correctly", {
   # Test sink
   expect_equal(nrow(import_points(bars[1, ], type = "out")), 1)
 
-  # Test other
-  expect_equal(nrow(import_points(bars, type = "poi")), 3)
 })
 
 test_that("Points that intersect throw error", {

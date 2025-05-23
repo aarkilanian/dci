@@ -2,16 +2,14 @@
 #'
 #' Constructs a [river_net] object, a geospatial network structure built on top
 #' of the [sfnetworks::sfnetwork()] class. This object integrates river lines,
-#' barriers, outlets, and optionally points of interest (POIs), allowing for
-#' advanced connectivity analyses with [calculate_dci()] or other network tools.
+#' barriers and outlets allowing for connectivity analyses with
+#' [calculate_dci()] or other network tools.
 #'
 #' @param rivers A `rivers` object returned by [import_rivers()].
 #' @param barriers A `barriers` object returned by [import_points()] with
 #' `type = "bars"`.
 #' @param outlet An `outlet` object returned by [import_points()] with
-#' `type = "out"`.
-#' @param poi An optional `poi` object returned by [import_points()] with `
-#' type = "poi"`.
+#' `type = "out"`..
 #' @param check Logical. If `TRUE` (default), dendritic topology is enforced
 #' using [enforce_dendritic()].
 #' @param tolerance A numeric value specifying the snapping distance
@@ -34,7 +32,6 @@
 river_net <- function(rivers,
                       barriers,
                       outlet,
-                      poi = NULL,
                       check = TRUE,
                       tolerance = NULL,
                       max_iter = 10) {
@@ -59,22 +56,8 @@ river_net <- function(rivers,
     stop("CRS of outlet does not match rivers")
   }
 
-  # Check points of interest
-  if (!(is.null(poi))) {
-    if (!("poi" %in% class(poi))) {
-      stop("Points of interest must first be imported with `import_points`")
-    }
-    if (sf::st_crs(poi) != sf::st_crs(rivers)) {
-      stop("CRS of points of interest does not match rivers")
-    }
-  }
-
   # Combine nodes
-  if (!is.null(poi)) {
-    user_nodes <- dplyr::bind_rows(barriers, outlet, poi)
-  } else {
-    user_nodes <- dplyr::bind_rows(barriers, outlet)
-  }
+  user_nodes <- dplyr::bind_rows(barriers, outlet)
 
   # Ensure user_nodes has geometry column named "geometry"
   if (!("geometry" %in% colnames(user_nodes))) {

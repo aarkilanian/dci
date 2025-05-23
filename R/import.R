@@ -102,9 +102,9 @@ import_rivers <- function(rivers, quiet = FALSE) {
 #' @param pts A character string specifying the path to a shapefile of points,
 #'   or an [sf] object containing point features.
 #' @param type A character string indicating the type of points. Must be one of:
-#'   `"bars"` for barriers, `"out"` for the outlet, or `"poi"` for points of interest.
+#'   `"bars"` for barriers or `"out"` for the outlet.
 #'
-#' @return An object of class `barriers`, `outlet`, or `poi`, depending on `type`,
+#' @return An object of class `barriers` or `outlet` depending on `type`,
 #'   prepared for use with [river_net()].
 #'
 #' @export
@@ -116,7 +116,7 @@ import_rivers <- function(rivers, quiet = FALSE) {
 #' }
 import_points <- function(pts, type) {
   # Check that type is valid
-  if (!(type %in% c("bars", "out", "poi"))) stop("Points must be of 'bars', 'out', or 'poi' type.")
+  if (!(type %in% c("bars", "out"))) stop("Points must be of 'bars' or 'out' type.")
 
   # Check for path type
   if (is.character(pts)) {
@@ -174,14 +174,5 @@ import_points <- function(pts, type) {
     # Return sinks
     outlet <- structure(pts, class = c("outlet", class(pts)))
     return(outlet)
-  }
-  # Points of interest
-  if (type == "poi") {
-    # Assign poi type
-    pts$type <- "poi"
-
-    # Return others
-    poi <- structure(pts, class = c("poi", class(pts)))
-    return(poi)
   }
 }
