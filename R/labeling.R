@@ -15,7 +15,7 @@ node_labeling <- function(net) {
   out_index <- which(out_index == "outlet")
   # Apply labeling function over network
   net <- activate(net, nodes) %>%
-    dplyr::mutate(node.label = tidygraph::map_bfs(
+    dplyr::mutate(node_label = tidygraph::map_bfs(
       root = out_index,
       .f = node_labeler, env = labelenv, mode = "all"
     ))
@@ -44,7 +44,7 @@ membership_labeling <- function(net) {
   out_index <- which(out_index == "outlet")
   # Apply labeling function over network
   net <- activate(net, nodes) %>%
-    dplyr::mutate(member.label = tidygraph::map_dfs_int(
+    dplyr::mutate(member_label = tidygraph::map_dfs_int(
       root = out_index,
       .f = membership_labeler, env = memberenv, mode = "all"
     ))
