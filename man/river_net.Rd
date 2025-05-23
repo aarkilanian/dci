@@ -4,7 +4,15 @@
 \alias{river_net}
 \title{Create a \code{river_net} Object}
 \usage{
-river_net(rivers, barriers, outlet, poi = NULL, check = TRUE, tolerance = NULL)
+river_net(
+  rivers,
+  barriers,
+  outlet,
+  poi = NULL,
+  check = TRUE,
+  tolerance = NULL,
+  max_iter = 10
+)
 }
 \arguments{
 \item{rivers}{A \code{rivers} object returned by \code{\link[=import_rivers]{import_rivers()}}.}
@@ -23,6 +31,9 @@ using \code{\link[=enforce_dendritic]{enforce_dendritic()}}.}
 \item{tolerance}{A numeric value specifying the snapping distance
 (in map units) to align points to the river network. Defaults to \code{NULL},
 meaning no snapping.}
+
+\item{max_iter}{Integer. Indicates the maximum number of topological correction
+iterations. Defaults to 10.}
 }
 \value{
 An object of class \link{river_net} representing the river network formed

@@ -4,7 +4,7 @@
 \alias{enforce_dendritic}
 \title{Enforce dendritic river topology}
 \usage{
-enforce_dendritic(rivers, correct = TRUE, quiet = FALSE)
+enforce_dendritic(rivers, correct = TRUE, quiet = FALSE, max_iter = 10)
 }
 \arguments{
 \item{rivers}{A \code{rivers} object returned by \code{\link[=import_rivers]{import_rivers()}}.}
@@ -15,6 +15,9 @@ automatically corrected.}
 
 \item{quiet}{Logical. If \code{FALSE}, the function prints a summary including
 the global DCI and a map of segments. Defaults to \code{TRUE}.}
+
+\item{max_iter}{Integer. Indicates the maximum number of topological correction
+iterations. Defaults to 10.}
 }
 \value{
 If \code{correct = FALSE}, returns a \link{sf} object with the columns

@@ -23,6 +23,9 @@ Only the largest fully connected component of the network is retained;
 river lines that are part of disconnected secondary networks are discarded.
 }
 \examples{
+data(yamaska)
+
+
 \dontrun{
 import_rivers(rivers = "path/to/shapefile.shp")
 import_rivers(rivers = sf_line_object)
