@@ -3,26 +3,20 @@
 \docType{data}
 \name{yamaska_barriers}
 \alias{yamaska_barriers}
-\title{River line features for the Yamaska watershed}
+\title{Barrier point features for the Yamaska watershed}
 \format{
 An \code{sf} object with 620 LINESTRING features:
 \describe{
-\item{qual}{a simulated weighting based on habitat quality of features}
-\item{riv_length}{length of edge features in meters}
-\item{geometry}{the geometry list column of river \code{LINESTRING} features}
+\item{pass_1}{the passability of nodes in the network from 0 (impassable) to 1}
+\item{pass_2}{the binary passability of nodes in the network, 0 if a barrier and 1 otherwise}
+\item{geometry}{the geometry list column of river \code{POINT} features}
 }
-}
-\source{
-\url{https://www.donneesquebec.ca/recherche/dataset/grhq}
-
-\url{https://www.donneesquebec.ca/recherche/dataset/structure}
 }
 \usage{
 yamaska_barriers
 }
 \description{
-An \code{sf} object of the \code{LINESTRING} geometries that make up the rivers of the
-Yamaska watershed of Southern Québec. The rivers make up the edges of the
-\code{yamaska_net} object. Features are projected to CRS:32198.
+An \code{sf} object of the \code{POINT} geometries that make up imagined barriers on the
+Yamaska watershed of Southern Québec. Features are projected to CRS:32198.
 }
 \keyword{datasets}
