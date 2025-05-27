@@ -22,11 +22,6 @@
 #'   automatically corrected.
 #' @param quiet Logical. If `FALSE`, the function prints a summary including
 #'   the global DCI and a map of segments. Defaults to `TRUE`.
-#' @param max_iter An integer indicating the maximum number of correction
-#' iterations to run. As some topological errors are corrected new ones can
-#' can arise requiring multiple passes. In some cases, an automated correction
-#' choice can lead to a recursive correction that eliminates most rivers. In
-#' this case, some manual corrections may help avoid this.
 #'
 #' @return If `correct = FALSE`, returns a [sf] object with the columns
 #'   `"divergent"` and `"complex"` indicating topological errors. These columns
