@@ -1,12 +1,13 @@
 #' Calculate DCI for a `river_net` Object
 #'
-#' Calculates the potamodromous and diaromous forms of the Dendritic Connectivity Index (DCI) for a
-#' [river_net] object.
+#' Calculates the potamodromous and diaromous forms of the Dendritic
+#' Connectivity Index (DCI) for a [river_net] object.
 #'
 #' @details
-#' Passability values are probabilities between 0 and 1, where 0 indicates a fully
-#' impassable barrier and 1 indicates full passability. If values in the specified
-#' passability column fall outside this range, they will be normalized.
+#' Passability values are probabilities between 0 and 1, where 0 indicates a
+#' fully impassable barrier and 1 indicates full passability. If values in the
+#' specified passability column fall outside this range, they will be
+#' normalized.
 #'
 #' Weighting values should also be probabilities between 0 and 1. River segments
 #' with weights of 0 or `NA` will be excluded from the DCI calculation.
@@ -17,16 +18,20 @@
 #' @param net A [river_net] object.
 #' @param form A string specifying the DCI form to calculate. Options are:
 #'   `"pot"` for potamodromous or `"dia"` for diadromous.
-#' @param pass The name of a column in the nodes table of `net` containing numeric
-#'   passability values. If `NULL`, all barriers are assumed to have 0 passability.
-#' @param weight The name of a column in the edges table of `net` containing numeric
-#'   weights for river lengths. If `NULL`, DCI is calculated using river length only.
-#' @param threshold Optional numeric value specifying a dispersal limit in map units.
-#'   If `NULL` (default), no limit is applied.
-#' @param n.cores Optional integer specifying the number of cores to use for computation.
-#'   Defaults to 1. Parallelization is currently supported only on macOS and Linux.
-#' @param quiet Logical. If `FALSE`, prints the global DCI and a plot of river segments
-#'   to the console. Defaults to `TRUE`.
+#' @param pass The name of a column in the nodes table of `net` containing
+#'   numeric passability values. If `NULL`, all barriers are assumed to have 0
+#'   passability.
+#' @param weight The name of a column in the edges table of `net` containing
+#'   numeric weights for river lengths. If `NULL`, DCI is calculated using river
+#'   length only.
+#' @param threshold Optional numeric value specifying a dispersal limit in map
+#'   units. If `NULL` (default), no limit is applied.
+#' @param parallel Logical. If `FALSE`, the default, all operations are
+#' performed in series. If `TRUE` parallel operation is performed using the
+#' [furrr] package. Specify the number of workers and strategy using
+#' [future::availableWorkers()].
+#' @param quiet Logical. If `FALSE`, prints the global DCI and a plot of river
+#'   segments to the console. Defaults to `TRUE`.
 #'
 #' @return An [sf] object of the river network with new columns specifying
 #' segment-level DCI values. If site data was provided, an [sf] object of the
@@ -41,7 +46,11 @@
 #'
 #' # For the diadromous DCI without weightings
 #' res <- calculate_dci(net = yamaska_net, form = "pot", pass = "pass_1")
-calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NULL, n.cores = 1, quiet = FALSE) {
+#'
+#' # For the diadromous DCI with a dispersal threshold of 100 meters
+#' res <- calculate_dci(net = yamaska_net, form = "pot", pass = "pass_1", threshold = 100)
+calculate_dci <- function(net, form, pass = NULL, weight = NULL,
+                          threshold = NULL, n.cores = 1, quiet = FALSE) {
   # Check that network is valid
   if (!("river_net" %in% class(net))) {
     stop("A valid river_net object is required.")
@@ -73,7 +82,8 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
     user_perm[non_bar] <- 1
     # Check that passability is between 0 and 1
     if (any(user_perm > 1)) {
-      user_perm <- (user_perm - min(user_perm)) / (max(user_perm) - min(user_perm))
+      user_perm <- (user_perm - min(user_perm)) /
+        (max(user_perm) - min(user_perm))
     }
     # Set active passability column
     net_nodes$pass <- user_perm
@@ -100,7 +110,8 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
     }
     # Check that weight is between 0 and 1
     if (any(user_weight > 1)) {
-      user_weight <- (user_weight - min(user_weight)) / (max(user_weight) - min(user_weight))
+      user_weight <- (user_weight - min(user_weight)) /
+        (max(user_weight) - min(user_weight))
     }
     # Set active weighting column
     net_edges$riv_weight <- user_weight
@@ -150,9 +161,12 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
     seg_weights$segweight <- seg_weights$segweight / totweight
 
     # Potamodromous case
-    if (form == "pot") DCIs <- calculate_dci_pot(all_members, net_nodes, seg_weights, n.cores, quiet)
+    if (form == "pot") DCIs <- calculate_dci_pot(all_members, net_nodes,
+                                                 seg_weights, n.cores, quiet)
     # Diadromous case
-    if (form == "dia") DCIs <- calculate_dci_dia(all_members, net_nodes, seg_weights, outlet_seg, n.cores, quiet)
+    if (form == "dia") DCIs <- calculate_dci_dia(all_members, net_nodes,
+                                                 seg_weights, outlet_seg,
+                                                 n.cores, quiet)
     # Return calculated DCI values
     DCIs <- structure(DCIs, class = c("dci_results", class(DCIs)))
     return(DCIs)
@@ -164,9 +178,17 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
     if (!is.null(weight)) weighted <- TRUE
 
     # Potamodromous case
-    if (form == "pot") DCIs <- calculate_dci_pot_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, n.cores, quiet)
+    if (form == "pot") DCIs <- calculate_dci_pot_thresh(net, all_members,
+                                                        net_nodes, seg_weights,
+                                                        weighted, threshold,
+                                                        totweight, n.cores,
+                                                        quiet)
     # Diadromous case
-    if (form == "dia") DCIs <- calculate_dci_dia_thresh(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, n.cores, quiet)
+    if (form == "dia") DCIs <- calculate_dci_dia_thresh(net, all_members,
+                                                        net_nodes, seg_weights,
+                                                        weighted, threshold,
+                                                        totweight, outlet_seg,
+                                                        n.cores, quiet)
     # Return calculated DCI values
     DCIs <- structure(DCIs, class = c("dci_results", class(DCIs)))
     return(DCIs)
@@ -178,17 +200,20 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NUL
 #' @inheritParams calculate_dci
 #' @param all_members An integer vector holding all assigned membership labels
 #'   in the \code{\link{river_net}} object.
-#' @param net_nodes An \code{\link{sf}} object of the nodes of the \code{\link{river_net}}
+#' @param net_nodes An \code{\link{sf}} object of the nodes of the
+#'   \code{\link{river_net}}
 #'   object with river attributes joined.
 #' @param seg_weights A data frame of each segments total length. Either
 #'   weighted or unweighted depending on parameters.
 #' @param n.cores An optional integer value indicating the number of cores to
 #'   use. Defaults to 1. Currently only works on MacOS and Linux.
 #'
-#' @return A data frame which holds raw and relative DCI scores for each segment.
+#' @return A data frame which holds raw and relative DCI scores for each
+#' segment.
 #'
 #' @keywords internal
-calculate_dci_pot <- function(all_members, net_nodes, seg_weights, n.cores, quiet) {
+calculate_dci_pot <- function(all_members, net_nodes, seg_weights, n.cores,
+                              quiet) {
   # Determine segment pairs
   from_segment <- rep(all_members,
     each = length(all_members)
@@ -199,9 +224,14 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights, n.cores, quie
 
   # Calculate passability between each pair of segments
   if (n.cores > 1) {
-    pass <- parallel::mcmapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
+    pass <- furrr::future_pmap_dbl(list(from_segment, to_segment,
+                                        nodes = net_nodes), gather_perm)
+    pass <- parallel::mcmapply(gather_perm, from_segment, to_segment,
+                               MoreArgs = list(nodes = net_nodes),
+                               mc.cores = n.cores)
   } else {
-    pass <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
+    pass <- mapply(gather_perm, from_segment, to_segment, MoreArgs =
+                     list(nodes = net_nodes))
   }
 
   # Gather DCI inputs and calculate sub-segmental DCI
@@ -210,9 +240,11 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights, n.cores, quie
     to = to_segment,
     pass
   )
-  DCIs_sub <- dplyr::left_join(DCIs_sub, seg_weights, by = c("from" = "member_label"))
+  DCIs_sub <- dplyr::left_join(DCIs_sub, seg_weights,
+                               by = c("from" = "member_label"))
   names(DCIs_sub)[names(DCIs_sub) == "segweight"] <- "from_len"
-  DCIs_sub <- dplyr::left_join(DCIs_sub, seg_weights, by = c("to" = "member_label"))
+  DCIs_sub <- dplyr::left_join(DCIs_sub, seg_weights,
+                               by = c("to" = "member_label"))
   names(DCIs_sub)[names(DCIs_sub) == "segweight"] <- "to_len"
   DCIs_sub$DCIs <- DCIs_sub$from_len * DCIs_sub$to_len * DCIs_sub$pass * 100
 
@@ -238,21 +270,26 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights, n.cores, quie
 #'
 #' @inheritParams calculate_dci
 #' @inheritParams calculate_dci_pot
-#' @param outlet_seg An integer indicating the membership label of the outlet segment
+#' @param outlet_seg An integer indicating the membership label of the outlet
+#' segment
 #'
-#' @return A data frame which holds raw and relative DCI scores for each segment.
+#' @return A data frame which holds raw and relative DCI scores for each
+#' segment.
 #'
 #' @keywords internal
-calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg, n.cores, quiet) {
+calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg,
+                              n.cores, quiet) {
   # Determine segment pairs
   to_segment <- all_members[all_members != 0]
   from_segment <- rep(outlet_seg, times = length(to_segment))
 
   # Calculate passability between each pair of segments
   if (n.cores > 1) {
-    pass <- parallel::mcmapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
+    pass <- parallel::mcmapply(gather_perm, from_segment, to_segment,
+                               MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
   } else {
-    pass <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
+    pass <- mapply(gather_perm, from_segment, to_segment,
+                   MoreArgs = list(nodes = net_nodes))
   }
 
   # Gather DCI inputs and calculate sub-segmental DCI
@@ -261,7 +298,8 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg, n
     to = to_segment,
     pass
   )
-  DCIs_sub <- dplyr::left_join(DCIs_sub, seg_weights, by = c("to" = "member_label"))
+  DCIs_sub <- dplyr::left_join(DCIs_sub, seg_weights,
+                               by = c("to" = "member_label"))
   names(DCIs_sub)[names(DCIs_sub) == "segweight"] <- "to_len"
   DCIs_sub$DCIs <- DCIs_sub$to_len * DCIs_sub$pass * 100
 
@@ -288,17 +326,20 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg, n
 #' @inheritParams calculate_dci
 #' @param all_members An integer vector holding all assigned membership labels
 #'   in the \code{\link{river_net}} object.
-#' @param net_nodes An \code{\link{sf}} object of the nodes of the \code{\link{river_net}}
-#'   object with river attributes joined.
+#' @param net_nodes An \code{\link{sf}} object of the nodes of the
+#' \code{\link{river_net}} object with river attributes joined.
 #' @param seg_weights A data frame of each segments total length. Either
 #'   weighted or unweighted depending on parameters.
 #' @param n.cores An optional integer value indicating the number of cores to
 #'   use. Defaults to 1. Currently only works on MacOS and Linux.
 #'
-#' @return A data frame which holds raw and relative DCI scores for each segment.
+#' @return A data frame which holds raw and relative DCI scores for each
+#' segment.
 #'
 #' @keywords internal
-calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, n.cores, quiet) {
+calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights,
+                                     weighted, threshold, totweight, n.cores,
+                                     quiet) {
   # Determine segment pairs
   from_segment <- rep(all_members,
     each = length(all_members)
@@ -309,9 +350,11 @@ calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights, w
 
   # Calculate segment-segment distance between each pair
   if (n.cores > 1) {
-    distances <- parallel::mcmapply(gather_dist, from_segment, to_segment, MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
+    distances <- parallel::mcmapply(gather_dist, from_segment, to_segment,
+                                    MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
   } else {
-    distances <- mapply(gather_dist, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
+    distances <- mapply(gather_dist, from_segment, to_segment,
+                        MoreArgs = list(nodes = net_nodes))
   }
 
   # Remove pairs with distances larger than the threshold
