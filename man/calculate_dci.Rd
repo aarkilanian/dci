@@ -41,8 +41,8 @@ segment-level DCI values. If site data was provided, an \link{sf} object of the
 site points with associated DCI scores is also returned.
 }
 \description{
-Calculates different forms of the Dendritic Connectivity Index (DCI) for a
-\link{river_net} object, including "potamodromous" and "diadromous".
+Calculates the potamodromous and diaromous forms of the Dendritic Connectivity Index (DCI) for a
+\link{river_net} object.
 }
 \details{
 Passability values are probabilities between 0 and 1, where 0 indicates a fully
@@ -56,12 +56,10 @@ Upon successful calculation, the global DCI value for the river network will
 be printed to the console unless \code{quiet = TRUE}.
 }
 \examples{
-\dontrun{
-calculate_dci(
-  net = net_name, form = "all", pass = "pass",
-  weight = "river_weight", threshold = 1500
-)
-calculate_dci(net = net_name, form = "pot")
-calculate_dci(net = net_name, form = "dia", threshold = 2100)
-}
+# For the potamodromous DCI
+res <- calculate_dci(net = yamaska_net, form = "pot", pass = "pass_1",
+weight = "weight")
+
+# For the diadromous DCI without weightings
+res <- calculate_dci(net = yamaska_net, form = "pot", pass = "pass_1")
 }

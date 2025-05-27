@@ -1,7 +1,7 @@
 #' Calculate DCI for a `river_net` Object
 #'
-#' Calculates different forms of the Dendritic Connectivity Index (DCI) for a
-#' [river_net] object, including "potamodromous" and "diadromous".
+#' Calculates the potamodromous and diaromous forms of the Dendritic Connectivity Index (DCI) for a
+#' [river_net] object.
 #'
 #' @details
 #' Passability values are probabilities between 0 and 1, where 0 indicates a fully
@@ -35,14 +35,12 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' calculate_dci(
-#'   net = net_name, form = "all", pass = "pass",
-#'   weight = "river_weight", threshold = 1500
-#' )
-#' calculate_dci(net = net_name, form = "pot")
-#' calculate_dci(net = net_name, form = "dia", threshold = 2100)
-#' }
+#' # For the potamodromous DCI
+#' res <- calculate_dci(net = yamaska_net, form = "pot", pass = "pass_1",
+#' weight = "weight")
+#'
+#' # For the diadromous DCI without weightings
+#' res <- calculate_dci(net = yamaska_net, form = "pot", pass = "pass_1")
 calculate_dci <- function(net, form, pass = NULL, weight = NULL, threshold = NULL, n.cores = 1, quiet = FALSE) {
   # Check that network is valid
   if (!("river_net" %in% class(net))) {

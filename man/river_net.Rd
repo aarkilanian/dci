@@ -20,7 +20,7 @@ river_net(
 \code{type = "bars"}.}
 
 \item{outlet}{An \code{outlet} object returned by \code{\link[=import_points]{import_points()}} with
-\code{type = "out"}..}
+\code{type = "out"}.}
 
 \item{check}{Logical. If \code{TRUE} (default), dendritic topology is enforced
 using \code{\link[=enforce_dendritic]{enforce_dendritic()}}.}
@@ -29,8 +29,11 @@ using \code{\link[=enforce_dendritic]{enforce_dendritic()}}.}
 (in map units) to align points to the river network. Defaults to \code{NULL},
 meaning no snapping.}
 
-\item{max_iter}{Integer. Indicates the maximum number of topological correction
-iterations. Defaults to 10.}
+\item{max_iter}{An integer indicating the maximum number of correction
+iterations to run. As some topological errors are corrected new ones can
+can arise requiring multiple passes. In some cases, an automated correction
+choice can lead to a recursive correction that eliminates most rivers. In
+this case, some manual corrections may help avoid this.}
 }
 \value{
 An object of class \link{river_net} representing the river network formed
@@ -43,9 +46,18 @@ barriers and outlets allowing for connectivity analyses with
 \code{\link[=calculate_dci]{calculate_dci()}} or other network tools.
 }
 \examples{
-\dontrun{
-river_net(rivers = river_data, barriers = barrier_data, outlet = outlet_data)
-river_net(river_data, barrier_data, outlet_data, poi = poi_data)
-river_net(river_data, barrier_data, outlet_data, tolerance = 15)
-}
+# Simple case with rivers, barriers, and outlet
+yam_net <- river_net(rivers = yamaska_rivers, barriers = yamaska_barriers,
+outlet - yamaska_outlet)
+
+# If corrections are done earlier they can be skipped in this constructor
+riv_cor <- enforce_dendritic(rivers = yamaska_rivers, correct = TRUE,
+quiet = TRUE)
+yam_net <- river_net(rivers = yamaska_cor, barriers = yamaska_barriers,
+outlet - yamaska_outlet, check = FALSE)
+
+# For large river networks it may be better to specify a smaller number of
+# correction sweeps.
+yam_net <- river_net(rivers = yamaska_rivers, barriers = yamaska_barriers,
+outlet - yamaska_outlet, max_iter = 3)
 }
