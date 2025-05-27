@@ -64,7 +64,7 @@ test_that("Multiple complex nodes are corrected", {
   rivers <- sf::st_as_sf(rivers, wkt = "x")
 
   # Correct complex confluences
-  net_correct <- sfnetworks::as_sfnetwork(suppressWarnings(enforce_dendritic(rivers, quiet = TRUE))) %>%
+  net_correct <- suppressWarnings(sfnetworks::as_sfnetwork(enforce_dendritic(rivers, quiet = TRUE), message = FALSE)) %>%
     # Get degree
     dplyr::mutate(degree = tidygraph::centrality_degree()) %>%
     sfnetworks::activate(nodes) %>%

@@ -14,8 +14,7 @@ export_dci(net, results, type = "rivers", relative = FALSE, quiet = TRUE)
 
 \item{type}{A character string specifying which component of the river network
 the results should be exported for. Valid options are \code{"rivers"} (default),
-or any of the node layers included in the \link{river_net} object, such as
-\code{"barriers"} or \code{"poi"}.}
+or \code{"barriers"}.}
 
 \item{relative}{A logical value indicating whether relative DCI values should
 be returned in addition to raw values. Defaults to \code{FALSE}.}

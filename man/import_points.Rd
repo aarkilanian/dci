@@ -11,10 +11,10 @@ import_points(pts, type)
 or an \link{sf} object containing point features.}
 
 \item{type}{A character string indicating the type of points. Must be one of:
-\code{"bars"} for barriers, \code{"out"} for the outlet, or \code{"poi"} for points of interest.}
+\code{"bars"} for barriers or \code{"out"} for the outlet.}
 }
 \value{
-An object of class \code{barriers}, \code{outlet}, or \code{poi}, depending on \code{type},
+An object of class \code{barriers} or \code{outlet} depending on \code{type},
 prepared for use with \code{\link[=river_net]{river_net()}}.
 }
 \description{

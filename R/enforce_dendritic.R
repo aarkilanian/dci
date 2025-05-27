@@ -159,7 +159,7 @@ correct_divergences <- function(net, correct = TRUE, quiet = FALSE) {
     dplyr::filter(.data$weight == max(.data$weight)) %>%
     tidygraph::ungroup(.data) %>%
     # Remove weight column
-    dplyr::select(!(.data$weight))
+    dplyr::select(-tidyselect::all_of("weight"))
 
   # Identify components
   net_comp <- activate(net_corrected, nodes) %>%

@@ -8,7 +8,6 @@ river_net(
   rivers,
   barriers,
   outlet,
-  poi = NULL,
   check = TRUE,
   tolerance = NULL,
   max_iter = 10
@@ -21,9 +20,7 @@ river_net(
 \code{type = "bars"}.}
 
 \item{outlet}{An \code{outlet} object returned by \code{\link[=import_points]{import_points()}} with
-\code{type = "out"}.}
-
-\item{poi}{An optional \code{poi} object returned by \code{\link[=import_points]{import_points()}} with \code{ type = "poi"}.}
+\code{type = "out"}..}
 
 \item{check}{Logical. If \code{TRUE} (default), dendritic topology is enforced
 using \code{\link[=enforce_dendritic]{enforce_dendritic()}}.}
@@ -42,8 +39,8 @@ from the provided spatial inputs.
 \description{
 Constructs a \link{river_net} object, a geospatial network structure built on top
 of the \code{\link[sfnetworks:sfnetwork]{sfnetworks::sfnetwork()}} class. This object integrates river lines,
-barriers, outlets, and optionally points of interest (POIs), allowing for
-advanced connectivity analyses with \code{\link[=calculate_dci]{calculate_dci()}} or other network tools.
+barriers and outlets allowing for connectivity analyses with
+\code{\link[=calculate_dci]{calculate_dci()}} or other network tools.
 }
 \examples{
 \dontrun{

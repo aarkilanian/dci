@@ -23,7 +23,8 @@ Imports:
     tidygraph,
     sfnetworks,
     igraph,
-    parallel
+    parallel,
+    tidyselect
 Depends: 
     R (>= 3.50)
 LazyData: true
