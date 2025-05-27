@@ -50,7 +50,7 @@
 #' # For the diadromous DCI with a dispersal threshold of 100 meters
 #' res <- calculate_dci(net = yamaska_net, form = "pot", pass = "pass_1", threshold = 100)
 calculate_dci <- function(net, form, pass = NULL, weight = NULL,
-                          threshold = NULL, n.cores = 1, quiet = FALSE) {
+                          threshold = NULL, parallel = FALSE, quiet = FALSE) {
   # Check that network is valid
   if (!("river_net" %in% class(net))) {
     stop("A valid river_net object is required.")
@@ -162,11 +162,11 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL,
 
     # Potamodromous case
     if (form == "pot") DCIs <- calculate_dci_pot(all_members, net_nodes,
-                                                 seg_weights, n.cores, quiet)
+                                                 seg_weights, parallel, quiet)
     # Diadromous case
     if (form == "dia") DCIs <- calculate_dci_dia(all_members, net_nodes,
                                                  seg_weights, outlet_seg,
-                                                 n.cores, quiet)
+                                                 parallel, quiet)
     # Return calculated DCI values
     DCIs <- structure(DCIs, class = c("dci_results", class(DCIs)))
     return(DCIs)
@@ -181,14 +181,14 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL,
     if (form == "pot") DCIs <- calculate_dci_pot_thresh(net, all_members,
                                                         net_nodes, seg_weights,
                                                         weighted, threshold,
-                                                        totweight, n.cores,
+                                                        totweight, parallel,
                                                         quiet)
     # Diadromous case
     if (form == "dia") DCIs <- calculate_dci_dia_thresh(net, all_members,
                                                         net_nodes, seg_weights,
                                                         weighted, threshold,
                                                         totweight, outlet_seg,
-                                                        n.cores, quiet)
+                                                        parallel, quiet)
     # Return calculated DCI values
     DCIs <- structure(DCIs, class = c("dci_results", class(DCIs)))
     return(DCIs)
@@ -205,14 +205,12 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL,
 #'   object with river attributes joined.
 #' @param seg_weights A data frame of each segments total length. Either
 #'   weighted or unweighted depending on parameters.
-#' @param n.cores An optional integer value indicating the number of cores to
-#'   use. Defaults to 1. Currently only works on MacOS and Linux.
 #'
 #' @return A data frame which holds raw and relative DCI scores for each
 #' segment.
 #'
 #' @keywords internal
-calculate_dci_pot <- function(all_members, net_nodes, seg_weights, n.cores,
+calculate_dci_pot <- function(all_members, net_nodes, seg_weights, parallel,
                               quiet) {
   # Determine segment pairs
   from_segment <- rep(all_members,
@@ -223,12 +221,9 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights, n.cores,
   )
 
   # Calculate passability between each pair of segments
-  if (n.cores > 1) {
+  if (parallel) {
     pass <- furrr::future_pmap_dbl(list(from_segment, to_segment,
                                         nodes = net_nodes), gather_perm)
-    pass <- parallel::mcmapply(gather_perm, from_segment, to_segment,
-                               MoreArgs = list(nodes = net_nodes),
-                               mc.cores = n.cores)
   } else {
     pass <- mapply(gather_perm, from_segment, to_segment, MoreArgs =
                      list(nodes = net_nodes))
@@ -278,15 +273,15 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights, n.cores,
 #'
 #' @keywords internal
 calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg,
-                              n.cores, quiet) {
+                              parallel, quiet) {
   # Determine segment pairs
   to_segment <- all_members[all_members != 0]
   from_segment <- rep(outlet_seg, times = length(to_segment))
 
   # Calculate passability between each pair of segments
-  if (n.cores > 1) {
-    pass <- parallel::mcmapply(gather_perm, from_segment, to_segment,
-                               MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
+  if (parallel) {
+    pass <- furrr::future_pmap_dbl(list(from_segment, to_segment,
+                                        nodes = net_nodes), gather_perm)
   } else {
     pass <- mapply(gather_perm, from_segment, to_segment,
                    MoreArgs = list(nodes = net_nodes))
@@ -330,15 +325,13 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg,
 #' \code{\link{river_net}} object with river attributes joined.
 #' @param seg_weights A data frame of each segments total length. Either
 #'   weighted or unweighted depending on parameters.
-#' @param n.cores An optional integer value indicating the number of cores to
-#'   use. Defaults to 1. Currently only works on MacOS and Linux.
 #'
 #' @return A data frame which holds raw and relative DCI scores for each
 #' segment.
 #'
 #' @keywords internal
 calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights,
-                                     weighted, threshold, totweight, n.cores,
+                                     weighted, threshold, totweight, parallel,
                                      quiet) {
   # Determine segment pairs
   from_segment <- rep(all_members,
@@ -349,9 +342,9 @@ calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights,
   )
 
   # Calculate segment-segment distance between each pair
-  if (n.cores > 1) {
-    distances <- parallel::mcmapply(gather_dist, from_segment, to_segment,
-                                    MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
+  if (parallel) {
+    distances <- furrr::future_pmap_dbl(list(from_segment, to_segment,
+                                        nodes = net_nodes), gather_dist)
   } else {
     distances <- mapply(gather_dist, from_segment, to_segment,
                         MoreArgs = list(nodes = net_nodes))
@@ -366,15 +359,19 @@ calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights,
   }
 
   # Calculate passability between remaining pairs
-  if (n.cores > 1) {
-    perms <- parallel::mcmapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
+  if (parallel) {
+    perms <- furrr::future_pmap_dbl(list(from_segment, to_segment,
+                                        nodes = net_nodes), gather_perm)
   } else {
     perms <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
   }
 
   # Calculate DCI
-  if (n.cores > 1) {
-    DCIs <- parallel::mcmapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted, form = "potamodromous"), mc.cores = n.cores)
+  if (parallel) {
+    DCIs <- furrr::future_pmap_dbl(list(from_segment, to_segment, distances,
+                                        perms, nodes = net_nodes, seg_weights,
+                                        threshold, totweight, weighted,
+                                        form = "potamodromous"), gather_dci)
   } else {
     DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted, form = "potamodromous"))
   }
@@ -403,14 +400,14 @@ calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights,
 #' @param outlet_seg An integer indicating the membership label of the outlet segment
 #'
 #' @keywords internal
-calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, n.cores, quiet) {
+calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, parallel, quiet) {
   # Determine segment pairs
   to_segment <- all_members[all_members != 0]
   from_segment <- rep(outlet_seg, times = length(to_segment))
 
   # Remove pairs of segments further than threshold
-  if (n.cores > 1) {
-    distances <- parallel::mcmapply(gather_dist, from_segment, to_segment, MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
+  if (parallel) {
+    distances <- furrr:future_pmap_dbl(list(from_segment, to_segment, nodes = net_nodes), gather_dist)
   } else {
     distances <- mapply(gather_dist, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
   }
@@ -424,15 +421,19 @@ calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, w
   }
 
   # Calculate passability between remaining pairs
-  if (n.cores > 1) {
-    perms <- parallel::mcmapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes), mc.cores = n.cores)
+  if (parallel) {
+    perms <- furrr::future_pmap_dbl(list(from_segment, to_segment,
+                                         nodes = net_nodes), gather_perm)
   } else {
     perms <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
   }
 
   # Calculate DCI
-  if (n.cores > 1) {
-    DCIs <- parallel::mcmapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted, form = "diadromous"), mc.cores = n.cores)
+  if (parallel) {
+    DCIs <- furrr::future_pmap_dbl(list(from_segment, to_segment, distances,
+                                        perms, nodes = net_nodes, seg_weights,
+                                        threshold, totweight, weighted,
+                                        form = "diadromous"), gather_dci)
   } else {
     DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted, form = "diadromous"))
   }
