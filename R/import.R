@@ -6,8 +6,8 @@
 #'
 #' @param rivers A character string specifying the path to a shapefile of river lines,
 #'   or an [sf] object representing river geometries.
-#' @param quiet Logical. If `FALSE` (default), plots the original and processed
-#'   river lines side-by-side for visual inspection.
+#' @param quiet Logical. If `FALSE` (default), plots the imported river lines in
+#' black over the original lines in red so that removed rivers are highlighted.
 #'
 #' @return An object of class `rivers`, suitable for use with [enforce_dendritic()]
 #'   or as input to [river_net()].
@@ -15,13 +15,10 @@
 #' @export
 #'
 #' @examples
-#' data(yamaska)
+#' rivers_in <- import_rivers(yamaska_rivers)
 #'
-#'
-#' \dontrun{
-#' import_rivers(rivers = "path/to/shapefile.shp")
-#' import_rivers(rivers = sf_line_object)
-#' }
+#' # This can also be done quietly to omit plotting river lines after importing
+#' rivers_in <- import_rivers(yamaska_rivers, quiet = TRUE)
 import_rivers <- function(rivers, quiet = FALSE) {
   # Check for path type
   if (is.character(rivers)) {
@@ -110,10 +107,8 @@ import_rivers <- function(rivers, quiet = FALSE) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' import_points(pts = "path/to/points.shp", type = "bars")
-#' import_points(pts = sf_point_object, type = "poi")
-#' }
+#' import_points(yamaska_barriers, type = "bars")
+#' import_points(yamaska_out, type = "out")
 import_points <- function(pts, type) {
   # Check that type is valid
   if (!(type %in% c("bars", "out"))) stop("Points must be of 'bars' or 'out' type.")

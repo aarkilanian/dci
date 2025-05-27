@@ -10,8 +10,8 @@ import_rivers(rivers, quiet = FALSE)
 \item{rivers}{A character string specifying the path to a shapefile of river lines,
 or an \link{sf} object representing river geometries.}
 
-\item{quiet}{Logical. If \code{FALSE} (default), plots the original and processed
-river lines side-by-side for visual inspection.}
+\item{quiet}{Logical. If \code{FALSE} (default), plots the imported river lines in
+black over the original lines in red so that removed rivers are highlighted.}
 }
 \value{
 An object of class \code{rivers}, suitable for use with \code{\link[=enforce_dendritic]{enforce_dendritic()}}
@@ -23,11 +23,8 @@ Only the largest fully connected component of the network is retained;
 river lines that are part of disconnected secondary networks are discarded.
 }
 \examples{
-data(yamaska)
+rivers_in <- import_rivers(yamaska_rivers)
 
-
-\dontrun{
-import_rivers(rivers = "path/to/shapefile.shp")
-import_rivers(rivers = sf_line_object)
-}
+# This can also be done quietly to omit plotting river lines after importing
+rivers_in <- import_rivers(yamaska_rivers, quiet = TRUE)
 }

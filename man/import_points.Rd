@@ -21,8 +21,6 @@ prepared for use with \code{\link[=river_net]{river_net()}}.
 Reads and prepares geospatial point data for use with \code{\link[=river_net]{river_net()}}.
 }
 \examples{
-\dontrun{
-import_points(pts = "path/to/points.shp", type = "bars")
-import_points(pts = sf_point_object, type = "poi")
-}
+import_points(yamaska_barriers, type = "bars")
+import_points(yamaska_out, type = "out")
 }
