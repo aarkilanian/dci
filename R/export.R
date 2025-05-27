@@ -8,7 +8,7 @@
 #'   [calculate_dci()].
 #' @param type A character string specifying which component of the river network
 #'   the results should be exported for. Valid options are `"rivers"` (default),
-#'   or `"barriers"`.
+#'   or `"bars"`.
 #' @param relative A logical value indicating whether relative DCI values should
 #'   be returned in addition to raw values. Defaults to `FALSE`.
 #'
@@ -20,12 +20,26 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' export_dci(net = net_name, results = dci_results, type = "rivers")
-#' export_dci(net = net_name, results = dci_results, type = "poi")
-#' export_dci(net = net_name, results = dci_results, type = "barriers")
-#' export_dci(net = net_name, results = list(result_a, result_b), type = "rivers")
-#' }
+#' res_pot <- calculate_dci(net = yamaska_net, form = "pot", pass = "pass_1",
+#' quiet = TRUE)
+#' res_dia <- calculate_dci(net = yamaska_net, form = "dia", pass = "pass_1",
+#' quiet = TRUE)
+#'
+#' # Export segment-level potamodromous DCI results to rivers
+#' riv_results <- export_dci(net = yamaska_net, results = res_pot,
+#' type = "rivers")
+#'
+#' # Can also be run quietly to keep from plotting results
+#' riv_results <- export_dci(net = yamaska_net, results = res_pot,
+#' type = "rivers", quiet = TRUE)
+#'
+#' # Results can also be exported to barrier points
+#' bar_results <- export_dci(net = yamaska_net, results = res_pot,
+#' type = "bars")
+#'
+#' # If multiple results are calculated these can be combined together
+#' all_res <- export_dci(net = yamaska_net, results = list(res_pot, res_dia),
+#' type = "rivers")
 export_dci <- function(net, results, type = "rivers", relative = FALSE,
                        quiet = TRUE) {
   if (type == "rivers") {
@@ -65,7 +79,7 @@ export_dci <- function(net, results, type = "rivers", relative = FALSE,
 
     # Return result
     invisible(rivers)
-  } else if (type == "barriers") {
+  } else if (type == "bars") {
     # Extract only barrier and outlet nodes
     barriers <- sf::st_as_sf(activate(net, nodes)) %>%
       dplyr::filter(.data$type %in% c("barrier", "outlet"))
@@ -100,6 +114,6 @@ export_dci <- function(net, results, type = "rivers", relative = FALSE,
     # Return result
     invisible(barriers)
   } else {
-    stop("type must be either 'rivers' or 'barriers'.")
+    stop("type must be either 'rivers' or 'bars'.")
   }
 }

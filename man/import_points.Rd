@@ -2,7 +2,7 @@
 % Please edit documentation in R/import.R
 \name{import_points}
 \alias{import_points}
-\title{Prepare Point Data for Connectivity Analyses}
+\title{Prepare point data for connectivity analyses}
 \usage{
 import_points(pts, type)
 }

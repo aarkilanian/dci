@@ -1,4 +1,4 @@
-#' Prepare Rivers for Connectivity Analyses
+#' Prepare rivers for connectivity analyses
 #'
 #' Reads and prepares geospatial river line data for use in [river_net()].
 #' Only the largest fully connected component of the network is retained;
@@ -92,7 +92,7 @@ import_rivers <- function(rivers, quiet = FALSE) {
   invisible(rivers)
 }
 
-#' Prepare Point Data for Connectivity Analyses
+#' Prepare point data for connectivity analyses
 #'
 #' Reads and prepares geospatial point data for use with [river_net()].
 #'

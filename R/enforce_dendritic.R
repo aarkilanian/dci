@@ -22,6 +22,11 @@
 #'   automatically corrected.
 #' @param quiet Logical. If `FALSE`, the function prints a summary including
 #'   the global DCI and a map of segments. Defaults to `TRUE`.
+#' @param max_iter An integer indicating the maximum number of correction
+#' iterations to run. As some topological errors are corrected new ones can
+#' can arise requiring multiple passes. In some cases, an automated correction
+#' choice can lead to a recursive correction that eliminates most rivers. In
+#' this case, some manual corrections may help avoid this.
 #'
 #' @return If `correct = FALSE`, returns a [sf] object with the columns
 #'   `"divergent"` and `"complex"` indicating topological errors. These columns
@@ -32,10 +37,18 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' enforce_dendritic(rivers = sf_line_object)
-#' enforce_dendritic(rivers = sf_line_object, correct = TRUE)
-#' }
+#' # Import rivers
+#' rivers_in <- import_rivers(yamaska_rivers, quiet = TRUE)
+#'
+#' # Correct errors automatically
+#' rivers_cor <- enforce_dendritic(rivers_in, correct = TRUE)
+#'
+#' # Return highlighted topological errors for manual correction
+#' rivers_uncor <- enforce_dendritic(rivers_in, correct = FALSE)
+#'
+#' # For large river networks it may be better to specify a smaller number of
+#' # correction sweeps.
+#' rivers_cor <- enforce_dendritic(rivers_in, correct = TRUE, max_iter = 3)
 enforce_dendritic <- function(rivers, correct = TRUE, quiet = FALSE,
                               max_iter = 10) {
 

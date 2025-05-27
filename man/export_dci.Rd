@@ -14,7 +14,7 @@ export_dci(net, results, type = "rivers", relative = FALSE, quiet = TRUE)
 
 \item{type}{A character string specifying which component of the river network
 the results should be exported for. Valid options are \code{"rivers"} (default),
-or \code{"barriers"}.}
+or \code{"bars"}.}
 
 \item{relative}{A logical value indicating whether relative DCI values should
 be returned in addition to raw values. Defaults to \code{FALSE}.}
@@ -33,10 +33,24 @@ Exports the output of \code{calculate_dci()} as a spatial object with DCI values
 to the relevant features in the river network.
 }
 \examples{
-\dontrun{
-export_dci(net = net_name, results = dci_results, type = "rivers")
-export_dci(net = net_name, results = dci_results, type = "poi")
-export_dci(net = net_name, results = dci_results, type = "barriers")
-export_dci(net = net_name, results = list(result_a, result_b), type = "rivers")
-}
+res_pot <- calculate_dci(net = yamaska_net, form = "pot", pass = "pass_1",
+quiet = TRUE)
+res_dia <- calculate_dci(net = yamaska_net, form = "dia", pass = "pass_1",
+quiet = TRUE)
+
+# Export segment-level potamodromous DCI results to rivers
+riv_results <- export_dci(net = yamaska_net, results = res_pot,
+type = "rivers")
+
+# Can also be run quietly to keep from plotting results
+riv_results <- export_dci(net = yamaska_net, results = res_pot,
+type = "rivers", quiet = TRUE)
+
+# Results can also be exported to barrier points
+bar_results <- export_dci(net = yamaska_net, results = res_pot,
+type = "bars")
+
+# If multiple results are calculated these can be combined together
+all_res <- export_dci(net = yamaska_net, results = list(res_pot, res_dia),
+type = "rivers")
 }

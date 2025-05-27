@@ -2,7 +2,7 @@
 % Please edit documentation in R/import.R
 \name{import_rivers}
 \alias{import_rivers}
-\title{Prepare Rivers for Connectivity Analyses}
+\title{Prepare rivers for connectivity analyses}
 \usage{
 import_rivers(rivers, quiet = FALSE)
 }
