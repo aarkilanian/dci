@@ -8,7 +8,7 @@ test_that("exporting works correctly for both rivers and barriers", {
   # Export to rivers
   riv_exp <- export_dci(net = net, results = res, type = "rivers")
   # Export to barriers
-  bar_exp <- export_dci(net = net, results = res, type = "barriers")
+  bar_exp <- export_dci(net = net, results = res, type = "bars")
 
   # Test
   expect_equal(all(c("DCI", "DCI_rel") %in% colnames(riv_exp)), TRUE)
