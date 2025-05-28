@@ -27,6 +27,10 @@
 #' @export
 #'
 #' @examples
+#' riv_in <- import_rivers(yamaska_rivers, quiet = TRUE)
+#' bar_in <- import_points(yamaska_barriers, type = "bars)
+#' out_in <- import_points(yamaska_out, type = "out")
+#'
 #' # Simple case with rivers, barriers, and outlet
 #' yam_net <- river_net(rivers = yamaska_rivers, barriers = yamaska_barriers,
 #' outlet - yamaska_outlet)

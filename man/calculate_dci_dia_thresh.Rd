@@ -13,7 +13,7 @@ calculate_dci_dia_thresh(
   threshold,
   totweight,
   outlet_seg,
-  n.cores,
+  parallel,
   quiet
 )
 }
@@ -23,22 +23,24 @@ calculate_dci_dia_thresh(
 \item{all_members}{An integer vector holding all assigned membership labels
 in the \code{\link{river_net}} object.}
 
-\item{net_nodes}{An \code{\link{sf}} object of the nodes of the \code{\link{river_net}}
-object with river attributes joined.}
+\item{net_nodes}{An \code{\link{sf}} object of the nodes of the
+\code{\link{river_net}} object with river attributes joined.}
 
 \item{seg_weights}{A data frame of each segments total length. Either
 weighted or unweighted depending on parameters.}
 
-\item{threshold}{Optional numeric value specifying a dispersal limit in map units.
-If \code{NULL} (default), no limit is applied.}
+\item{threshold}{Optional numeric value specifying a dispersal limit in map
+units. If \code{NULL} (default), no limit is applied.}
 
 \item{outlet_seg}{An integer indicating the membership label of the outlet segment}
 
-\item{n.cores}{Optional integer specifying the number of cores to use for computation.
-Defaults to 1. Parallelization is currently supported only on macOS and Linux.}
+\item{parallel}{Logical. If \code{FALSE}, the default, all operations are
+performed in series. If \code{TRUE} parallel operation is performed using the
+\link{furrr} package. Specify the number of workers and strategy using
+\code{\link[future:re-exports]{future::availableWorkers()}}.}
 
-\item{quiet}{Logical. If \code{FALSE}, prints the global DCI and a plot of river segments
-to the console. Defaults to \code{TRUE}.}
+\item{quiet}{Logical. If \code{FALSE}, prints the global DCI and a plot of river
+segments to the console. Defaults to \code{TRUE}.}
 }
 \description{
 Calculate thresholded diadromous DCI

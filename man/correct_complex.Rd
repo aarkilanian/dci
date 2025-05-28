@@ -13,8 +13,8 @@ correct_complex(net, correct = TRUE, quiet = FALSE)
 topological issues are identified only. If \code{TRUE}, issues are
 automatically corrected.}
 
-\item{quiet}{Logical. If \code{FALSE}, prints the global DCI and a plot of river segments
-to the console. Defaults to \code{TRUE}.}
+\item{quiet}{Logical. If \code{FALSE}, prints the global DCI and a plot of river
+segments to the console. Defaults to \code{TRUE}.}
 }
 \value{
 If correct is \code{TRUE} a \code{\link[sf]{sf}} object of rivers with complex confluences separated into two closely located valid confluences. If correct is \code{FALSE} a \code{\link[sf]{sf}} object with rivers participating in complex confluences labeled with the same number ina  new "complex" column.

@@ -45,19 +45,3 @@ of the \code{\link[sfnetworks:sfnetwork]{sfnetworks::sfnetwork()}} class. This o
 barriers and outlets allowing for connectivity analyses with
 \code{\link[=calculate_dci]{calculate_dci()}} or other network tools.
 }
-\examples{
-# Simple case with rivers, barriers, and outlet
-yam_net <- river_net(rivers = yamaska_rivers, barriers = yamaska_barriers,
-outlet - yamaska_outlet)
-
-# If corrections are done earlier they can be skipped in this constructor
-riv_cor <- enforce_dendritic(rivers = yamaska_rivers, correct = TRUE,
-quiet = TRUE)
-yam_net <- river_net(rivers = yamaska_cor, barriers = yamaska_barriers,
-outlet - yamaska_outlet, check = FALSE)
-
-# For large river networks it may be better to specify a smaller number of
-# correction sweeps.
-yam_net <- river_net(rivers = yamaska_rivers, barriers = yamaska_barriers,
-outlet - yamaska_outlet, max_iter = 3)
-}

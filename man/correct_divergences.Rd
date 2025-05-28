@@ -13,8 +13,8 @@ correct_divergences(net, correct = TRUE, quiet = FALSE)
 topological issues are identified only. If \code{TRUE}, issues are
 automatically corrected.}
 
-\item{quiet}{Logical. If \code{FALSE}, prints the global DCI and a plot of river segments
-to the console. Defaults to \code{TRUE}.}
+\item{quiet}{Logical. If \code{FALSE}, prints the global DCI and a plot of river
+segments to the console. Defaults to \code{TRUE}.}
 }
 \value{
 If correct is \link{TRUE} a \code{\link{river_net}} object with the shorter of each divergent pair removed. If correct is \code{FALSE} a \code{\link[sf]{sf}} object with divergent pairs identified with a shared number in the new "divergent" column.

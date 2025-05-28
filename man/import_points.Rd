@@ -22,5 +22,5 @@ Reads and prepares geospatial point data for use with \code{\link[=river_net]{ri
 }
 \examples{
 import_points(yamaska_barriers, type = "bars")
-import_points(yamaska_out, type = "out")
+import_points(yamaska_outlet, type = "out")
 }

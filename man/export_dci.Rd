@@ -19,8 +19,8 @@ or \code{"bars"}.}
 \item{relative}{A logical value indicating whether relative DCI values should
 be returned in addition to raw values. Defaults to \code{FALSE}.}
 
-\item{quiet}{Logical. If \code{FALSE}, prints the global DCI and a plot of river segments
-to the console. Defaults to \code{TRUE}.}
+\item{quiet}{Logical. If \code{FALSE}, prints the global DCI and a plot of river
+segments to the console. Defaults to \code{TRUE}.}
 }
 \value{
 An \link{sf} object containing the corresponding DCI results joined

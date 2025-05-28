@@ -108,7 +108,7 @@ import_rivers <- function(rivers, quiet = FALSE) {
 #'
 #' @examples
 #' import_points(yamaska_barriers, type = "bars")
-#' import_points(yamaska_out, type = "out")
+#' import_points(yamaska_outlet, type = "out")
 import_points <- function(pts, type) {
   # Check that type is valid
   if (!(type %in% c("bars", "out"))) stop("Points must be of 'bars' or 'out' type.")

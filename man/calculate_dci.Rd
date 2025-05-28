@@ -10,7 +10,7 @@ calculate_dci(
   pass = NULL,
   weight = NULL,
   threshold = NULL,
-  n.cores = 1,
+  parallel = FALSE,
   quiet = FALSE
 )
 }
@@ -20,20 +20,24 @@ calculate_dci(
 \item{form}{A string specifying the DCI form to calculate. Options are:
 \code{"pot"} for potamodromous or \code{"dia"} for diadromous.}
 
-\item{pass}{The name of a column in the nodes table of \code{net} containing numeric
-passability values. If \code{NULL}, all barriers are assumed to have 0 passability.}
+\item{pass}{The name of a column in the nodes table of \code{net} containing
+numeric passability values. If \code{NULL}, all barriers are assumed to have 0
+passability.}
 
-\item{weight}{The name of a column in the edges table of \code{net} containing numeric
-weights for river lengths. If \code{NULL}, DCI is calculated using river length only.}
+\item{weight}{The name of a column in the edges table of \code{net} containing
+numeric weights for river lengths. If \code{NULL}, DCI is calculated using river
+length only.}
 
-\item{threshold}{Optional numeric value specifying a dispersal limit in map units.
-If \code{NULL} (default), no limit is applied.}
+\item{threshold}{Optional numeric value specifying a dispersal limit in map
+units. If \code{NULL} (default), no limit is applied.}
 
-\item{n.cores}{Optional integer specifying the number of cores to use for computation.
-Defaults to 1. Parallelization is currently supported only on macOS and Linux.}
+\item{parallel}{Logical. If \code{FALSE}, the default, all operations are
+performed in series. If \code{TRUE} parallel operation is performed using the
+\link{furrr} package. Specify the number of workers and strategy using
+\code{\link[future:re-exports]{future::availableWorkers()}}.}
 
-\item{quiet}{Logical. If \code{FALSE}, prints the global DCI and a plot of river segments
-to the console. Defaults to \code{TRUE}.}
+\item{quiet}{Logical. If \code{FALSE}, prints the global DCI and a plot of river
+segments to the console. Defaults to \code{TRUE}.}
 }
 \value{
 An \link{sf} object of the river network with new columns specifying
@@ -41,13 +45,14 @@ segment-level DCI values. If site data was provided, an \link{sf} object of the
 site points with associated DCI scores is also returned.
 }
 \description{
-Calculates the potamodromous and diaromous forms of the Dendritic Connectivity Index (DCI) for a
-\link{river_net} object.
+Calculates the potamodromous and diaromous forms of the Dendritic
+Connectivity Index (DCI) for a \link{river_net} object.
 }
 \details{
-Passability values are probabilities between 0 and 1, where 0 indicates a fully
-impassable barrier and 1 indicates full passability. If values in the specified
-passability column fall outside this range, they will be normalized.
+Passability values are probabilities between 0 and 1, where 0 indicates a
+fully impassable barrier and 1 indicates full passability. If values in the
+specified passability column fall outside this range, they will be
+normalized.
 
 Weighting values should also be probabilities between 0 and 1. River segments
 with weights of 0 or \code{NA} will be excluded from the DCI calculation.
@@ -62,4 +67,7 @@ weight = "weight")
 
 # For the diadromous DCI without weightings
 res <- calculate_dci(net = yamaska_net, form = "pot", pass = "pass_1")
+
+# For the diadromous DCI with a dispersal threshold of 100 meters
+res <- calculate_dci(net = yamaska_net, form = "pot", pass = "pass_1", threshold = 100)
 }

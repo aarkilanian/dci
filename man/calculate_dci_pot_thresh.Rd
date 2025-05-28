@@ -12,7 +12,7 @@ calculate_dci_pot_thresh(
   weighted,
   threshold,
   totweight,
-  n.cores,
+  parallel,
   quiet
 )
 }
@@ -22,23 +22,26 @@ calculate_dci_pot_thresh(
 \item{all_members}{An integer vector holding all assigned membership labels
 in the \code{\link{river_net}} object.}
 
-\item{net_nodes}{An \code{\link{sf}} object of the nodes of the \code{\link{river_net}}
-object with river attributes joined.}
+\item{net_nodes}{An \code{\link{sf}} object of the nodes of the
+\code{\link{river_net}} object with river attributes joined.}
 
 \item{seg_weights}{A data frame of each segments total length. Either
 weighted or unweighted depending on parameters.}
 
-\item{threshold}{Optional numeric value specifying a dispersal limit in map units.
-If \code{NULL} (default), no limit is applied.}
+\item{threshold}{Optional numeric value specifying a dispersal limit in map
+units. If \code{NULL} (default), no limit is applied.}
 
-\item{n.cores}{An optional integer value indicating the number of cores to
-use. Defaults to 1. Currently only works on MacOS and Linux.}
+\item{parallel}{Logical. If \code{FALSE}, the default, all operations are
+performed in series. If \code{TRUE} parallel operation is performed using the
+\link{furrr} package. Specify the number of workers and strategy using
+\code{\link[future:re-exports]{future::availableWorkers()}}.}
 
-\item{quiet}{Logical. If \code{FALSE}, prints the global DCI and a plot of river segments
-to the console. Defaults to \code{TRUE}.}
+\item{quiet}{Logical. If \code{FALSE}, prints the global DCI and a plot of river
+segments to the console. Defaults to \code{TRUE}.}
 }
 \value{
-A data frame which holds raw and relative DCI scores for each segment.
+A data frame which holds raw and relative DCI scores for each
+segment.
 }
 \description{
 Calculate non-thresholded invasive DCI

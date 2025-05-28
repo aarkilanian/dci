@@ -24,11 +24,12 @@ gather_dci(
 \item{form}{A string specifying the DCI form to calculate. Options are:
 \code{"pot"} for potamodromous or \code{"dia"} for diadromous.}
 
-\item{pass}{The name of a column in the nodes table of \code{net} containing numeric
-passability values. If \code{NULL}, all barriers are assumed to have 0 passability.}
+\item{pass}{The name of a column in the nodes table of \code{net} containing
+numeric passability values. If \code{NULL}, all barriers are assumed to have 0
+passability.}
 
-\item{threshold}{Optional numeric value specifying a dispersal limit in map units.
-If \code{NULL} (default), no limit is applied.}
+\item{threshold}{Optional numeric value specifying a dispersal limit in map
+units. If \code{NULL} (default), no limit is applied.}
 
 \item{totweight}{The total length or weighted length of the whole network.}
 

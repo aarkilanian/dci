@@ -407,7 +407,7 @@ calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, w
 
   # Remove pairs of segments further than threshold
   if (parallel) {
-    distances <- furrr:future_pmap_dbl(list(from_segment, to_segment, nodes = net_nodes), gather_dist)
+    distances <- furrr::future_pmap_dbl(list(from_segment, to_segment, nodes = net_nodes), gather_dist)
   } else {
     distances <- mapply(gather_dist, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
   }
