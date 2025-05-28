@@ -1,7 +1,6 @@
 .httr-oauth
 local
 inst/doc
-/doc/
 /Meta/
 
 # Package
