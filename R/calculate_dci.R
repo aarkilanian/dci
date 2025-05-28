@@ -1,6 +1,6 @@
 #' Calculate DCI for a `river_net` Object
 #'
-#' Calculates the potamodromous and diaromous forms of the Dendritic
+#' Calculates the potamodromous and diadromous forms of the Dendritic
 #' Connectivity Index (DCI) for a [river_net] object.
 #'
 #' @details
@@ -34,8 +34,9 @@
 #'   segments to the console. Defaults to `TRUE`.
 #'
 #' @return An [sf] object of the river network with new columns specifying
-#' segment-level DCI values. If site data was provided, an [sf] object of the
-#' site points with associated DCI scores is also returned.
+#' segmental DCI values and relative DCI values. These are each segment's
+#' contribution to the global DCI score which is printed. The relative values
+#' are simply those values normalized.
 #'
 #' @export
 #'
