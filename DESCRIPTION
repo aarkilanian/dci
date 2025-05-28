@@ -4,6 +4,7 @@ Version: 0.0.0.9000
 Authors@R: 
     person("Alex", "Arkilanian", , "a.arkilanian@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-5427-2867"))
+Maintainer: Alex Arkilanian <a.arkilanian@gmail.com>
 Description: Calculate and analyze ecological connectivity across the watercourse of river networks using the Dendritic Connectivity Index.
 License: MIT + file LICENSE
 Encoding: UTF-8
