@@ -15,9 +15,9 @@
 #' Upon successful calculation, the global DCI value for the river network will
 #' be printed to the console unless `quiet = TRUE`.
 #'
-#' @param net A [river_net] object.
+#' @param net A [`river_net`] object.
 #' @param form A string specifying the DCI form to calculate. Options are:
-#'   `"pot"` for potamodromous or `"dia"` for diadromous.
+#'   "pot" for potamodromous or "dia" for diadromous.
 #' @param pass The name of a column in the nodes table of `net` containing
 #'   numeric passability values. If `NULL`, all barriers are assumed to have 0
 #'   passability.

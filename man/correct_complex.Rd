@@ -7,7 +7,7 @@
 correct_complex(net, correct = TRUE, quiet = FALSE)
 }
 \arguments{
-\item{net}{A \link{river_net} object.}
+\item{net}{A \code{\link{river_net}} object.}
 
 \item{correct}{Logical. If \code{FALSE} (default), no changes are made and
 topological issues are identified only. If \code{TRUE}, issues are

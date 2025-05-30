@@ -7,7 +7,7 @@
 node_labeling(net)
 }
 \arguments{
-\item{net}{A \link{river_net} object.}
+\item{net}{A \code{\link{river_net}} object.}
 }
 \value{
 A \code{\link{river_net}} object with nodes assigned binary topological labels.

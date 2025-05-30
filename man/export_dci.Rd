@@ -7,7 +7,7 @@
 export_dci(net, results, type = "rivers", relative = FALSE, quiet = TRUE)
 }
 \arguments{
-\item{net}{A \link{river_net} object.}
+\item{net}{A \code{\link{river_net}} object.}
 
 \item{results}{A \code{dci_results} object, or a list of such objects, as returned by
 \code{\link[=calculate_dci]{calculate_dci()}}.}

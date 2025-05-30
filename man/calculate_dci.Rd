@@ -15,10 +15,10 @@ calculate_dci(
 )
 }
 \arguments{
-\item{net}{A \link{river_net} object.}
+\item{net}{A \code{\link{river_net}} object.}
 
 \item{form}{A string specifying the DCI form to calculate. Options are:
-\code{"pot"} for potamodromous or \code{"dia"} for diadromous.}
+"pot" for potamodromous or "dia" for diadromous.}
 
 \item{pass}{The name of a column in the nodes table of \code{net} containing
 numeric passability values. If \code{NULL}, all barriers are assumed to have 0
@@ -41,11 +41,12 @@ segments to the console. Defaults to \code{TRUE}.}
 }
 \value{
 An \link{sf} object of the river network with new columns specifying
-segment-level DCI values. If site data was provided, an \link{sf} object of the
-site points with associated DCI scores is also returned.
+segmental DCI values and relative DCI values. These are each segment's
+contribution to the global DCI score which is printed. The relative values
+are simply those values normalized.
 }
 \description{
-Calculates the potamodromous and diaromous forms of the Dendritic
+Calculates the potamodromous and diadromous forms of the Dendritic
 Connectivity Index (DCI) for a \link{river_net} object.
 }
 \details{

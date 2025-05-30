@@ -18,7 +18,7 @@ calculate_dci_dia_thresh(
 )
 }
 \arguments{
-\item{net}{A \link{river_net} object.}
+\item{net}{A \code{\link{river_net}} object.}
 
 \item{all_members}{An integer vector holding all assigned membership labels
 in the \code{\link{river_net}} object.}
