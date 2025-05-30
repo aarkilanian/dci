@@ -1,6 +1,4 @@
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-
 # dci
 
 <!-- badges: start -->
@@ -12,13 +10,15 @@ developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.re
 [![Codecov test coverage](https://codecov.io/gh/aarkilanian/dci/branch/master/graph/badge.svg)](https://app.codecov.io/gh/aarkilanian/dci?branch=main)
 <!-- badges: end -->
 
+## Overview
+
 The `dci` package provides an R interface to the Dendritic Connectivity Index (DCI) allowing for the analysis of longitudinal connectivity in river networks. Given a set of spatial data representing river lines, barrier point locations and the location of the target watershed's outlet the `dci` package provides tools to calculate ecological connectivity with the DCI. There are options to calculate the potamodromous or diadromous form of the DCI as well as options to consider a distance threshold and/or weights to be applied to river lengths.
 
 This package extends the tidy representation of geospatial network data from the [sfnetworks package](https://luukvdmeer.github.io/sfnetworks/). This provides access to a rich set of further network analysis tools from the [tidygraph package](https://tidygraph.data-imaginist.com/index.html) as well as data manipulation from the [tidyverse](https://www.tidyverse.org/) family of packages.
 
 ## Installation
 
-### From GitHub
+### Development version
 
 To install the development version of the `dci` package from this github page follow these instructions:
 ```r
