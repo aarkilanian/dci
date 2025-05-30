@@ -45,11 +45,10 @@
 #' res <- calculate_dci(net = yamaska_net, form = "pot", pass = "pass_1",
 #' weight = "weight")
 #'
-#' # For the diadromous DCI without weightings
-#' res <- calculate_dci(net = yamaska_net, form = "pot", pass = "pass_1")
-#'
-#' # For the diadromous DCI with a dispersal threshold of 100 meters
-#' res <- calculate_dci(net = yamaska_net, form = "pot", pass = "pass_1", threshold = 100)
+#' # For the diadromous DCI with a dispersal threshold of 100 meters and no
+#' # weights
+#' res <- calculate_dci(net = yamaska_net, form = "pot", pass = "pass_1",
+#' threshold = 100)
 calculate_dci <- function(net, form, pass = NULL, weight = NULL,
                           threshold = NULL, parallel = FALSE, quiet = FALSE) {
   # Check that network is valid
