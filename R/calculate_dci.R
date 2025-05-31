@@ -1,7 +1,7 @@
 #' Calculate DCI for a `river_net` Object
 #'
 #' Calculates the potamodromous and diadromous forms of the Dendritic
-#' Connectivity Index (DCI) for a [river_net] object.
+#' Connectivity Index (DCI) for a [`river_net`] object.
 #'
 #' @details
 #' Passability values are probabilities between 0 and 1, where 0 indicates a
@@ -27,13 +27,13 @@
 #' @param threshold Optional numeric value specifying a dispersal limit in map
 #'   units. If `NULL` (default), no limit is applied.
 #' @param parallel Logical. If `FALSE`, the default, all operations are
-#' performed in series. If `TRUE` parallel operation is performed using the
-#' [furrr] package. Specify the number of workers and strategy using
-#' [future::availableWorkers()].
+#' performed in series. If `TRUE` parallel operation is performed using
+#' [furrr::future_pmap()]. Specify the number of workers and strategy using
+#' [future::plan()].
 #' @param quiet Logical. If `FALSE`, prints the global DCI and a plot of river
 #'   segments to the console. Defaults to `TRUE`.
 #'
-#' @return An [sf] object of the river network with new columns specifying
+#' @return An [`sf::sf`] object of the river network with new columns specifying
 #' segmental DCI values and relative DCI values. These are each segment's
 #' contribution to the global DCI score which is printed. The relative values
 #' are simply those values normalized.
@@ -222,8 +222,7 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights, parallel,
 
   # Calculate passability between each pair of segments
   if (parallel) {
-    pass <- furrr::future_pmap_dbl(list(from_segment, to_segment,
-                                        nodes = net_nodes), gather_perm)
+    pass <- furrr::future_pmap(list(from_segment, to_segment), gather_perm, nodes = net_nodes, .env_globals = globalenv())
   } else {
     pass <- mapply(gather_perm, from_segment, to_segment, MoreArgs =
                      list(nodes = net_nodes))

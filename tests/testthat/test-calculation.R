@@ -7,6 +7,19 @@ test_that("Potamodromous DCI", {
   expect_equal(round(sum(dci$DCI), 2), 93.72)
 })
 
+test_that("Potamodromous DCI (parallel)", {
+  # Load rivnet
+  net <- readRDS(test_path("testdata", "testnet.rds"))
+
+  # Set future
+  future::plan(strategy = multisession, workers = 2)
+
+  # Run test
+  dci <- calculate_dci(net, form = "pot", pass = "pass_1", quiet = TRUE,
+                       parallel = TRUE)
+  expect_equal(round(sum(dci$DCI), 2), 93.72)
+})
+
 test_that("Potamodromous DCI with weight", {
   # Load rivnet
   net <- readRDS(test_path("testdata", "testnet.rds"))
