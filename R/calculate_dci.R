@@ -222,7 +222,8 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights, parallel,
 
   # Calculate passability between each pair of segments
   if (parallel) {
-    pass <- furrr::future_pmap(list(from_segment, to_segment), gather_perm, nodes = net_nodes, .env_globals = globalenv())
+    pass <- furrr::future_pmap_dbl(list(from_segment, to_segment), gather_perm,
+                                   nodes = net_nodes)
   } else {
     pass <- mapply(gather_perm, from_segment, to_segment, MoreArgs =
                      list(nodes = net_nodes))
@@ -342,8 +343,8 @@ calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights,
 
   # Calculate segment-segment distance between each pair
   if (parallel) {
-    distances <- furrr::future_pmap_dbl(list(from_segment, to_segment,
-                                        nodes = net_nodes), gather_dist)
+    distances <- furrr::future_pmap_dbl(list(from_segment, to_segment), gather_dist,
+                           nodes = net_nodes)
   } else {
     distances <- mapply(gather_dist, from_segment, to_segment,
                         MoreArgs = list(nodes = net_nodes))
@@ -359,8 +360,8 @@ calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights,
 
   # Calculate passability between remaining pairs
   if (parallel) {
-    perms <- furrr::future_pmap_dbl(list(from_segment, to_segment,
-                                        nodes = net_nodes), gather_perm)
+    perms <- furrr::future_pmap_dbl(list(from_segment, to_segment), gather_perm,
+                                    nodes = net_nodes)
   } else {
     perms <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
   }
@@ -368,9 +369,9 @@ calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights,
   # Calculate DCI
   if (parallel) {
     DCIs <- furrr::future_pmap_dbl(list(from_segment, to_segment, distances,
-                                        perms, nodes = net_nodes, seg_weights,
+                                        perms), gather_dci, nodes = net_nodes, seg_weights,
                                         threshold, totweight, weighted,
-                                        form = "potamodromous"), gather_dci)
+                                        form = "potamodromous")
   } else {
     DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted, form = "potamodromous"))
   }
@@ -406,7 +407,8 @@ calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, w
 
   # Remove pairs of segments further than threshold
   if (parallel) {
-    distances <- furrr::future_pmap_dbl(list(from_segment, to_segment, nodes = net_nodes), gather_dist)
+    distances <- furrr::future_pmap_dbl(list(from_segment, to_segment), gather_dist,
+                                        nodes = net_nodes)
   } else {
     distances <- mapply(gather_dist, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
   }
@@ -421,8 +423,8 @@ calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, w
 
   # Calculate passability between remaining pairs
   if (parallel) {
-    perms <- furrr::future_pmap_dbl(list(from_segment, to_segment,
-                                         nodes = net_nodes), gather_perm)
+    perms <- furrr::future_pmap_dbl(list(from_segment, to_segment), gather_perm,
+                                    nodes = net_nodes)
   } else {
     perms <- mapply(gather_perm, from_segment, to_segment, MoreArgs = list(nodes = net_nodes))
   }
@@ -430,9 +432,9 @@ calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, w
   # Calculate DCI
   if (parallel) {
     DCIs <- furrr::future_pmap_dbl(list(from_segment, to_segment, distances,
-                                        perms, nodes = net_nodes, seg_weights,
-                                        threshold, totweight, weighted,
-                                        form = "diadromous"), gather_dci)
+                                        perms), gather_dci, nodes = net_nodes, seg_weights,
+                                   threshold, totweight, weighted,
+                                   form = "diadromous")
   } else {
     DCIs <- mapply(gather_dci, from_segment, to_segment, distances, perms, MoreArgs = list(net = net, nodes = net_nodes, seg_weights, threshold, totweight, weighted, form = "diadromous"))
   }
@@ -472,6 +474,33 @@ calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, w
 #'
 #' @keywords internal
 gather_dci <- function(net, form, from, to, distance, pass, nodes, seg_weights, threshold, totweight, weighted) {
+
+  # Helper to find path between two nodes
+  path_between <- function(s1, s2) {
+    # Get path from segments to root
+    s1_path <- path_to_root(s1)
+    s2_path <- path_to_root(s2)
+
+    # Determine non-repeating nodes
+    path_sub <- s1_path[!(s1_path %in% s2_path)]
+    path <- append(path_sub, s2_path[!(s2_path %in% s1_path)])
+
+    # Return list of nodes across path
+    return(path)
+  }
+
+  # Helper to find the path from a node to the root node
+  path_to_root <- function(seg) {
+    # Prepare input vectors
+    path <- rep(seg, each = length(unlist(seg)))
+    len <- length(unlist(seg)):1
+    # Sequentially remove final element from path until 1 left
+    path_out <- mapply(function(x, y) unlist(x)[1:y],
+                       path, len,
+                       SIMPLIFY = TRUE
+    )
+  }
+
   # Diadromous case
   if (form == "diadromous") {
     # Case when from and to segment are the same
@@ -623,6 +652,33 @@ gather_dci <- function(net, form, from, to, distance, pass, nodes, seg_weights, 
 #'
 #' @keywords internal
 gather_dist <- function(from, to, nodes) {
+
+  # Helper to find path between two nodes
+  path_between <- function(s1, s2) {
+    # Get path from segments to root
+    s1_path <- path_to_root(s1)
+    s2_path <- path_to_root(s2)
+
+    # Determine non-repeating nodes
+    path_sub <- s1_path[!(s1_path %in% s2_path)]
+    path <- append(path_sub, s2_path[!(s2_path %in% s1_path)])
+
+    # Return list of nodes across path
+    return(path)
+  }
+
+  # Helper to find the path from a node to the root node
+  path_to_root <- function(seg) {
+    # Prepare input vectors
+    path <- rep(seg, each = length(unlist(seg)))
+    len <- length(unlist(seg)):1
+    # Sequentially remove final element from path until 1 left
+    path_out <- mapply(function(x, y) unlist(x)[1:y],
+                       path, len,
+                       SIMPLIFY = TRUE
+    )
+  }
+
   # Extract sinks and barriers
   sinks_bars <- subset(nodes, nodes$type %in% c("outlet", "barrier"))
 
