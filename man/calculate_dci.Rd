@@ -65,9 +65,4 @@ be printed to the console unless \code{quiet = TRUE}.
 # For the potamodromous DCI
 res <- calculate_dci(net = yamaska_net, form = "pot", pass = "pass_1",
 weight = "weight")
-
-# For the diadromous DCI with a dispersal threshold of 100 meters and no
-# weights
-res <- calculate_dci(net = yamaska_net, form = "pot", pass = "pass_1",
-threshold = 100)
 }

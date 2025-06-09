@@ -31,10 +31,6 @@
 #' bar_in <- import_points(yamaska_barriers, type = "bars")
 #' out_in <- import_points(yamaska_outlet, type = "out")
 #'
-#' # Simple case with rivers, barriers, and outlet
-#' yam_net <- river_net(rivers = riv_in, barriers = bar_in,
-#' outlet = out_in)
-#'
 #' # For large river networks it may be better to specify a smaller number of
 #' # correction sweeps.
 #' yam_net <- river_net(rivers = riv_in, barriers = bar_in,
