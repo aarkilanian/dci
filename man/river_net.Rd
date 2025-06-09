@@ -51,17 +51,11 @@ bar_in <- import_points(yamaska_barriers, type = "bars")
 out_in <- import_points(yamaska_outlet, type = "out")
 
 # Simple case with rivers, barriers, and outlet
-yam_net <- river_net(rivers = yamaska_rivers, barriers = yamaska_barriers,
-outlet - yamaska_outlet)
-
-# If corrections are done earlier they can be skipped in this constructor
-riv_cor <- enforce_dendritic(rivers = yamaska_rivers, correct = TRUE,
-quiet = TRUE)
-yam_net <- river_net(rivers = yamaska_cor, barriers = yamaska_barriers,
-outlet - yamaska_outlet, check = FALSE)
+yam_net <- river_net(rivers = riv_in, barriers = bar_in,
+outlet = out_in)
 
 # For large river networks it may be better to specify a smaller number of
 # correction sweeps.
-yam_net <- river_net(rivers = yamaska_rivers, barriers = yamaska_barriers,
-outlet - yamaska_outlet, max_iter = 3)
+yam_net <- river_net(rivers = riv_in, barriers = bar_in,
+outlet = out_in, max_iter = 3)
 }
