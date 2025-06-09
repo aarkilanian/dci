@@ -60,6 +60,13 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL,
     stop("A valid form of the DCI must be requested. Either `pot` or `dia`")
   }
 
+  # Check parallel dependencies
+  if (parallel) {
+    if (!requireNamespace("furrr", quietly = TRUE)) {
+      stop("Package 'furrr' must be installed to use parallel execution.")
+    }
+  }
+
   # Extract edges
   net_edges <- as.data.frame(activate(net, edges))
 
