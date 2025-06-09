@@ -11,6 +11,8 @@ Encoding: UTF-8
 URL: https://github.com/aarkilanian/dci
 BugReports: https://github.com/aarkilanian/dci/issues
 Suggests:
+    furrr,
+    future,
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)
@@ -24,8 +26,7 @@ Imports:
     tidygraph,
     sfnetworks,
     igraph,
-    tidyselect,
-    furrr
+    tidyselect
 Depends: 
     R (>= 3.50)
 LazyData: true
