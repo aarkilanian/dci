@@ -32,22 +32,22 @@ length only.}
 units. If \code{NULL} (default), no limit is applied.}
 
 \item{parallel}{Logical. If \code{FALSE}, the default, all operations are
-performed in series. If \code{TRUE} parallel operation is performed using the
-\link{furrr} package. Specify the number of workers and strategy using
-\code{\link[future:re-exports]{future::availableWorkers()}}.}
+performed in series. If \code{TRUE} parallel operation is performed using
+\code{\link[furrr:future_map2]{furrr::future_pmap()}}. Specify the number of workers and strategy using
+\code{\link[future:plan]{future::plan()}}.}
 
 \item{quiet}{Logical. If \code{FALSE}, prints the global DCI and a plot of river
 segments to the console. Defaults to \code{TRUE}.}
 }
 \value{
-An \link{sf} object of the river network with new columns specifying
+An \code{\link[sf:sf]{sf::sf}} object of the river network with new columns specifying
 segmental DCI values and relative DCI values. These are each segment's
 contribution to the global DCI score which is printed. The relative values
 are simply those values normalized.
 }
 \description{
 Calculates the potamodromous and diadromous forms of the Dendritic
-Connectivity Index (DCI) for a \link{river_net} object.
+Connectivity Index (DCI) for a \code{\link{river_net}} object.
 }
 \details{
 Passability values are probabilities between 0 and 1, where 0 indicates a
@@ -66,9 +66,8 @@ be printed to the console unless \code{quiet = TRUE}.
 res <- calculate_dci(net = yamaska_net, form = "pot", pass = "pass_1",
 weight = "weight")
 
-# For the diadromous DCI without weightings
-res <- calculate_dci(net = yamaska_net, form = "pot", pass = "pass_1")
-
-# For the diadromous DCI with a dispersal threshold of 100 meters
-res <- calculate_dci(net = yamaska_net, form = "pot", pass = "pass_1", threshold = 100)
+# For the diadromous DCI with a dispersal threshold of 100 meters and no
+# weights
+res <- calculate_dci(net = yamaska_net, form = "pot", pass = "pass_1",
+threshold = 100)
 }

@@ -28,9 +28,9 @@ weighted or unweighted depending on parameters.}
 segment}
 
 \item{parallel}{Logical. If \code{FALSE}, the default, all operations are
-performed in series. If \code{TRUE} parallel operation is performed using the
-\link{furrr} package. Specify the number of workers and strategy using
-\code{\link[future:re-exports]{future::availableWorkers()}}.}
+performed in series. If \code{TRUE} parallel operation is performed using
+\code{\link[furrr:future_map2]{furrr::future_pmap()}}. Specify the number of workers and strategy using
+\code{\link[future:plan]{future::plan()}}.}
 
 \item{quiet}{Logical. If \code{FALSE}, prints the global DCI and a plot of river
 segments to the console. Defaults to \code{TRUE}.}
