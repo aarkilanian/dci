@@ -12,7 +12,7 @@ test_that("Potamodromous DCI (parallel)", {
   net <- readRDS(test_path("testdata", "testnet.rds"))
 
   # Set future
-  future::plan(multisession(workers = 2))
+  future::plan("multisession", workers = 2)
 
   # Run test
   dci <- calculate_dci(net, form = "pot", pass = "pass_1", quiet = TRUE,
