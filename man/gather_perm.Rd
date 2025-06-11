@@ -11,7 +11,7 @@ gather_perm(from, to, nodes)
 
 \item{to}{The to node's label}
 
-\item{nodes}{An \code{\link{sf}} object of the nodes of the \code{\link{river_net}} object with river attributes joined.}
+\item{nodes}{An \code{sf} object of the nodes of the \code{\link{river_net}} object with river attributes joined.}
 }
 \value{
 The passability from 0 to 1 between the given nodes.

@@ -5,7 +5,7 @@
 #' river lines that are part of disconnected secondary networks are discarded.
 #'
 #' @param rivers A character string specifying the path to a shapefile of river lines,
-#'   or an [sf] object representing river geometries.
+#'   or an `sf` object representing river geometries.
 #' @param quiet Logical. If `FALSE` (default), plots the imported river lines in
 #' black over the original lines in red so that removed rivers are highlighted.
 #'
@@ -97,7 +97,7 @@ import_rivers <- function(rivers, quiet = FALSE) {
 #' Reads and prepares geospatial point data for use with [river_net()].
 #'
 #' @param pts A character string specifying the path to a shapefile of points,
-#'   or an [sf] object containing point features.
+#'   or an `sf` object containing point features.
 #' @param type A character string indicating the type of points. Must be one of:
 #'   `"bars"` for barriers or `"out"` for the outlet.
 #'

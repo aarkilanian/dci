@@ -23,7 +23,7 @@ be returned in addition to raw values. Defaults to \code{FALSE}.}
 segments to the console. Defaults to \code{TRUE}.}
 }
 \value{
-An \link{sf} object containing the corresponding DCI results joined
+An \code{sf} object containing the corresponding DCI results joined
 to the selected network component. If multiple results are supplied, result
 columns are appended by a number corresponding to the index of the
 associated results.

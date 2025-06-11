@@ -12,7 +12,7 @@
 #' @param relative A logical value indicating whether relative DCI values should
 #'   be returned in addition to raw values. Defaults to `FALSE`.
 #'
-#' @return An [sf] object containing the corresponding DCI results joined
+#' @return An `sf` object containing the corresponding DCI results joined
 #'   to the selected network component. If multiple results are supplied, result
 #'   columns are appended by a number corresponding to the index of the
 #'   associated results.

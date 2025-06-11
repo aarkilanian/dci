@@ -8,7 +8,7 @@ import_rivers(rivers, quiet = FALSE)
 }
 \arguments{
 \item{rivers}{A character string specifying the path to a shapefile of river lines,
-or an \link{sf} object representing river geometries.}
+or an \code{sf} object representing river geometries.}
 
 \item{quiet}{Logical. If \code{FALSE} (default), plots the imported river lines in
 black over the original lines in red so that removed rivers are highlighted.}

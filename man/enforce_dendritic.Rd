@@ -23,7 +23,7 @@ choice can lead to a recursive correction that eliminates most rivers. In
 this case, some manual corrections may help avoid this.}
 }
 \value{
-If \code{correct = FALSE}, returns a \link{sf} object with the columns
+If \code{correct = FALSE}, returns a \code{sf} object with the columns
 \code{"divergent"} and \code{"complex"} indicating topological errors. These columns
 contain integer identifiers indicating which features are part of the
 same divergent or complex structure. If \code{correct = TRUE}, returns a

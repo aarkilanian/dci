@@ -8,7 +8,7 @@ import_points(pts, type)
 }
 \arguments{
 \item{pts}{A character string specifying the path to a shapefile of points,
-or an \link{sf} object containing point features.}
+or an \code{sf} object containing point features.}
 
 \item{type}{A character string indicating the type of points. Must be one of:
 \code{"bars"} for barriers or \code{"out"} for the outlet.}

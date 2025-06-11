@@ -23,7 +23,7 @@
 #' @param quiet Logical. If `FALSE`, the function prints a summary including
 #'   the global DCI and a map of segments. Defaults to `TRUE`.
 #'
-#' @return If `correct = FALSE`, returns a [sf] object with the columns
+#' @return If `correct = FALSE`, returns a `sf` object with the columns
 #'   `"divergent"` and `"complex"` indicating topological errors. These columns
 #'   contain integer identifiers indicating which features are part of the
 #'   same divergent or complex structure. If `correct = TRUE`, returns a

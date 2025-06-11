@@ -10,7 +10,7 @@ calculate_dci_pot(all_members, net_nodes, seg_weights, parallel, quiet)
 \item{all_members}{An integer vector holding all assigned membership labels
 in the \code{\link{river_net}} object.}
 
-\item{net_nodes}{An \code{\link{sf}} object of the nodes of the
+\item{net_nodes}{An \code{sf} object of the nodes of the
 \code{\link{river_net}}
 object with river attributes joined.}
 

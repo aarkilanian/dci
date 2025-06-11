@@ -33,7 +33,7 @@
 #' @param quiet Logical. If `FALSE`, prints the global DCI and a plot of river
 #'   segments to the console. Defaults to `TRUE`.
 #'
-#' @return An [`sf::sf`] object of the river network with new columns specifying
+#' @return An `sf` object of the river network with new columns specifying
 #' segmental DCI values and relative DCI values. These are each segment's
 #' contribution to the global DCI score which is printed. The relative values
 #' are simply those values normalized.
@@ -201,9 +201,9 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL,
 #'
 #' @inheritParams calculate_dci
 #' @param all_members An integer vector holding all assigned membership labels
-#'   in the \code{\link{river_net}} object.
-#' @param net_nodes An \code{\link{sf}} object of the nodes of the
-#'   \code{\link{river_net}}
+#'   in the [`river_net`] object.
+#' @param net_nodes An `sf` object of the nodes of the
+#'   [`river_net`]
 #'   object with river attributes joined.
 #' @param seg_weights A data frame of each segments total length. Either
 #'   weighted or unweighted depending on parameters.
@@ -322,9 +322,9 @@ calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg,
 #'
 #' @inheritParams calculate_dci
 #' @param all_members An integer vector holding all assigned membership labels
-#'   in the \code{\link{river_net}} object.
-#' @param net_nodes An \code{\link{sf}} object of the nodes of the
-#' \code{\link{river_net}} object with river attributes joined.
+#'   in the [`river_net`] object.
+#' @param net_nodes An `sf` object of the nodes of the
+#' [`river_net`] object with river attributes joined.
 #' @param seg_weights A data frame of each segments total length. Either
 #'   weighted or unweighted depending on parameters.
 #'
@@ -648,7 +648,7 @@ gather_dci <- function(net, form, from, to, distance, pass, nodes, seg_weights, 
 #'
 #' @param from The from node's label
 #' @param to The to node's label
-#' @param nodes An \code{\link{sf}} object of the nodes of the \code{\link{river_net}} object with river attributes joined.
+#' @param nodes An `sf` object of the nodes of the [`river_net`] object with river attributes joined.
 #'
 #' @return The distance, in map units, between the two given segments.
 #'

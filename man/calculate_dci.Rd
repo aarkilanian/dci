@@ -40,7 +40,7 @@ performed in series. If \code{TRUE} parallel operation is performed using
 segments to the console. Defaults to \code{TRUE}.}
 }
 \value{
-An \code{\link[sf:sf]{sf::sf}} object of the river network with new columns specifying
+An \code{sf} object of the river network with new columns specifying
 segmental DCI values and relative DCI values. These are each segment's
 contribution to the global DCI score which is printed. The relative values
 are simply those values normalized.
