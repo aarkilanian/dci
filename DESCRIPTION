@@ -1,6 +1,6 @@
 Package: dci
 Title: Calculate the Dendritic Connectivity Index in River Networks
-Version: 1.0.1
+Version: 1.0.2
 Authors@R: 
     person("Alex", "Arkilanian", , "a.arkilanian@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-5427-2867"))
