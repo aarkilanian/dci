@@ -8,6 +8,10 @@ test_that("Potamodromous DCI", {
 })
 
 test_that("Potamodromous DCI (parallel)", {
+
+  # Skip on Github Actions
+  skip_on_ci()
+
   # Load rivnet
   net <- readRDS(test_path("testdata", "testnet.rds"))
 
