@@ -45,79 +45,117 @@
 #' # correction sweeps.
 #' rivers_cor <- enforce_dendritic(rivers_in, correct = TRUE, max_iter = 3)
 enforce_dendritic <- function(rivers, correct = TRUE, quiet = FALSE,
-                              max_iter = 10) {
+                              max_iter = 10, divergences = TRUE,
+                              complex = TRUE) {
 
-  # Create river network with length as weight
+  # Create sfnetwork to identify errors
   net <- suppressWarnings(
     sfnetworks::as_sfnetwork(rivers, length_as_weight = TRUE)
   )
 
-  # Correct complex confluences
-  # If automatically correcting topology, use network with divergences corrected
-  if (correct) {
+  # Correct automatically
+  if(correct){
+
+    # Start iteration counter
+    i <- 1
 
     # Print iteration
-    i <- 1
     if(!quiet) message(paste0("Iteration ", i, ":"))
-    rivers <- correct_divergences(net, correct, quiet)
-    divergences <- rivers[[2]]
-    rivers <- rivers[[1]]
 
-    # Create network from rivers
-    net <- suppressWarnings(
-      sfnetworks::as_sfnetwork(rivers)
-    )
+    # Correct divergences
+    if(divergences){
 
-    rivers <- correct_complex(net, correct, quiet)
-    complexes <- rivers[[2]]
-    rivers <- rivers[[1]]
-
-    # Keep correcting until no more errors
-    i <- 2
-    while(divergences != 0 || complexes != 0){
-
-      # Print iteration
-      if(!quiet) message(paste0("Iteration ", i, ":"))
-
-      # Prepare new network
-      net <- suppressWarnings(
-        sfnetworks::as_sfnetwork(rivers, length_as_weight = TRUE)
-      )
-
-      # Correct divergences
       rivers <- correct_divergences(net, correct, quiet)
       divergences <- rivers[[2]]
       rivers <- rivers[[1]]
 
-      # Create network from rivers
+      # Rebuild network
       net <- suppressWarnings(
         sfnetworks::as_sfnetwork(rivers)
       )
+    } else{
+      divergences <- 0
+    }
 
-      # Correct complex
+    # Correct complex confluences
+    if(complex){
       rivers <- correct_complex(net, correct, quiet)
       complexes <- rivers[[2]]
       rivers <- rivers[[1]]
+    } else{
+      complexes <- 0
+    }
 
-      # Increment counter
+    # Return if only one iteration requested
+    if(i == max_iter){
+
+      # Recalculate river lengths
+      rivers$riv_length <- as.double(sf::st_length(rivers))
+
+      # Return corrected rivers
+      invisible(rivers)
+
+      # If max_iter > 1 keep correcting
+    } else{
+
+      # Iterate counter
       i <- i + 1
 
-      # Issue error if reached maximum iterations
-      if(i > max_iter) stop("Maximum number of topology correction iterations
+      # Keep correcting until no more errors remain
+      while(divergences != 0 || complexes != 0){
+
+        # Print iteration
+        if(!quiet) message(paste0("Iteration ", i, ":"))
+
+        # Prepare new network
+        net <- suppressWarnings(
+          sfnetworks::as_sfnetwork(rivers, length_as_weight = TRUE)
+        )
+
+        # If divergences remain correct them
+        if(divergences != 0){
+          rivers <- correct_divergences(net, correct, quiet)
+          divergences <- rivers[[2]]
+          rivers <- rivers[[1]]
+          # Create network from rivers
+          net <- suppressWarnings(
+            sfnetworks::as_sfnetwork(rivers)
+          )
+        }
+
+        # If complex confluences remain correct them
+        if(complexes != 0){
+          rivers <- correct_complex(net, correct, quiet)
+          complexes <- rivers[[2]]
+          rivers <- rivers[[1]]
+          # Create network from rivers
+          net <- suppressWarnings(
+            sfnetworks::as_sfnetwork(rivers)
+          )
+        }
+
+        # Increment counter
+        i <- i + 1
+
+        # Issue error if reached maximum iterations
+        if(i > max_iter) stop("Maximum number of topology correction iterations
                              reached. Consider manual correction of some or all
                              topological errors with the standalone
                              `enforce_dendritic(correct = FALSE)` or increase
                              `max_iter` parameter.")
+
+      }
+
+      # Recalculate river lengths
+      rivers$riv_length <- as.double(sf::st_length(rivers))
+
+      # Return corrected rivers
+      invisible(rivers)
+
     }
 
-    # Recalculate river lengths
-    rivers$riv_length <- as.double(sf::st_length(rivers))
-
-    # Return corrected rivers
-    invisible(rivers)
-
-    # If errors are set to be manually edited, use full network
-  } else {
+    # Only identify errors, no corrections
+  } else{
 
     # Get original column names
     orig_cols <- colnames(rivers)
@@ -132,7 +170,9 @@ enforce_dendritic <- function(rivers, correct = TRUE, quiet = FALSE,
 
     # Output rivers
     invisible(net_comp)
+
   }
+
 }
 
 #' Correct river divergences
