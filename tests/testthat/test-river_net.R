@@ -15,7 +15,7 @@ test_that("Simple river network is created", {
 
 
   # Create river network
-  net2 <- suppressWarnings(river_net(rivers = rivs, barriers = bars, outlet = outlet))
+  net2 <- suppressWarnings(suppressMessages(river_net(rivers = rivs, barriers = bars, outlet = outlet)))
 
   expect_equal(any(class(net2) == "river_net"), TRUE)
 

@@ -46,7 +46,7 @@
 #' rivers_cor <- enforce_dendritic(rivers_in, correct = TRUE, max_iter = 3)
 enforce_dendritic <- function(rivers, correct = TRUE, quiet = FALSE,
                               max_iter = 10, divergences = TRUE,
-                              complex = TRUE) {
+                              complex = TRUE, max_loss = 15, max_div_corr = 5) {
 
   # Create sfnetwork to identify errors
   net <- suppressWarnings(
@@ -65,9 +65,13 @@ enforce_dendritic <- function(rivers, correct = TRUE, quiet = FALSE,
     # Correct divergences
     if(divergences){
 
-      rivers <- correct_divergences(net, correct, quiet)
+      rivers <- correct_divergences(net, correct, quiet, max_loss, max_div_corr)
+
+      if(is.null(rivers)) return(NULL)
+
       divergences <- rivers[[2]]
       rivers <- rivers[[1]]
+
 
       # Rebuild network
       net <- suppressWarnings(
@@ -183,65 +187,161 @@ enforce_dendritic <- function(rivers, correct = TRUE, quiet = FALSE,
 #' @return If correct is [TRUE] a \code{\link{river_net}} object with the shorter of each divergent pair removed. If correct is \code{FALSE} a \code{\link[sf]{sf}} object with divergent pairs identified with a shared number in the new "divergent" column.
 #'
 #' @keywords internal
-correct_divergences <- function(net, correct = TRUE, quiet = FALSE) {
-  # If no corrections desired, find and return divergences
-  if (!correct) {
+correct_divergences <- function(net, correct = TRUE, quiet = FALSE,
+                                max_loss, max_div_corr) {
+
+  # Correct divergences
+  if(correct){
+
+    # Find and correct divergences. Always keep longest stream
+    net_corrected <- activate(net, edges) %>%
+      dplyr::group_by(.data$from) %>%
+      dplyr::filter(.data$weight == max(.data$weight)) %>%
+      tidygraph::ungroup(.data) %>%
+      # Remove weight column
+      dplyr::select(-tidyselect::all_of("weight"))
+
+    # Get number of removed rivers
+    orig_num <- nrow(as.data.frame(activate(net, edges)))
+    cor_num <- nrow(as.data.frame(activate(net_corrected, edges)))
+    num_div <- orig_num - cor_num
+
+    # If no divergences return
+    if (num_div == 0) {
+      if (!quiet) message("No divergences detected.")
+      # Extract rivers
+      rivers <- sf::st_as_sf(activate(net, edges))[,-c(1:2)]
+      # Return
+      invisible(list(rivers, num_div))
+
+      # If divergenes print number and identify largest components
+    } else {
+      if (!quiet) message(paste0(num_div, " divergences corrected."))
+
+      # Identify components
+      net_comp <- activate(net_corrected, nodes) %>%
+        dplyr::mutate(component = tidygraph::group_components()) %>%
+        dplyr::group_by(.data$component) %>%
+        tidygraph::ungroup(.data)
+
+      # Determine largest component and extract
+      comps <- as.data.frame(activate(net_comp, nodes))$component
+      big_comp <- sort(table(comps), decreasing = TRUE)[1]
+      big_comp <- as.integer(names(big_comp))
+      net_corrected2 <- net_comp %>%
+        dplyr::filter(.data$component == big_comp)
+
+      # Compare components to pre-correction network
+      len_cor <- sum(sf::st_length(net_corrected2 %>% activate(edges)), na.rm = TRUE)
+      len_uncor <- sum(sf::st_length(net %>% activate(edges)), na.rm = TRUE)
+      percent_lost <- 100 - round(len_cor/len_uncor * 100, digits = 2)
+
+      if(percent_lost >= max_loss){
+                message(paste(paste0("Divergence corrections have led to the disconnection of ", percent_lost, "% of the river network."),
+                              "Would you like to:",
+                              "A: randomize divergence corrections to hopefully achieve a lower percent loss.",
+                              "B: continue with the current correction.",
+                              "C: exit automatic correction and correct topology manually with 'enforce_dendritic(correct = FALSE)'.",
+                              sep = "\n"))
+                user_input <- readLines(n = 1, con = getOption("mypkg.connection"))
+
+                # Cases
+                if(user_input == "A"){
+
+                  # Maximum number of correction attempts
+                  i <- 1
+
+                  while(percent_lost >= max_loss & i <= max_div_corr){
+
+                    # Find and correct divergences. Keep random river
+                    net_corrected <- activate(net, edges) %>%
+                      dplyr::group_by(.data$from) %>%
+                      dplyr::slice_sample(n = 1) %>%
+                      tidygraph::ungroup(.data)
+
+                    # Identify components
+                    net_comp <- activate(net_corrected, nodes) %>%
+                      dplyr::mutate(component = tidygraph::group_components()) %>%
+                      dplyr::group_by(.data$component) %>%
+                      tidygraph::ungroup(.data)
+
+                    # Determine largest component and extract
+                    comps <- as.data.frame(activate(net_comp, nodes))$component
+                    big_comp <- sort(table(comps), decreasing = TRUE)[1]
+                    big_comp <- as.integer(names(big_comp))
+                    net_corrected2 <- net_comp %>%
+                      dplyr::filter(.data$component == big_comp)
+
+                    # Compare components to pre-correction network
+                    len_cor <- sum(sf::st_length(net_corrected2 %>% activate(edges)), na.rm = TRUE)
+                    len_uncor <- sum(sf::st_length(net %>% activate(edges)), na.rm = TRUE)
+                    percent_lost <- 100 - round(len_cor/len_uncor * 100, digits = 2)
+
+                    # Iterate counter
+                    i <- i + 1
+                  }
+
+                  if(i > max_div_corr){
+                    stop("Reached maximum number of randomized divergence corrections. Increase 'max_div_corr' or correct manually.")
+                  }
+
+                  if(percent_lost >= max_loss){
+                    stop(paste0("Could not achieve less than ", max_loss, "% river loss with randomized divergence corrections."))
+                  }
+
+                  # If fixed return
+                  # Extract rivers
+                  rivers <- sf::st_as_sf(activate(net_corrected2, edges))[,-c(1:2)]
+                  # Return
+                  invisible(list(rivers, num_div))
+
+                } else if(user_input == "B"){
+
+                  # Extract rivers
+                  rivers <- sf::st_as_sf(activate(net_corrected2, edges))[,-c(1:2)]
+                  # Return
+                  invisible(list(rivers, num_div))
+
+                } else if(user_input == "C"){
+
+                  return(NULL)
+
+                } else{
+
+                  # Prompt again for correct choice
+                  while(!(user_input %in% c("A", "B", "C"))){
+                    user_input <- readline(prompt = "You've made an invalid choice (A, B, or C): ")
+                  }
+                }
+      }
+
+      # Extract rivers
+      rivers <- sf::st_as_sf(activate(net_corrected2, edges))[,-c(1:2)]
+      # Return
+      invisible(list(rivers, num_div))
+
+    }
+
+    # Only identify errors, no corrections
+  } else{
+
     # Find and identify divergent pairs
     riv_divergences <- activate(net, edges) %>%
       dplyr::group_by(.data$from) %>%
       dplyr::mutate(grp_size = dplyr::n()) %>%
       dplyr::mutate(divergent = dplyr::if_else(.data$grp_size > 1, .data$from, NA_integer_)) %>%
       dplyr::ungroup()
+
     # Print number of divergences
     num_div <- length(unique(as.data.frame(activate(riv_divergences, edges))$divergent)) - 1
     if (!quiet) {
       message(paste0(num_div, " divergences have been found."))
     }
+
     # Return non-corrected divergences
     return(riv_divergences)
   }
 
-  # Find and correct divergences. Always keep longest stream
-  net_corrected <- activate(net, edges) %>%
-    dplyr::group_by(.data$from) %>%
-    dplyr::filter(.data$weight == max(.data$weight)) %>%
-    tidygraph::ungroup(.data) %>%
-    # Remove weight column
-    dplyr::select(-tidyselect::all_of("weight"))
-
-  # Identify components
-  net_comp <- activate(net_corrected, nodes) %>%
-    dplyr::mutate(component = tidygraph::group_components()) %>%
-    dplyr::group_by(.data$component) %>%
-    tidygraph::ungroup(.data)
-
-  # Determine largest component and extract
-  comps <- as.data.frame(activate(net_comp, nodes))$component
-  big_comp <- sort(table(comps), decreasing = TRUE)[1]
-  big_comp <- as.integer(names(big_comp))
-  net_corrected <- net_comp %>%
-    dplyr::filter(.data$component == big_comp)
-
-  # Get number of removed rivers
-  orig_num <- nrow(as.data.frame(activate(net, edges)))
-  cor_num <- nrow(as.data.frame(activate(net_corrected, edges)))
-  num_div <- orig_num - cor_num
-
-  # Print number of corrected divergences
-  if (num_div == 0) {
-    if (!quiet) message("No divergences detected.")
-    # Extract rivers
-    rivers <- sf::st_as_sf(activate(net, edges))[,-c(1:2)]
-    # Return
-    invisible(list(rivers, num_div))
-
-  } else {
-    if (!quiet) message(paste0(num_div, " divergences corrected."))
-    # Extract rivers
-    rivers <- sf::st_as_sf(activate(net_corrected, edges))[,-c(1:2)]
-    # Return
-    invisible(list(rivers, num_div))
-  }
 }
 
 #' Correct complex confluences

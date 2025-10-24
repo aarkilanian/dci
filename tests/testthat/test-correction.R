@@ -9,7 +9,7 @@ test_that("Single divergences (loops) are corrected", {
   ))
 
   # Run test
-  new_net <- enforce_dendritic(rivers, quiet = TRUE)
+  new_net <- enforce_dendritic(rivers, quiet = TRUE, max_loss = 100)
   expect_equal(nrow(new_net), 4)
 })
 
@@ -27,8 +27,51 @@ test_that("Multiple divergences (braiding) are corrected", {
   ))
 
   # Run test
-  new_net <- enforce_dendritic(rivers, quiet = TRUE)
+  new_net <- enforce_dendritic(rivers, quiet = TRUE, max_loss = 100)
   expect_equal(nrow(new_net), 6)
+})
+
+test_that("Divergence randomization works", {
+
+  # Create test network
+  rivers <- sf::st_as_sf(sf::st_sfc(
+    sf::st_linestring(matrix(c(-1,0,1,2), 2)),
+    sf::st_linestring(matrix(c(-1,-1,0,1), 2)),
+    sf::st_linestring(matrix(c(2,-1,0,1), 2)),
+    sf::st_linestring(matrix(c(3,2,-1,0), 2)),
+    sf::st_linestring(matrix(c(2,4,0,1), 2)),
+    sf::st_linestring(matrix(c(4,4,1,8), 2)),
+    sf::st_linestring(matrix(c(5,4,-6,1), 2))
+  ))
+
+  # Make file connection for user input
+  f <- file()
+  options(mypkg.connection = f)
+  ans <- paste(c("A", "A", "A", "B", "C"), collapse = "\n")
+  write(ans, f)
+
+  # Option A works
+  new_net <- suppressMessages(enforce_dendritic(rivers, quiet = TRUE, max_loss = 50))
+  expect_equal(round(sum(sf::st_length(new_net)), digits = 2), 17.72)
+  # Option A reaches max iterations
+  expect_error(suppressMessages(enforce_dendritic(rivers, quiet = TRUE, max_loss = 5, max_div_corr = 1)),
+               "Reached maximum number of randomized divergence corrections. Increase 'max_div_corr' or correct manually.")
+  # Option A cannot achieve less than max loss
+  expect_error(suppressMessages(enforce_dendritic(rivers, quiet = TRUE, max_loss = 10, max_div_corr = 3)),
+               "Reached maximum number of randomized divergence corrections. Increase 'max_div_corr' or correct manually.")
+
+  # Option B works
+  new_net <- suppressMessages(enforce_dendritic(rivers, quiet = TRUE, max_loss = 50))
+  expect_equal(round(sum(sf::st_length(new_net)), digits = 2), 6.99)
+
+  # Option C works
+  new_net <- suppressMessages(enforce_dendritic(rivers, quiet = TRUE, max_loss = 50))
+  expect_equal(new_net, NULL)
+
+  # Clean up file connection
+  options(mypkg.connection = stdin())
+  close(f)
+
 })
 
 test_that("Single complex nodes are corrected", {
@@ -143,7 +186,7 @@ test_that("Manual correction works", {
   rivers <- sf::st_as_sf(rivers, wkt = "x")
 
   # Perform check for dendritic violations
-  rivers_out <- enforce_dendritic(rivers, correct = FALSE)
+  rivers_out <- suppressMessages(enforce_dendritic(rivers, correct = FALSE))
 
   expect_equal(all(c("complexID", "divergent") %in% colnames(rivers_out)), TRUE)
 
