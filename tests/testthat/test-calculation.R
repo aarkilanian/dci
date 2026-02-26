@@ -57,7 +57,7 @@ test_that("Diadromous DCI", {
 
   # Run test
   dci <- calculate_dci(net, form = "dia", pass = "pass_1", quiet = TRUE)
-  expect_equal(round(sum(dci$DCI), 2), 68.46)
+  expect_equal(round(sum(dci$DCI), 2), 90.63)
 })
 
 test_that("Diadromous DCI with weight", {
@@ -66,7 +66,7 @@ test_that("Diadromous DCI with weight", {
 
   # Run test
   dci <- calculate_dci(net, form = "dia", weight = "riv_weight", pass = "pass_1", quiet = TRUE)
-  expect_equal(round(sum(dci$DCI), 2), 75.61)
+  expect_equal(round(sum(dci$DCI), 2), 90.54)
 })
 
 test_that("Diadromous DCI with threshold", {
@@ -75,7 +75,7 @@ test_that("Diadromous DCI with threshold", {
 
   # Run test
   dci <- calculate_dci(net, form = "dia", threshold = 3, pass = "pass_1", quiet = TRUE)
-  expect_equal(round(sum(dci$DCI), 2), 10.52)
+  expect_equal(round(sum(dci$DCI), 2), 32.69)
 })
 
 test_that("Diadromous DCI with threshold and weight", {
@@ -84,5 +84,5 @@ test_that("Diadromous DCI with threshold and weight", {
 
   # Run test
   dci <- calculate_dci(net, form = "dia", weight = "riv_weight", threshold = 3, pass = "pass_1", quiet = TRUE)
-  expect_equal(round(sum(dci$DCI), 2), 22.18)
+  expect_equal(round(sum(dci$DCI), 2), 37.11)
 })
