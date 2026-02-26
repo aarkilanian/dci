@@ -385,7 +385,7 @@ correct_complex <- function(net, correct = TRUE, quiet = FALSE) {
     # Add ID to complex nodes
     complex_nodes <- complex_nodes %>%
       dplyr::mutate(complexID = 1:dplyr::n())
-    # Create small buffer around confluence point
+    # Create small buffer around confluence points
     buffer <- sf::st_buffer(complex_nodes, dist = 1)
     buffer <- sf::st_cast(buffer, "MULTILINESTRING", group_or_split = FALSE)
     sf::st_agr(buffer) <- "constant"
