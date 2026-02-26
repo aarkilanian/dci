@@ -277,7 +277,7 @@ calculate_dci_pot <- function(all_members, net_nodes, seg_weights, parallel,
 calculate_dci_dia <- function(all_members, net_nodes, seg_weights, outlet_seg,
                               parallel, quiet) {
   # Determine segment pairs
-  to_segment <- all_members[all_members != 0]
+  to_segment <- all_members
   from_segment <- rep(outlet_seg, times = length(to_segment))
 
   # Calculate passability between each pair of segments
@@ -404,7 +404,7 @@ calculate_dci_pot_thresh <- function(net, all_members, net_nodes, seg_weights,
 #' @keywords internal
 calculate_dci_dia_thresh <- function(net, all_members, net_nodes, seg_weights, weighted, threshold, totweight, outlet_seg, parallel, quiet) {
   # Determine segment pairs
-  to_segment <- all_members[all_members != 0]
+  to_segment <- all_members
   from_segment <- rep(outlet_seg, times = length(to_segment))
 
   # Remove pairs of segments further than threshold
