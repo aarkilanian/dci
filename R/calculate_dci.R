@@ -123,7 +123,7 @@ calculate_dci <- function(net, form, pass = NULL, weight = NULL,
   # Weights from edges associated w/ upstream nodes
   net_nodes <- net_nodes %>%
     dplyr::mutate(nodeID = dplyr::row_number()) %>%
-    dplyr::left_join(net_edges, by = c("nodeID" = "from"), multiple = "any")
+    dplyr::left_join(net_edges, by = c("nodeID" = "to"), multiple = "any")
   net_nodes <- sf::st_as_sf(net_nodes, sf_column_name = "geometry.x")
   # Set outlet length to 0
   net_nodes[net_nodes$type == "outlet", ]$riv_length <- 0
